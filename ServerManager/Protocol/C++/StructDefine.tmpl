@@ -1,0 +1,78 @@
+<StructDescription>
+struct <StructName><BaseStruct>
+{
+	<Members>
+	<SSTIDEnumDefine>
+	<StructName>()
+	{
+		Clear();
+	}
+	<StructName>(const <StructName>& Value)
+	{
+		*this=Value;
+	}
+	void Clear()
+	{
+		<IfHaveBaseClass>
+		<BaseClass>::Clear();
+		</IfHaveBaseClass>
+
+		<InitOperations>
+	}
+	bool MakePacket(CSmartStruct& Packet) const
+	{
+		UINT FailCount=0;
+
+		<IfHaveBaseClass>
+		if(!<BaseClass>::MakePacket(Packet))
+			FailCount++;
+		</IfHaveBaseClass>
+
+		<PackOperations>
+
+		return FailCount==0;
+	}
+	bool ParsePacket(const CSmartStruct& Packet)
+	{
+		<IfHaveBaseClass>
+		<BaseClass>::ParsePacket(Packet);
+		</IfHaveBaseClass>
+
+		<IfHaveMember>
+		void * Pos=Packet.GetFirstMemberPosition();
+		while(Pos)
+		{
+			WORD MemberID;
+			CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+			switch(MemberID)
+			{
+			<UnpackOperations>
+			}
+		}
+		</IfHaveMember>
+		return true;
+	}
+	UINT GetSmartStructSize() const
+	{
+		UINT Size=0;
+		<IfHaveBaseClass>
+		Size += <BaseClass>::GetSmartStructSize();
+		</IfHaveBaseClass>
+		<PacketSizes>
+		return Size;
+	}
+	void CloneFrom(const <StructName>& Value)
+	{
+		<IfHaveBaseClass>
+		<BaseClass>::CloneFrom(Value);
+		</IfHaveBaseClass>
+		<CloneFromOperations>
+	}
+	<StructName>& operator=(const <StructName>& Value)
+	{
+		CloneFrom(Value);
+		return *this;
+	}
+	<XMLProcess> 
+};
+

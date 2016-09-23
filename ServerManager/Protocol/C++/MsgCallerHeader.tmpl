@@ -1,0 +1,15 @@
+#pragma once
+
+
+class C<InterfaceName>MsgCaller :
+	public I<InterfaceName>
+{
+protected:
+	INetProcessor *	m_pNet;
+public:
+	C<InterfaceName>MsgCaller(INetProcessor * pNet);	
+	~C<InterfaceName>MsgCaller(void);
+	
+	<Methods>
+	<PackMethods>
+};

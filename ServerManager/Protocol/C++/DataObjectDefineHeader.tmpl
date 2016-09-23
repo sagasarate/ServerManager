@@ -1,0 +1,66 @@
+#pragma once
+
+//<GenerateArea1Start>
+<Description>
+//<GenerateArea1End>
+
+class <ClassName><IfHaveBaseClass>:public <BaseClass></IfHaveBaseClass>
+{
+protected:
+	UINT64	m_ModifyFlag;
+	
+//<GenerateArea2Start>	   
+	<Members>
+//<GenerateArea2End>
+	
+public:
+//<GenerateArea3Start>
+	<SSTIDEnumDefine>
+	<ModifyFlagEnumDefine>
+//<GenerateArea3End>
+
+public:
+//<GenerateArea4Start>
+	<ClassName>();
+	<ClassName>(const <ClassName>& Object)
+	{
+		*this=Object;
+	}
+	virtual ~<ClassName>();
+	virtual void Clear();
+	
+	void SetModifyFlag(UINT64 RemoveFlags,UINT64 AddFlags);
+	 
+	<SetMethodsDeclare>
+		   
+	<GetMethodsDeclare>
+
+	
+	virtual void GetModifyFlag(DATA_OBJECT_MODIFY_FLAGS& ModifyFlags,int GetType,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
+	virtual bool IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
+	virtual void ClearModifyFlag(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
+	virtual bool MakeUpdatePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
+	virtual bool MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
+	virtual void ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
+	virtual void CloneFrom(const <ClassName>& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
+	virtual UINT GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
+	<ClassName>& operator=(const <ClassName>& DataObject);
+	
+//<GenerateArea4End>
+
+};
+
+
+//<GenerateArea5Start>
+
+inline void <ClassName>::SetModifyFlag(UINT64 RemoveFlags,UINT64 AddFlags)
+{
+	m_ModifyFlag&=~RemoveFlags;
+	m_ModifyFlag|=AddFlags;
+}
+
+<SetMethodsDefine>
+		   
+<GetMethodsDefine>
+
+//<GenerateArea5End>

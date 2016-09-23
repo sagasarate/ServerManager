@@ -1,0 +1,15 @@
+#pragma once
+
+class C<InterfaceName>MsgHandler:public I<InterfaceName>
+{
+
+public:
+	C<InterfaceName>MsgHandler(void);
+	~C<InterfaceName>MsgHandler(void);
+
+	void InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INFO>& MsgMap);	
+
+	<Methods>
+
+};
+

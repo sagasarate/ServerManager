@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="预编译">
+      <UniqueIdentifier>{e2540de5-7f8f-42f0-ba0f-b0956025fcd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源">
+      <UniqueIdentifier>{1e01f062-d8ca-4e91-b574-6fec246dd2ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="主程序">
+      <UniqueIdentifier>{03c8de85-5a1a-4f27-bf49-eafe479cd868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="主线程">
+      <UniqueIdentifier>{c1cf1a2e-a231-45f9-8fa6-0442de2bf052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="主配置">
+      <UniqueIdentifier>{994cc52c-b264-46fd-aa55-9de7190bb217}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="侦听服务">
+      <UniqueIdentifier>{16d9a24f-3a38-4830-b652-564db3c992b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="客户端连接">
+      <UniqueIdentifier>{dd7d500d-3d55-4897-a027-e68bc72d672f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="脚本执行">
+      <UniqueIdentifier>{5579bdb1-091c-48ca-8f68-1c001553356b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>预编译</Filter>
+    </ClCompile>
+    <ClCompile Include="MainApp.cpp">
+      <Filter>主程序</Filter>
+    </ClCompile>
+    <ClCompile Include="MainThread.cpp">
+      <Filter>主线程</Filter>
+    </ClCompile>
+    <ClCompile Include="MainConfig.cpp">
+      <Filter>主配置</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerService.cpp">
+      <Filter>侦听服务</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerClient.cpp">
+      <Filter>客户端连接</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptExecutor.cpp">
+      <Filter>脚本执行</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>预编译</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>资源</Filter>
+    </ClInclude>
+    <ClInclude Include="MainApp.h">
+      <Filter>主程序</Filter>
+    </ClInclude>
+    <ClInclude Include="MainThread.h">
+      <Filter>主线程</Filter>
+    </ClInclude>
+    <ClInclude Include="MainConfig.h">
+      <Filter>主配置</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerService.h">
+      <Filter>侦听服务</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerClient.h">
+      <Filter>客户端连接</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptExecutor.h">
+      <Filter>脚本执行</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>资源</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\..\Libs\ServerFrameWork\ServerFrameWork.rc">
+      <Filter>资源</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\Libs\ServerFrameWork\TrayIcon.ico" />
+  </ItemGroup>
+</Project>

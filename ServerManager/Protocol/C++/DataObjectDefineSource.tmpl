@@ -1,0 +1,163 @@
+#include "stdafx.h"
+
+
+
+<ClassName>::<ClassName>()
+{
+	Clear();
+}
+<ClassName>::~<ClassName>()
+{
+}
+
+void <ClassName>::Clear()
+{
+//<GenerateArea1Start>
+	<IfHaveBaseClass><BaseClass>::Clear();</IfHaveBaseClass>
+
+	m_ModifyFlag=0;
+	   
+	<InitOperations>
+//<GenerateArea1End>
+
+}
+
+void <ClassName>::GetModifyFlag(DATA_OBJECT_MODIFY_FLAGS& ModifyFlags,int GetType,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
+{
+//<GenerateArea2Start>
+	<IfHaveBaseClass><BaseClass>::GetModifyFlag(ModifyFlags,GetType,MemberFlags);</IfHaveBaseClass>
+	switch(GetType)
+	{
+	case GMFT_COPY:
+		ModifyFlags[<CLASS_FLAG_INDEX>]=m_ModifyFlag&MemberFlags[<CLASS_FLAG_INDEX>];
+		break;
+	case GMFT_AND:
+		ModifyFlags[<CLASS_FLAG_INDEX>]&=m_ModifyFlag&MemberFlags[<CLASS_FLAG_INDEX>];
+		break;
+	case GMFT_OR:
+		ModifyFlags[<CLASS_FLAG_INDEX>]|=m_ModifyFlag&MemberFlags[<CLASS_FLAG_INDEX>];
+		break;
+	}
+	<DataObjectMembersGetModifyFlag>
+//<GenerateArea2End>
+}
+
+bool <ClassName>::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
+{
+
+	bool IsModified=false;
+//<GenerateArea3Start>	
+	<IfHaveBaseClass>IsModified=IsModified||<BaseClass>::IsModified(MemberFlags);</IfHaveBaseClass>
+	
+	IsModified=IsModified||(m_ModifyFlag&MemberFlags[<CLASS_FLAG_INDEX>])!=0;
+	
+	IsModified=IsModified
+		<DataObjectMembersIsModified>;
+	
+//<GenerateArea3End>
+	return IsModified;
+
+}
+
+void <ClassName>::ClearModifyFlag(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
+{
+//<GenerateArea4Start>
+	<IfHaveBaseClass><BaseClass>::ClearModifyFlag(MemberFlags);</IfHaveBaseClass>
+	m_ModifyFlag&=~MemberFlags[<CLASS_FLAG_INDEX>];
+	<DataObjectMembersClearModifyFlag>
+//<GenerateArea4End>
+}
+
+bool <ClassName>::MakeUpdatePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
+{
+//<GenerateArea5Start>
+	DATA_OBJECT_MODIFY_FLAGS ModifyFlags;
+	ZeroMemory(&ModifyFlags,sizeof(ModifyFlags));
+	GetModifyFlag(ModifyFlags,GMFT_OR,MemberFlags);	
+//<GenerateArea5End>
+	return MakePacket(Packet,ModifyFlags);
+}
+
+bool <ClassName>::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
+{
+//<GenerateArea6Start>
+	UINT FailCount=0;
+	<IfHaveBaseClass>
+	if(!<BaseClass>::MakePacket(Packet,MemberFlags))
+		FailCount++;
+	</IfHaveBaseClass>
+	
+	UINT64 Flag=MemberFlags[<CLASS_FLAG_INDEX>];
+
+	<PackOperations>
+//<GenerateArea6End>
+	return FailCount==0;
+
+}
+
+void <ClassName>::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
+{
+//<GenerateArea7Start>
+	<IfHaveBaseClass>
+	<BaseClass>::ParsePacket(Packet,MemberFlags);
+	</IfHaveBaseClass>
+	
+	UINT64 Flag=MemberFlags[<CLASS_FLAG_INDEX>];
+	UINT64 UpdateFlag=0;
+	
+	<IfHaveMember>
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		<UnpackOperations>
+		}
+	}
+	</IfHaveMember>
+//<GenerateArea7End>
+	
+	m_ModifyFlag|=UpdateFlag;	
+
+}
+
+void <ClassName>::CloneFrom(const <ClassName>& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
+{
+//<GenerateArea8Start>
+	<IfHaveBaseClass>
+	<BaseClass>::CloneFrom(DataObject,MemberFlags);
+	</IfHaveBaseClass>
+	
+	UINT64 Flag=MemberFlags[<CLASS_FLAG_INDEX>];
+	UINT64 UpdateFlag=0;
+	
+	<CloneOperations>
+	
+//<GenerateArea8End>
+
+	m_ModifyFlag|=UpdateFlag;
+}
+
+UINT <ClassName>::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
+{
+//<GenerateArea9Start>
+	UINT Size=0;
+	<PacketSizes>
+		
+	<IfHaveBaseClass>
+	Size+=<BaseClass>::GetSmartStructSize(MemberFlags);
+	</IfHaveBaseClass>
+//<GenerateArea9End>	
+	return Size;
+
+}
+
+<ClassName>& <ClassName>::operator=(const <ClassName>& DataObject)
+{
+//<GenerateArea10Start>
+	CloneFrom(DataObject,<FULL_MODIFY_FLAG>);
+//<GenerateArea10End>	
+	return *this;
+}

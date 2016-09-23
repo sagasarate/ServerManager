@@ -1,0 +1,19 @@
+bool ToXML(xml_node& StructNode)
+{
+	<IfHaveBaseClass>
+	if (!base.ToXML(StructNode))
+		return false;
+	</IfHaveBaseClass>
+	<ToXMLOperations>
+	return true;
+}
+bool FromXML(xml_node& StructNode)
+{
+	UINT FailCount=0;
+	<IfHaveBaseClass>
+	if (!base.FromXML(StructNode))
+		return false;
+	</IfHaveBaseClass>
+	<FromXMLOperations>
+	return FailCount==0;
+}

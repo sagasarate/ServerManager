@@ -1,0 +1,4 @@
+﻿#pragma once
+
+const DATA_OBJECT_MODIFY_FLAGS DOMF_DATA_OBJECT_EMPTY_FULL={
+		0};

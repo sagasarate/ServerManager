@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf8"?>
+<ServiceList>
+	<Service ID="2" Type="" Name="ServerManager" ImageFilePath="D:\MyPrj\ServerManager\Work\ServerManagerD.exe" WorkDir="D:\MyPrj\ServerManager\Work" StartupParam="" KeepRunning="false" RestartupTime="60"/>
+</ServiceList>

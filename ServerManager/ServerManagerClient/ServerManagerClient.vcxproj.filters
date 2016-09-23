@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="连接">
+      <UniqueIdentifier>{02438827-0752-49f7-9a53-c85498db7484}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="主程序">
+      <UniqueIdentifier>{91c54d32-9195-4e45-ba79-344f90bf4042}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="文档">
+      <UniqueIdentifier>{8b5c74b6-7568-4979-9429-80502f7c19bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="框架">
+      <UniqueIdentifier>{4b62e64f-c247-4c62-a1ca-86dbc7f7d4d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="视图">
+      <UniqueIdentifier>{c2ff4963-4645-49a8-bbf7-9e7ab233e583}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="预编译">
+      <UniqueIdentifier>{570622d5-2104-425b-b5d9-75f8badfb2c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="对话框">
+      <UniqueIdentifier>{2a002699-ecae-49ad-bbc8-478d9da7787e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="文件传输队列">
+      <UniqueIdentifier>{ab098440-99ea-40a2-9c37-9c8900256751}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ServerConnection.cpp">
+      <Filter>连接</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerClient.cpp">
+      <Filter>主程序</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerClientDoc.cpp">
+      <Filter>文档</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>框架</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerClientView.cpp">
+      <Filter>视图</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>预编译</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgEditBox.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInput.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgServerManage.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgWorkDirBowser.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="FileTransferQueue.cpp">
+      <Filter>文件传输队列</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgListSelector.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgServiceEditor.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ServerConnection.h">
+      <Filter>连接</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>资源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>资源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerClient.h">
+      <Filter>主程序</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerClientDoc.h">
+      <Filter>文档</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>框架</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerClientView.h">
+      <Filter>视图</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>预编译</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgEditBox.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgInput.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgServerManage.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgWorkDirBowser.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="FileTransferQueue.h">
+      <Filter>文件传输队列</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgListSelector.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgServiceEditor.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ServerManagerClient.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\ServerManagerClientDoc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ServerManagerClient.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\ServerManagerClient.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

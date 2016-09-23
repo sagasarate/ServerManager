@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{cc7fe83b-b3bf-4cfe-9382-ec52d9cdc131}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="预编译">
+      <UniqueIdentifier>{a0a90175-9426-43d6-9538-8387b702640a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerManager">
+      <UniqueIdentifier>{ad381108-83ff-495c-ba58-d4382e7d6a60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="数据对象">
+      <UniqueIdentifier>{a25ef1fc-429a-4748-9706-e20fb2906d7c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>预编译</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>预编译</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerAckInterface.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerAckMsgCaller.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerAckMsgHandler.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerInterface.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerMsgCaller.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManagerMsgHandler.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SvrMgrDataStructs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SvrMgrInterfaces.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SvrMgrMainConsts.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SvrMgrMainEnums.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SvrMgrMainStructs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SvrMgrSystemEnums.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectEmpty.h">
+      <Filter>数据对象</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectModifyFlags.h">
+      <Filter>数据对象</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>预编译</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerAckMsgCaller.cpp">
+      <Filter>ServerManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerAckMsgHandler.cpp">
+      <Filter>ServerManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerMsgCaller.cpp">
+      <Filter>ServerManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManagerMsgHandler.cpp">
+      <Filter>ServerManager</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectEmpty.cpp">
+      <Filter>数据对象</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Protocol.cbp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Protocol.xml" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,1378 @@
+﻿#include "stdafx.h"
+
+
+CServerManagerMsgCaller::CServerManagerMsgCaller(INetProcessor * pNet)
+{
+	m_pNet=pNet;
+}
+
+CServerManagerMsgCaller::~CServerManagerMsgCaller(void)
+{
+}
+
+
+int CServerManagerMsgCaller::GetServiceList()
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		;
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVICE_LIST,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetServiceList(Packet))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::GetProcessList(short Page ,short PageLen )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(short))
+		+CSmartStruct::GetFixMemberSize(sizeof(short));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_PROCESS_LIST,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetProcessList(Packet, Page , PageLen ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::GetNetAdapterList()
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		;
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_NET_ADAPTER_LIST,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetNetAdapterList(Packet))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::ServiceStartup(UINT ServiceID )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SERVICE_STARTUP,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgServiceStartup(Packet, ServiceID ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::ServiceShutdown(UINT ServiceID ,bool IsForce )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SERVICE_SHUTDOWN,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgServiceShutdown(Packet, ServiceID , IsForce ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::RunProgram(UINT ServiceID ,const CEasyString& FilePath ,const CEasyString& WorkDir ,const CEasyString& Param )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength())
+		+CSmartStruct::GetStringMemberSize((UINT)WorkDir.GetLength())
+		+CSmartStruct::GetStringMemberSize((UINT)Param.GetLength());
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_RUN_PROGRAM,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgRunProgram(Packet, ServiceID , FilePath , WorkDir , Param ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::ProcessShutdown(UINT ProcessID ,bool IsForce )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_PROCESS_SHUTDOWN,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgProcessShutdown(Packet, ProcessID , IsForce ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::ExecuteScript(UINT ServiceID ,const CEasyString& Script ,bool FromFile )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)Script.GetLength())
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_EXECUTE_SCRIPT,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgExecuteScript(Packet, ServiceID , Script , FromFile ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::BrowseServiceDir(UINT ServiceID ,const CEasyString& Dir ,short Page ,short PageLen )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)Dir.GetLength())
+		+CSmartStruct::GetFixMemberSize(sizeof(short))
+		+CSmartStruct::GetFixMemberSize(sizeof(short));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_BROWSE_SERVICE_DIR,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgBrowseServiceDir(Packet, ServiceID , Dir , Page , PageLen ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::FileDownloadStart(UINT ServiceID ,const CEasyString& FilePath )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength());
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_START,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileDownloadStart(Packet, ServiceID , FilePath ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::FileDownloadData(UINT64 Offset ,UINT Length )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_DATA,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileDownloadData(Packet, Offset , Length ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::FileDownloadEnd()
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		;
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_END,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileDownloadEnd(Packet))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::FileUploadStart(UINT ServiceID ,const CEasyString& FilePath )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength());
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_START,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileUploadStart(Packet, ServiceID , FilePath ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::FileUploadData(UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize(FileData.GetUsedSize());
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_DATA,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileUploadData(Packet, Offset , Length , FileData ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::FileUploadEnd(UINT FileLastWriteTime )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_END,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileUploadEnd(Packet, FileLastWriteTime ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::CreateDir(UINT ServiceID ,const CEasyString& Dir )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)Dir.GetLength());
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_CREATE_DIR,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgCreateDir(Packet, ServiceID , Dir ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::DeleteFile(UINT ServiceID ,const CEasyString& FilePath ,bool IsRecursive )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength())
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_DELETE_FILE,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgDeleteFile(Packet, ServiceID , FilePath , IsRecursive ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::ChangeFileMode(UINT ServiceID ,const CEasyString& FilePath ,UINT Mode )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength())
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_CHANGE_FILE_MODE,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgChangeFileMode(Packet, ServiceID , FilePath , Mode ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::AddService(const SERVICE_INFO& ServiceInfo )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetStructMemberSize(ServiceInfo.GetSmartStructSize())
+		;
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_ADD_SERVICE,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgAddService(Packet, ServiceInfo ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::EditService(const SERVICE_INFO& ServiceInfo )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetStructMemberSize(ServiceInfo.GetSmartStructSize())
+		;
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_EDIT_SERVICE,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgEditService(Packet, ServiceInfo ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::DeleteService(UINT ServiceID )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_DELETE_SERVICE,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgDeleteService(Packet, ServiceID ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+
+bool CServerManagerMsgCaller::PackMsgGetServiceList(CSmartStruct& Packet)
+{
+	UINT FailCount=0;
+
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgGetProcessList(CSmartStruct& Packet,short Page ,short PageLen )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_PROCESS_LIST_PAGE,Page),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_PROCESS_LIST_PAGE_LEN,PageLen),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgGetNetAdapterList(CSmartStruct& Packet)
+{
+	UINT FailCount=0;
+
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgServiceStartup(CSmartStruct& Packet,UINT ServiceID )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SERVICE_STARTUP_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgServiceShutdown(CSmartStruct& Packet,UINT ServiceID ,bool IsForce )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SERVICE_SHUTDOWN_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SERVICE_SHUTDOWN_IS_FORCE,IsForce),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgRunProgram(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,const CEasyString& WorkDir ,const CEasyString& Param )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_RUN_PROGRAM_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_RUN_PROGRAM_FILE_PATH,FilePath),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_RUN_PROGRAM_WORK_DIR,WorkDir),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_RUN_PROGRAM_PARAM,Param),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgProcessShutdown(CSmartStruct& Packet,UINT ProcessID ,bool IsForce )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_PROCESS_SHUTDOWN_PROCESS_ID,ProcessID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_PROCESS_SHUTDOWN_IS_FORCE,IsForce),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgExecuteScript(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Script ,bool FromFile )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_EXECUTE_SCRIPT_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_EXECUTE_SCRIPT_SCRIPT,Script),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_EXECUTE_SCRIPT_FROM_FILE,FromFile),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgBrowseServiceDir(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Dir ,short Page ,short PageLen )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_BROWSE_SERVICE_DIR_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_BROWSE_SERVICE_DIR_DIR,Dir),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_BROWSE_SERVICE_DIR_PAGE,Page),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_BROWSE_SERVICE_DIR_PAGE_LEN,PageLen),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileDownloadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_START_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_START_FILE_PATH,FilePath),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileDownloadData(CSmartStruct& Packet,UINT64 Offset ,UINT Length )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_OFFSET,Offset),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_LENGTH,Length),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileDownloadEnd(CSmartStruct& Packet)
+{
+	UINT FailCount=0;
+
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileUploadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_START_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_START_FILE_PATH,FilePath),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileUploadData(CSmartStruct& Packet,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_OFFSET,Offset),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_LENGTH,Length),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_FILE_DATA,(LPCSTR)FileData.GetBuffer(),FileData.GetUsedSize()),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileUploadEnd(CSmartStruct& Packet,UINT FileLastWriteTime )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_END_FILE_LAST_WRITE_TIME,FileLastWriteTime),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgCreateDir(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Dir )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CREATE_DIR_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CREATE_DIR_DIR,Dir),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgDeleteFile(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,bool IsRecursive )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_DELETE_FILE_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_DELETE_FILE_FILE_PATH,FilePath),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_DELETE_FILE_IS_RECURSIVE,IsRecursive),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgChangeFileMode(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,UINT Mode )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CHANGE_FILE_MODE_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CHANGE_FILE_MODE_FILE_PATH,FilePath),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CHANGE_FILE_MODE_MODE,Mode),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgAddService(CSmartStruct& Packet,const SERVICE_INFO& ServiceInfo )
+{
+	UINT FailCount=0;
+
+	{
+		UINT BufferSize;
+		void * pBuffer=Packet.PrepareMember(BufferSize);
+		CSmartStruct SubPacket(pBuffer,BufferSize,true);
+		if(!ServiceInfo.MakePacket(SubPacket)) FailCount++;
+		Packet.FinishMember(SST_ADD_SERVICE_SERVICE_INFO,SubPacket.GetDataLen());
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgEditService(CSmartStruct& Packet,const SERVICE_INFO& ServiceInfo )
+{
+	UINT FailCount=0;
+
+	{
+		UINT BufferSize;
+		void * pBuffer=Packet.PrepareMember(BufferSize);
+		CSmartStruct SubPacket(pBuffer,BufferSize,true);
+		if(!ServiceInfo.MakePacket(SubPacket)) FailCount++;
+		Packet.FinishMember(SST_EDIT_SERVICE_SERVICE_INFO,SubPacket.GetDataLen());
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgDeleteService(CSmartStruct& Packet,UINT ServiceID )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_DELETE_SERVICE_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+
