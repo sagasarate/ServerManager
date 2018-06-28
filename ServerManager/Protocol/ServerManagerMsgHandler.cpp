@@ -12,6 +12,9 @@ void CServerManagerMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INFO>&
 {
 	MSG_HANDLE_INFO MsgHandleInfo;
 	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgLogin;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_LOGIN,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgGetServiceList;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVICE_LIST,false),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
@@ -20,6 +23,9 @@ void CServerManagerMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INFO>&
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgGetNetAdapterList;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_NET_ADAPTER_LIST,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgGetServiceInfo;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVICE_INFO,false),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgServiceStartup;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SERVICE_STARTUP,false),MsgHandleInfo);
@@ -74,9 +80,61 @@ void CServerManagerMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INFO>&
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgDeleteService;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_DELETE_SERVICE,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgSendCommand;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SEND_COMMAND,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgEnableLogRecv;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_ENABLE_LOG_RECV,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgGetServerStatus;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgGetAllServerStatus;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_ALL_SERVER_STATUS,false),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerMsgHandler::HandleMsgGetServerStatusFormat;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS_FORMAT,false),MsgHandleInfo);
 	
 }
 
+int CServerManagerMsgHandler::HandleMsgLogin(CSmartStruct& Packet)
+{
+	LPCTSTR		UserName;
+	LPCTSTR		Password;
+	
+	
+	UserName=NULL;
+	Password=NULL;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_LOGIN_USER_NAME:
+			{
+				UserName=Value;
+		
+			}
+			break;
+		case SST_LOGIN_PASSWORD:
+			{
+				Password=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return Login( UserName , Password );
+}
 int CServerManagerMsgHandler::HandleMsgGetServiceList(CSmartStruct& Packet)
 {
 	
@@ -134,6 +192,35 @@ int CServerManagerMsgHandler::HandleMsgGetNetAdapterList(CSmartStruct& Packet)
 
 	return GetNetAdapterList();
 }
+int CServerManagerMsgHandler::HandleMsgGetServiceInfo(CSmartStruct& Packet)
+{
+	UINT	ServiceID;
+	
+	
+	ServiceID=0;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_SERVICE_INFO_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetServiceInfo( ServiceID );
+}
 int CServerManagerMsgHandler::HandleMsgServiceStartup(CSmartStruct& Packet)
 {
 	UINT	ServiceID;
@@ -166,11 +253,11 @@ int CServerManagerMsgHandler::HandleMsgServiceStartup(CSmartStruct& Packet)
 int CServerManagerMsgHandler::HandleMsgServiceShutdown(CSmartStruct& Packet)
 {
 	UINT	ServiceID;
-	bool	IsForce;
+	BYTE	ShutdownType;
 	
 	
 	ServiceID=0;
-	IsForce=false;
+	ShutdownType=0;
 	
 
 	
@@ -187,9 +274,9 @@ int CServerManagerMsgHandler::HandleMsgServiceShutdown(CSmartStruct& Packet)
 		
 			}
 			break;
-		case SST_SERVICE_SHUTDOWN_IS_FORCE:
+		case SST_SERVICE_SHUTDOWN_SHUTDOWN_TYPE:
 			{
-				IsForce=Value;
+				ShutdownType=Value;
 		
 			}
 			break;
@@ -198,7 +285,7 @@ int CServerManagerMsgHandler::HandleMsgServiceShutdown(CSmartStruct& Packet)
 	}
 		
 
-	return ServiceShutdown( ServiceID , IsForce );
+	return ServiceShutdown( ServiceID , ShutdownType );
 }
 int CServerManagerMsgHandler::HandleMsgRunProgram(CSmartStruct& Packet)
 {
@@ -256,11 +343,11 @@ int CServerManagerMsgHandler::HandleMsgRunProgram(CSmartStruct& Packet)
 int CServerManagerMsgHandler::HandleMsgProcessShutdown(CSmartStruct& Packet)
 {
 	UINT	ProcessID;
-	bool	IsForce;
+	BYTE	ShutdownType;
 	
 	
 	ProcessID=0;
-	IsForce=false;
+	ShutdownType=0;
 	
 
 	
@@ -277,9 +364,9 @@ int CServerManagerMsgHandler::HandleMsgProcessShutdown(CSmartStruct& Packet)
 		
 			}
 			break;
-		case SST_PROCESS_SHUTDOWN_IS_FORCE:
+		case SST_PROCESS_SHUTDOWN_SHUTDOWN_TYPE:
 			{
-				IsForce=Value;
+				ShutdownType=Value;
 		
 			}
 			break;
@@ -288,7 +375,7 @@ int CServerManagerMsgHandler::HandleMsgProcessShutdown(CSmartStruct& Packet)
 	}
 		
 
-	return ProcessShutdown( ProcessID , IsForce );
+	return ProcessShutdown( ProcessID , ShutdownType );
 }
 int CServerManagerMsgHandler::HandleMsgExecuteScript(CSmartStruct& Packet)
 {
@@ -713,7 +800,7 @@ int CServerManagerMsgHandler::HandleMsgChangeFileMode(CSmartStruct& Packet)
 }
 int CServerManagerMsgHandler::HandleMsgAddService(CSmartStruct& Packet)
 {
-	SERVICE_INFO	ServiceInfo;
+	CSmartStruct	ServiceInfo;
 	
 	
 	ServiceInfo.Clear();
@@ -729,7 +816,7 @@ int CServerManagerMsgHandler::HandleMsgAddService(CSmartStruct& Packet)
 		{
 		case SST_ADD_SERVICE_SERVICE_INFO:
 			{
-				ServiceInfo.ParsePacket(Value);
+				ServiceInfo.CloneFrom(Value);
 		
 			}
 			break;
@@ -742,7 +829,7 @@ int CServerManagerMsgHandler::HandleMsgAddService(CSmartStruct& Packet)
 }
 int CServerManagerMsgHandler::HandleMsgEditService(CSmartStruct& Packet)
 {
-	SERVICE_INFO	ServiceInfo;
+	CSmartStruct	ServiceInfo;
 	
 	
 	ServiceInfo.Clear();
@@ -758,7 +845,7 @@ int CServerManagerMsgHandler::HandleMsgEditService(CSmartStruct& Packet)
 		{
 		case SST_EDIT_SERVICE_SERVICE_INFO:
 			{
-				ServiceInfo.ParsePacket(Value);
+				ServiceInfo.CloneFrom(Value);
 		
 			}
 			break;
@@ -797,4 +884,173 @@ int CServerManagerMsgHandler::HandleMsgDeleteService(CSmartStruct& Packet)
 		
 
 	return DeleteService( ServiceID );
+}
+int CServerManagerMsgHandler::HandleMsgSendCommand(CSmartStruct& Packet)
+{
+	UINT		ServiceID;
+	LPCTSTR		Command;
+	
+	
+	ServiceID=0;
+	Command=NULL;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_SEND_COMMAND_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_SEND_COMMAND_COMMAND:
+			{
+				Command=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return SendCommand( ServiceID , Command );
+}
+int CServerManagerMsgHandler::HandleMsgEnableLogRecv(CSmartStruct& Packet)
+{
+	UINT	ServiceID;
+	bool	Enable;
+	
+	
+	ServiceID=0;
+	Enable=false;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_ENABLE_LOG_RECV_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_ENABLE_LOG_RECV_ENABLE:
+			{
+				Enable=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return EnableLogRecv( ServiceID , Enable );
+}
+int CServerManagerMsgHandler::HandleMsgGetServerStatus(CSmartStruct& Packet)
+{
+	UINT			ServiceID;
+	CSmartStruct	StatusListPacket;
+	
+	
+	ServiceID=0;
+	StatusListPacket.Clear();
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_SERVER_STATUS_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_GET_SERVER_STATUS_STATUS_LIST_PACKET:
+			{
+				StatusListPacket.CloneFrom(Value);
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetServerStatus( ServiceID , StatusListPacket );
+}
+int CServerManagerMsgHandler::HandleMsgGetAllServerStatus(CSmartStruct& Packet)
+{
+	UINT	ServiceID;
+	
+	
+	ServiceID=0;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_ALL_SERVER_STATUS_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetAllServerStatus( ServiceID );
+}
+int CServerManagerMsgHandler::HandleMsgGetServerStatusFormat(CSmartStruct& Packet)
+{
+	UINT	ServiceID;
+	
+	
+	ServiceID=0;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_SERVER_STATUS_FORMAT_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetServerStatusFormat( ServiceID );
 }

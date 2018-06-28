@@ -4,22 +4,27 @@
 	<GlobalDefine>
 		<Consts Name="Main" IgnoreOnExport="false"/>
 		<Enums Name="Main" IgnoreOnExport="false">
-			<Enum Name="MSG_RESULT" ShortName="MSG_RESULT" Flag="0" Description="">
-				<Member Name="MSG_RESULT_SUCCEED" Value="0" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_FILE_NOT_EXIST" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_DIR_NOT_EXIST" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_INVALID_SCRIPT" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_ONE_SCRIPT_IS_EXCUTING" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_SCRIPT_FILE_NOT_EXIST" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_SCRIPT_FILE_READ_ERROR" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_SERVICE_NOT_EXIST" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_QUERY_SEQUENCE_ERROR" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_QUERY_SIZE_TOO_BIG" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_DATA_COMPRESS_ERROR" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_FILE_WRITE_ERROR" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_FILE_READ_ERROR" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_SERVICE_ID_IS_USED" Value="" StrValue="" Description=""/>
-				<Member Name="MSG_RESULT_SERVICE_TYPE_NOT_SUPPORT" Value="" StrValue="" Description=""/>
+			<Enum Name="MSG_RESULT" ShortName="MSG_RESULT" Flag="2" Description="">
+				<Member Name="MSG_RESULT_SUCCEED" Value="0" StrValue="成功" Description=""/>
+				<Member Name="MSG_RESULT_FAILED" Value="" StrValue="失败" Description=""/>
+				<Member Name="MSG_RESULT_FILE_NOT_EXIST" Value="" StrValue="文件不存在" Description=""/>
+				<Member Name="MSG_RESULT_DIR_NOT_EXIST" Value="" StrValue="目录不存在" Description=""/>
+				<Member Name="MSG_RESULT_INVALID_SCRIPT" Value="" StrValue="非法脚本" Description=""/>
+				<Member Name="MSG_RESULT_ONE_SCRIPT_IS_EXCUTING" Value="" StrValue="已有脚本在执行" Description=""/>
+				<Member Name="MSG_RESULT_SCRIPT_FILE_NOT_EXIST" Value="" StrValue="脚本文件不存在" Description=""/>
+				<Member Name="MSG_RESULT_SCRIPT_FILE_READ_ERROR" Value="" StrValue="脚本文件读取错误" Description=""/>
+				<Member Name="MSG_RESULT_SERVICE_NOT_EXIST" Value="" StrValue="服务不存在" Description=""/>
+				<Member Name="MSG_RESULT_QUERY_SEQUENCE_ERROR" Value="" StrValue="请求序列错误" Description=""/>
+				<Member Name="MSG_RESULT_QUERY_SIZE_TOO_BIG" Value="" StrValue="请就数据过大" Description=""/>
+				<Member Name="MSG_RESULT_DATA_COMPRESS_ERROR" Value="" StrValue="数据压缩错误" Description=""/>
+				<Member Name="MSG_RESULT_FILE_WRITE_ERROR" Value="" StrValue="文件写入错误" Description=""/>
+				<Member Name="MSG_RESULT_FILE_READ_ERROR" Value="" StrValue="文件读取错误" Description=""/>
+				<Member Name="MSG_RESULT_SERVICE_ID_IS_USED" Value="" StrValue="服务ID已被占用" Description=""/>
+				<Member Name="MSG_RESULT_SERVICE_TYPE_NOT_SUPPORT" Value="" StrValue="服务类型不支持" Description=""/>
+				<Member Name="MSG_RESULT_USER_NAME_OR_PASSWORD_ERROR" Value="" StrValue="用户名或密码错误" Description=""/>
+				<Member Name="MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE" Value="" StrValue="控制管道不可用" Description=""/>
+				<Member Name="MSG_RESULT_SHUTDOWN_CMD_NOT_SET" Value="" StrValue="关服命令未设置" Description=""/>
+				<Member Name="MSG_RESULT_MAX" Value="" StrValue="" Description=""/>
 			</Enum>
 			<Enum Name="SERVICE_STATUS_TYPE" ShortName="SRVICES_STATUS_TYPE" Flag="0" Description="">
 				<Member Name="SERVICE_STATUS_NONE" Value="" StrValue="" Description=""/>
@@ -44,24 +49,50 @@
 				<Member Name="FILE_ATTRIBUTE_FLAG_DIRECTORY" Value="1" StrValue="" Description=""/>
 				<Member Name="FILE_ATTRIBUTE_FLAG_CAN_EXEC" Value="(1&lt;&lt;1)" StrValue="" Description=""/>
 			</Enum>
+			<Enum Name="SERVICE_SHUTDOWN_TYPE" ShortName="SERVICE_SHUTDOWN_TYPE" Flag="0" Description="">
+				<Member Name="SERVICE_SHUTDOWN_TYPE_NORMAL" Value="" StrValue="" Description=""/>
+				<Member Name="SERVICE_SHUTDOWN_TYPE_FORCE" Value="" StrValue="" Description=""/>
+				<Member Name="SERVICE_SHUTDOWN_TYPE_SAFE" Value="" StrValue="" Description=""/>
+			</Enum>
 		</Enums>
 		<Structs Name="Main" IgnoreOnExport="false">
-			<Struct Name="PROCESS_INFO" ShortName="SERVICE_INFO" BaseStruct="" Description="" IDSeed="10" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+			<Struct Name="CProcessInfo" ShortName="PROCI" BaseStruct="" Description="" IDSeed="10" Flag="1" ObjectID="100">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
 				<Member Name="ProcessID" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-				<Member Name="ImageFile" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
+				<Member Name="ImageFilePath" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
 				<Member Name="ImageFileTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
 				<Member Name="CPUUsedTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="9"/>
 				<Member Name="CPUUsed" Type="float" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="6"/>
 				<Member Name="MemoryUsed" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="7"/>
 				<Member Name="VirtualMemoryUsed" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="8"/>
 			</Struct>
-			<Struct Name="PROCESS_INFO_LIST" ShortName="SERVICE_INFO_LIST" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="List" Type="PROCESS_INFO" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+			<Struct Name="CProcessInfoList" ShortName="PROCIL" BaseStruct="" Description="" IDSeed="2" Flag="1" ObjectID="200">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<Member Name="List" Type="CProcessInfo" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+			</Struct>
+			<Struct Name="CServiceInfo" ShortName="SRVI" BaseStruct="CProcessInfo" Description="" IDSeed="22" Flag="1" ObjectID="300">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<Member Name="ServiceID" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+				<Member Name="Name" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="13"/>
+				<Member Name="Type" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
+				<Member Name="WorkDir" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
+				<Member Name="StartupParam" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="5"/>
+				<Member Name="Status" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="8"/>
+				<Member Name="WorkStatus" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="19"/>
+				<Member Name="LastOperation" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="14"/>
+				<Member Name="LastStatusChangeTime" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="15"/>
+				<Member Name="RestartupTime" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="16"/>
+				<Member Name="ControlPipeName" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="17"/>
+				<Member Name="ShutdownCmd" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="18"/>
+				<Member Name="CharSet" Type="int" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="20"/>
+				<Member Name="OtherExecFileList" Type="StringEx" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="21"/>
+			</Struct>
+			<Struct Name="CServiceInfoList" ShortName="SRVIL" BaseStruct="" Description="" IDSeed="2" Flag="1" ObjectID="400">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<Member Name="List" Type="CServiceInfo" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
 			</Struct>
 			<Struct Name="NET_ADAPTER_INFO" ShortName="NET_ADAPTER_INFO" BaseStruct="" Description="" IDSeed="8" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
 				<Member Name="Index" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
 				<Member Name="IPAddressList" Type="StringEx" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
 				<Member Name="Name" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="7"/>
@@ -71,11 +102,11 @@
 				<Member Name="RecvFlux" Type="float" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
 			</Struct>
 			<Struct Name="NET_ADAPTER_INFO_LIST" ShortName="NET_ADAPTER_INFO_LIST" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
 				<Member Name="List" Type="NET_ADAPTER_INFO" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
 			</Struct>
 			<Struct Name="FILE_INFO" ShortName="FILE_INFO" BaseStruct="" Description="" IDSeed="7" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
 				<Member Name="Name" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
 				<Member Name="Attribute" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
 				<Member Name="Size" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
@@ -84,39 +115,75 @@
 				<Member Name="LastWriteTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="6"/>
 			</Struct>
 			<Struct Name="FILE_INFO_LIST" ShortName="FILE_INFO_LIST" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
 				<Member Name="List" Type="FILE_INFO" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
 			</Struct>
-			<Struct Name="CDataObjectEmpty" ShortName="CDataObjectEmpty" BaseStruct="" Description="" IDSeed="1" Flag="1" ObjectID="100">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-			</Struct>
-			<Struct Name="SERVICE_INFO" ShortName="SERVICE_INFO" BaseStruct="" Description="" IDSeed="17" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="ServiceID" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-				<Member Name="Name" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="13"/>
-				<Member Name="Type" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
-				<Member Name="ImageFilePath" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
-				<Member Name="ImageFileTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="12"/>
-				<Member Name="WorkDir" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
-				<Member Name="StartupParam" Type="StringEx" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="5"/>
-				<Member Name="ProcessID" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="6"/>
-				<Member Name="RecentTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="7"/>
-				<Member Name="Status" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="8"/>
-				<Member Name="CPUUsed" Type="float" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="9"/>
-				<Member Name="MemoryUsed" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="10"/>
-				<Member Name="VirtualMemoryUsed" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="11"/>
-				<Member Name="LastOperation" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="14"/>
-				<Member Name="LastStatusChangeTime" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="15"/>
-				<Member Name="RestartupTime" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="16"/>
-			</Struct>
-			<Struct Name="SERVICE_INFO_LIST" ShortName="SERVICE_INFO_LIST" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="List" Type="SERVICE_INFO" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-			</Struct>
 		</Structs>
-		<DataObjectModifyFlags/>
+		<DataObjectModifyFlags>
+			<ModifyFlag Name="DOMF_SERVICE_INFO_LIST_FOR_CLIENT_FETCH">
+				<Unit ClassName="CProcessInfo">
+					<Flag Name="ProcessID"/>
+					<Flag Name="ImageFilePath"/>
+					<Flag Name="ImageFileTime"/>
+					<Flag Name="CPUUsedTime"/>
+					<Flag Name="CPUUsed"/>
+					<Flag Name="MemoryUsed"/>
+					<Flag Name="VirtualMemoryUsed"/>
+				</Unit>
+				<Unit ClassName="CProcessInfoList"/>
+				<Unit ClassName="CServiceInfo">
+					<Flag Name="ServiceID"/>
+					<Flag Name="Name"/>
+					<Flag Name="Type"/>
+					<Flag Name="WorkDir"/>
+					<Flag Name="Status"/>
+					<Flag Name="WorkStatus"/>
+					<Flag Name="RestartupTime"/>
+					<Flag Name="CharSet"/>
+				</Unit>
+				<Unit ClassName="CServiceInfoList">
+					<Flag Name="List"/>
+				</Unit>
+			</ModifyFlag>
+			<ModifyFlag Name="DOMF_PROCESS_INFO_FOR_STATUS_FETCH">
+				<Unit ClassName="CProcessInfo">
+					<Flag Name="ProcessID"/>
+					<Flag Name="CPUUsedTime"/>
+					<Flag Name="CPUUsed"/>
+					<Flag Name="MemoryUsed"/>
+					<Flag Name="VirtualMemoryUsed"/>
+				</Unit>
+				<Unit ClassName="CProcessInfoList"/>
+				<Unit ClassName="CServiceInfo"/>
+				<Unit ClassName="CServiceInfoList"/>
+			</ModifyFlag>
+			<ModifyFlag Name="DOMF_SERVICE_INFO_FOR_EDIT">
+				<Unit ClassName="CProcessInfo">
+					<Flag Name="ImageFilePath"/>
+				</Unit>
+				<Unit ClassName="CProcessInfoList"/>
+				<Unit ClassName="CServiceInfo">
+					<Flag Name="ServiceID"/>
+					<Flag Name="Name"/>
+					<Flag Name="Type"/>
+					<Flag Name="WorkDir"/>
+					<Flag Name="StartupParam"/>
+					<Flag Name="RestartupTime"/>
+					<Flag Name="ControlPipeName"/>
+					<Flag Name="ShutdownCmd"/>
+					<Flag Name="CharSet"/>
+					<Flag Name="OtherExecFileList"/>
+				</Unit>
+				<Unit ClassName="CServiceInfoList"/>
+			</ModifyFlag>
+		</DataObjectModifyFlags>
 	</GlobalDefine>
-	<Interface Name="ServerManager" ID="1" IDSeed="23" Description="">
+	<Interface Name="ServerManager" ID="1" IDSeed="31" Description="">
+		<Method Name="Login" Type="0" ID="23" Flag="0" ParamIDSeed="4" Description="">
+			<CallParam Name="UserName" Type="String" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="Password" Type="String" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+		</Method>
 		<Method Name="GetServiceList" Type="0" ID="1" Flag="0" ParamIDSeed="3" Description="">
 			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="ServiceListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
@@ -134,6 +201,11 @@
 			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="NetAdapterListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
 		</Method>
+		<Method Name="GetServiceInfo" Type="0" ID="30" Flag="0" ParamIDSeed="4" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="ServiceInfoPacket" Type="CSmartStruct" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+		</Method>
 		<Method Name="ServiceStartup" Type="0" ID="3" Flag="0" ParamIDSeed="4" Description="">
 			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
@@ -141,7 +213,7 @@
 		</Method>
 		<Method Name="ServiceShutdown" Type="0" ID="4" Flag="0" ParamIDSeed="5" Description="">
 			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="IsForce" Type="bool" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ShutdownType" Type="BYTE" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 		</Method>
@@ -154,7 +226,7 @@
 		</Method>
 		<Method Name="ProcessShutdown" Type="0" ID="18" Flag="0" ParamIDSeed="5" Description="">
 			<CallParam Name="ProcessID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="IsForce" Type="bool" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ShutdownType" Type="BYTE" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="ProcessID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 		</Method>
@@ -245,17 +317,52 @@
 			<AckParam Name="Mode" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 		</Method>
 		<Method Name="AddService" Type="0" ID="20" Flag="0" ParamIDSeed="3" Description="">
-			<CallParam Name="ServiceInfo" Type="SERVICE_INFO" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceInfo" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
 			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 		</Method>
 		<Method Name="EditService" Type="0" ID="21" Flag="0" ParamIDSeed="3" Description="">
-			<CallParam Name="ServiceInfo" Type="SERVICE_INFO" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceInfo" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
 			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 		</Method>
 		<Method Name="DeleteService" Type="0" ID="22" Flag="0" ParamIDSeed="4" Description="">
 			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="SendCommand" Type="0" ID="24" Flag="0" ParamIDSeed="5" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="Command" Type="String" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="EnableLogRecv" Type="0" ID="25" Flag="0" ParamIDSeed="6" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="Enable" Type="bool" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Enable" Type="bool" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="ConsoleLogNotify" Type="1" ID="26" Flag="0" ParamIDSeed="3" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="LogMsg" Type="String" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="GetServerStatus" Type="0" ID="27" Flag="0" ParamIDSeed="6" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="StatusListPacket" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="StatusListPacket" Type="CSmartStruct" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="GetAllServerStatus" Type="2" ID="28" Flag="0" ParamIDSeed="4" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="StatusListPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="GetServerStatusFormat" Type="0" ID="29" Flag="0" ParamIDSeed="5" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="StatusFormatPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
 		</Method>
 	</Interface>
 	<Prefix Content=""/>

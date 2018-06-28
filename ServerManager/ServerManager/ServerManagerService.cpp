@@ -43,12 +43,12 @@ BOOL CServerManagerService::Init(CNetServer * pServer)
 	{
 		return FALSE;
 	}
-	CMainConfig::GetInstance()->LoadServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList.List);
+	CMainConfig::GetInstance()->LoadServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList);
 	
-	for (UINT i = 0; i<m_ServiceInfoList.List.GetCount(); i++)
+	for (UINT i = 0; i<m_ServiceInfoList.GetCount(); i++)
 	{
-		m_ServiceInfoList.List[i].Status = SERVICE_STATUS_NONE;
-		m_ServiceInfoList.List[i].LastStatusChangeTime = time(NULL);
+		m_ServiceInfoList[i].SetStatus( SERVICE_STATUS_NONE);
+		m_ServiceInfoList[i].SetLastStatusChangeTime(time(NULL));		
 	}
 
 #ifdef WIN32
@@ -59,7 +59,6 @@ BOOL CServerManagerService::Init(CNetServer * pServer)
 
 	//m_RecentTime = CEasyTimerEx::GetTime();
 
-	m_ServiceKeepTimer.SaveTime();
 
 	InitNetAdapterInfo();
 
@@ -71,6 +70,10 @@ BOOL CServerManagerService::Init(CNetServer * pServer)
 void CServerManagerService::Destory()
 {
 	FUNCTION_BEGIN;
+	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
+	{
+		SAFE_DELETE(m_ServiceInfoList[i].pControlPipe);
+	}
 	CNetService::Destory();
 	FUNCTION_END;
 }
@@ -145,52 +148,73 @@ int CServerManagerService::Update(int ProcessPacketLimit)
 		UpdateNetAdapterInfo();
 	}
 
-	if (m_ServiceKeepTimer.IsTimeOut(SERVICE_KEEP_TIME))
+
+	UINT CurTime = time(NULL);
+	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 	{
-		m_ServiceKeepTimer.SaveTime();
-		UINT CurTime = time(NULL);
-		for (UINT i = 0; i < m_ServiceInfoList.List.GetCount(); i++)
+		CServiceInfoEx& SeriveInfo = m_ServiceInfoList[i];
+		if (SeriveInfo.GetType() == SERVICE_TYPE_NORMAL &&
+			SeriveInfo.GetStatus() == SERVICE_STATUS_STOP && SeriveInfo.GetLastOperation() == SERVICE_OPERATION_STARTUP &&
+			CurTime - SeriveInfo.GetLastStatusChangeTime() >= SeriveInfo.GetRestartupTime())
 		{
-			SERVICE_INFO& SeriveInfo = m_ServiceInfoList.List[i];
-			if (SeriveInfo.Type == SERVICE_TYPE_NORMAL && 
-				SeriveInfo.Status == SERVICE_STATUS_STOP && SeriveInfo.LastOperation == SERVICE_OPERATION_STARTUP &&
-				CurTime - SeriveInfo.LastStatusChangeTime >= SeriveInfo.RestartupTime)
-			{
-				Log("检测到服务[%u](%s)已停止，重新启动", SeriveInfo.ServiceID, (LPCTSTR)SeriveInfo.Name);
-				StartupService(SeriveInfo.ServiceID);
-			}
+			Log("检测到服务[%u](%s)已停止，重新启动", SeriveInfo.GetServiceID(), (LPCTSTR)SeriveInfo.GetName());
+			StartupService(SeriveInfo.GetServiceID());
 		}
+
+		if (SeriveInfo.pControlPipe)
+			Process += SeriveInfo.pControlPipe->Update(ProcessPacketLimit);
 	}
 	return Process;
 	FUNCTION_END;
 	return 0;
 }
 
-SERVICE_INFO * CServerManagerService::GetServiceInfo(UINT ServiceID)
+CServiceInfoEx * CServerManagerService::GetServiceInfo(UINT ServiceID)
 {
-	for (UINT i = 0; i < m_ServiceInfoList.List.GetCount(); i++)
+	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 	{
-		if (m_ServiceInfoList.List[i].ServiceID == ServiceID)
-			return m_ServiceInfoList.List.GetObject(i);
+		if (m_ServiceInfoList[i].GetServiceID() == ServiceID)
+			return m_ServiceInfoList.GetObject(i);
+	}
+	return NULL;
+}
+
+LPCTSTR CServerManagerService::GetServiceWorkDir(UINT ServiceID)
+{
+	if (ServiceID == 0)
+	{
+		static CEasyString ModuleDir;
+
+		ModuleDir = CFileTools::MakeFullPath(CFileTools::GetModulePath(NULL));
+
+		return ModuleDir;
+	}
+	else
+	{
+		CServiceInfoEx * pServiceInfo = GetServiceInfo(ServiceID);
+		if (pServiceInfo)
+		{
+			return pServiceInfo->GetWorkDir();
+		}
 	}
 	return NULL;
 }
 
 int CServerManagerService::StartupService(UINT ServiceID)
 {
-	SERVICE_INFO * pServiceInfo = GetServiceInfo(ServiceID);
+	CServiceInfoEx * pServiceInfo = GetServiceInfo(ServiceID);
 	if (pServiceInfo)
 	{
-		if (pServiceInfo->Type == SERVICE_TYPE_NORMAL)
+		if (pServiceInfo->GetType() == SERVICE_TYPE_NORMAL)
 		{
-			if (pServiceInfo->Status == SERVICE_STATUS_STOP)
+			if (pServiceInfo->GetStatus() == SERVICE_STATUS_STOP)
 			{
-				if (StartupProcess(pServiceInfo->ImageFilePath, pServiceInfo->WorkDir, pServiceInfo->StartupParam))
+				if (StartupProcess(pServiceInfo->GetImageFilePath(), pServiceInfo->GetWorkDir(), pServiceInfo->GetStartupParam()))
 				{
 					Log("服务%u成功执行启动", ServiceID);
-					pServiceInfo->LastOperation = SERVICE_OPERATION_STARTUP;
-					pServiceInfo->Status = SERVICE_STATUS_STARTUPPING;
-					pServiceInfo->LastStatusChangeTime = time(NULL);
+					pServiceInfo->SetLastOperation(SERVICE_OPERATION_STARTUP);
+					pServiceInfo->SetStatus(SERVICE_STATUS_STARTUPPING);
+					pServiceInfo->SetLastStatusChangeTime(time(NULL));
 					return MSG_RESULT_SUCCEED;
 				}
 				else
@@ -200,17 +224,17 @@ int CServerManagerService::StartupService(UINT ServiceID)
 			}
 			else
 			{
-				Log("服务%u状态错误%d", ServiceID, pServiceInfo->Status);
+				Log("服务%u状态错误%d", ServiceID, pServiceInfo->GetStatus());
 			}
 		}
 		else
 		{
-			if (StartupWinService(pServiceInfo->Name))
+			if (StartupWinService(pServiceInfo->GetName()))
 			{
 				Log("Win服务%u成功执行启动", ServiceID);
-				pServiceInfo->LastOperation = SERVICE_OPERATION_STARTUP;
-				pServiceInfo->Status = SERVICE_STATUS_STARTUPPING;
-				pServiceInfo->LastStatusChangeTime = time(NULL);
+				pServiceInfo->SetLastOperation(SERVICE_OPERATION_STARTUP);
+				pServiceInfo->SetStatus(SERVICE_STATUS_STARTUPPING);
+				pServiceInfo->SetLastStatusChangeTime(time(NULL));
 				return MSG_RESULT_SUCCEED;
 			}
 			else
@@ -219,7 +243,7 @@ int CServerManagerService::StartupService(UINT ServiceID)
 			}
 		}
 		
-		return COMMON_RESULT_FAILED;
+		return MSG_RESULT_FAILED;
 	}
 	else
 	{
@@ -228,39 +252,75 @@ int CServerManagerService::StartupService(UINT ServiceID)
 	}
 }
 
-int CServerManagerService::ShutdownService(UINT ServiceID, bool IsForce)
+int CServerManagerService::ShutdownService(UINT ServiceID, int ShutdownType)
 {
-	SERVICE_INFO * pServiceInfo = GetServiceInfo(ServiceID);
+	CServiceInfoEx * pServiceInfo = GetServiceInfo(ServiceID);
 	if (pServiceInfo)
 	{
-		if (pServiceInfo->Type == SERVICE_TYPE_NORMAL)
+		if (pServiceInfo->GetType() == SERVICE_TYPE_NORMAL)
 		{
-			if (pServiceInfo->Status == SERVICE_STATUS_RUNNING)
+			if (pServiceInfo->GetStatus() == SERVICE_STATUS_RUNNING)
 			{
-				if (ShutdownProcess(pServiceInfo->ProcessID, IsForce))
+				if (ShutdownType == SERVICE_SHUTDOWN_TYPE_SAFE)
 				{
-					Log("服务%u成功执行%s关闭", ServiceID, IsForce ? "强制" : "");
-					pServiceInfo->LastOperation = SERVICE_OPERATION_SHUTDOWN;
-					pServiceInfo->Status = SERVICE_STATUS_SHUTDOWNNING;
-					pServiceInfo->LastStatusChangeTime = time(NULL);
-					return MSG_RESULT_SUCCEED;
+					if (!pServiceInfo->GetShutdownCmd().IsEmpty())
+					{
+						if (pServiceInfo->pControlPipe)
+						{
+							if (pServiceInfo->pControlPipe->IsConnected())
+							{
+								if (pServiceInfo->pControlPipe->SendCommand(0, pServiceInfo->GetShutdownCmd()))
+								{
+									pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
+									pServiceInfo->SetStatus(SERVICE_STATUS_SHUTDOWNNING);
+									pServiceInfo->SetLastStatusChangeTime(time(NULL));
+									return MSG_RESULT_SUCCEED;
+								}
+								else
+								{
+									return MSG_RESULT_FAILED;
+								}
+							}
+						}
+						return MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE;
+					}
+					else
+					{
+						return MSG_RESULT_SHUTDOWN_CMD_NOT_SET;
+					}
+				}
+				else
+				{
+					if (ShutdownProcess(pServiceInfo->GetProcessID(), ShutdownType))
+					{
+						Log("服务%u成功执行关闭%d", ServiceID, ShutdownType);
+						pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
+						pServiceInfo->SetStatus(SERVICE_STATUS_SHUTDOWNNING);
+						pServiceInfo->SetLastStatusChangeTime(time(NULL));
+						return MSG_RESULT_SUCCEED;
+					}
 				}
 			}
+			else
+			{
+				pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
+				Log("服务%u已经关闭%d", ServiceID, ShutdownType);
+			}
 		}
-		else
+		else if (pServiceInfo->GetType() == SERVICE_TYPE_WIN_SERVICE)
 		{
-			if (ShutdownWinService(pServiceInfo->Name))
+			if (ShutdownWinService(pServiceInfo->GetName()))
 			{
 				Log("Win服务%u成功执行关闭", ServiceID);
-				pServiceInfo->LastOperation = SERVICE_OPERATION_SHUTDOWN;
-				pServiceInfo->Status = SERVICE_STATUS_SHUTDOWNNING;
-				pServiceInfo->LastStatusChangeTime = time(NULL);
+				pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
+				pServiceInfo->SetStatus(SERVICE_STATUS_SHUTDOWNNING);
+				pServiceInfo->SetLastStatusChangeTime(time(NULL));
 				return MSG_RESULT_SUCCEED;
 			}
 
 		}
-		Log("服务%u执行%s关闭失败", ServiceID, IsForce ? "强制" : "");
-		return COMMON_RESULT_FAILED;
+		Log("服务%u执行关闭失败%d", ServiceID, ShutdownType);
+		return MSG_RESULT_FAILED;
 	}
 	else
 	{
@@ -307,97 +367,116 @@ void CServerManagerService::FetchProcessInfo()
 	m_ProcessSnapshot.Snapshot();
 	const CEasyArray<CProcessSnapshot::PROCESS_INFO>& ProcessList = m_ProcessSnapshot.GetProcessList();
 
-	m_ProcessInfoList.List.Resize(ProcessList.GetCount());
+	m_ProcessInfoList.GetList().Resize(ProcessList.GetCount());
 	for (UINT i = 0; i < ProcessList.GetCount(); i++)
 	{
-		m_ProcessInfoList.List[i].ProcessID = ProcessList[i].ProcessID;
-		m_ProcessInfoList.List[i].ImageFile = ProcessList[i].ImageFile;
-		m_ProcessInfoList.List[i].CPUUsedTime = ProcessList[i].CPUUsedTime;
-		m_ProcessInfoList.List[i].CPUUsed = ProcessList[i].CPUUsedRate;
-		m_ProcessInfoList.List[i].MemoryUsed = ProcessList[i].MemoryUsed;
-		m_ProcessInfoList.List[i].VirtualMemoryUsed = ProcessList[i].VirtualMemoryUsed;
+		m_ProcessInfoList.GetList()[i].SetProcessID(ProcessList[i].ProcessID);
+		m_ProcessInfoList.GetList()[i].SetImageFilePath(ProcessList[i].ImageFile);
+		m_ProcessInfoList.GetList()[i].SetCPUUsedTime(ProcessList[i].CPUUsedTime);
+		m_ProcessInfoList.GetList()[i].SetCPUUsed(ProcessList[i].CPUUsedRate);
+		m_ProcessInfoList.GetList()[i].SetMemoryUsed(ProcessList[i].MemoryUsed);
+		m_ProcessInfoList.GetList()[i].SetVirtualMemoryUsed(ProcessList[i].VirtualMemoryUsed);
 	}
 
-	for(UINT j=0;j<m_ServiceInfoList.List.GetCount();j++)
+	for(UINT j=0;j<m_ServiceInfoList.GetCount();j++)
 	{
-		SERVICE_INFO& ServiceInfo = m_ServiceInfoList.List[j];
-		ServiceInfo.ProcessID = 0;
-		ServiceInfo.CPUUsed=0;
-		ServiceInfo.MemoryUsed=0;
-		ServiceInfo.VirtualMemoryUsed=0;
-		for(UINT i=0;i<m_ProcessInfoList.List.GetCount();i++)
+		CServiceInfoEx& ServiceInfo = m_ServiceInfoList[j];
+		ServiceInfo.SetProcessID(0);
+		ServiceInfo.SetCPUUsed(0);
+		ServiceInfo.SetMemoryUsed(0);
+		ServiceInfo.SetVirtualMemoryUsed(0);
+		for(UINT i=0;i<m_ProcessInfoList.GetList().GetCount();i++)
 		{
-			PROCESS_INFO& ProcessInfo = m_ProcessInfoList.List[i];
-			if(ServiceInfo.ImageFilePath[0])
+			CProcessInfo& ProcessInfo = m_ProcessInfoList.GetList()[i];
+			if(!ServiceInfo.GetImageFilePath().IsEmpty())
 			{
-				if (ServiceInfo.ImageFilePath.CompareNoCase(ProcessInfo.ImageFile) == 0)
+				if (ServiceInfo.GetImageFilePath().CompareNoCase(ProcessInfo.GetImageFilePath()) == 0)
 				{
-					ServiceInfo.ProcessID=ProcessInfo.ProcessID;
-					ServiceInfo.CPUUsed=ProcessInfo.CPUUsed;
-					ServiceInfo.MemoryUsed=ProcessInfo.MemoryUsed;
-					ServiceInfo.VirtualMemoryUsed=ProcessInfo.VirtualMemoryUsed;
+					ServiceInfo.CProcessInfo::CloneFrom(ProcessInfo, DOMF_PROCESS_INFO_FOR_STATUS_FETCH);					
 				}
 			}
 		}
-		switch (ServiceInfo.Status)
+		if (ServiceInfo.GetProcessID())
+		{
+			if ((!ServiceInfo.GetControlPipeName().IsEmpty()) && (ServiceInfo.pControlPipe == NULL))
+			{
+				CEasyString PipeName;
+				PipeName.Format("%s(%u)", (LPCTSTR)ServiceInfo.GetControlPipeName(), ServiceInfo.GetProcessID());
+				ServiceInfo.pControlPipe = new CServiceControlPipe(ServiceInfo.GetServiceID());
+			}
+		}
+		if (ServiceInfo.pControlPipe)
+		{
+			ServiceInfo.pControlPipe->QueryGetServerWorkStatus();
+		}
+		switch (ServiceInfo.GetStatus())
 		{
 		case SERVICE_STATUS_NONE:
-			if (ServiceInfo.ProcessID == 0)
+			if (ServiceInfo.GetProcessID() == 0)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_STOP;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			else
 			{
-				ServiceInfo.Status = SERVICE_STATUS_RUNNING;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_RUNNING);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
 		case SERVICE_STATUS_STOP:
-			if (ServiceInfo.ProcessID != 0)
+			if (ServiceInfo.GetProcessID() != 0)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_RUNNING;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_RUNNING);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
 		case SERVICE_STATUS_RUNNING:
-			if (ServiceInfo.ProcessID == 0)
+			if (ServiceInfo.GetProcessID() == 0)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_STOP;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
 		case SERVICE_STATUS_SHUTDOWNNING:
-			if (ServiceInfo.ProcessID == 0)
+			if (ServiceInfo.GetProcessID() == 0)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_STOP;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
-			else if (CurTime - ServiceInfo.LastStatusChangeTime > MAX_OPERATION_WAIT_TIME)
+			else if (CurTime - ServiceInfo.GetLastStatusChangeTime() > MAX_OPERATION_WAIT_TIME)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_RUNNING;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_RUNNING);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
 		case SERVICE_STATUS_STARTUPPING:
-			if (ServiceInfo.ProcessID != 0)
+			if (ServiceInfo.GetProcessID() != 0)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_RUNNING;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_RUNNING);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
-			else if (CurTime - ServiceInfo.LastStatusChangeTime > MAX_OPERATION_WAIT_TIME)
+			else if (CurTime - ServiceInfo.GetLastStatusChangeTime() > MAX_OPERATION_WAIT_TIME)
 			{
-				ServiceInfo.Status = SERVICE_STATUS_STOP;
-				ServiceInfo.LastStatusChangeTime = time(NULL);
+				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
+				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
 		}		
 
-		CFileInfo FileInfo(ServiceInfo.ImageFilePath);
+		CFileInfo FileInfo;
 
-		if (FileInfo.IsOK())
+		if (FileInfo.FetchFileInfo(ServiceInfo.GetImageFilePath()))
 		{
-			ServiceInfo.ImageFileTime = FileInfo.GetLastWriteTime();
+			time_t LastExecFileTime = FileInfo.GetLastWriteTime();
+			for (UINT i = 0; i < ServiceInfo.GetOtherExecFileList().GetCount(); i++)
+			{
+				if (FileInfo.FetchFileInfo(ServiceInfo.GetOtherExecFileList()[i]))
+				{
+					if (FileInfo.GetLastWriteTime() > LastExecFileTime)
+						LastExecFileTime = FileInfo.GetLastWriteTime();
+				}
+			}
+			ServiceInfo.SetImageFileTime(LastExecFileTime);
 		}
 	}
 
@@ -406,20 +485,21 @@ void CServerManagerService::FetchProcessInfo()
 #ifdef WIN32
 void CServerManagerService::FetchWinServiceInfo()
 {
-	for(UINT i=0;i<m_ServiceInfoList.List.GetCount();i++)
+	for(UINT i=0;i<m_ServiceInfoList.GetCount();i++)
 	{
-		SERVICE_INFO& ServiceInfo = m_ServiceInfoList.List[i];
+		CServiceInfoEx& ServiceInfo = m_ServiceInfoList[i];
 
-		if(ServiceInfo.Type==SERVICE_TYPE_WIN_SERVICE)
+		if (ServiceInfo.GetType() == SERVICE_TYPE_WIN_SERVICE)
 		{
 			CWinServiceController ServiceController;
-			if(ServiceController.OpenService(ServiceInfo.Name))
+			if(ServiceController.OpenService(ServiceInfo.GetName()))
 			{
 				TCHAR Path[MAX_PATH];
 				ServiceController.GetServiceImageFilePath(Path, MAX_PATH);
-				ServiceInfo.ImageFilePath = Path;
-				ServiceInfo.WorkDir = CFileTools::GetPathDirectory(Path);
-				ServiceInfo.WorkDir.TrimRight(DIR_SLASH);
+				ServiceInfo.SetImageFilePath(Path);
+				CEasyString WorkDir = CFileTools::GetPathDirectory(Path);
+				WorkDir.TrimRight(DIR_SLASH);
+				ServiceInfo.SetWorkDir(WorkDir);
 				ServiceController.CloseService();
 			}
 		}
@@ -484,127 +564,152 @@ int CServerManagerService::StartupProcess(LPCTSTR szImageFileName, LPCTSTR szWor
 #endif
 }
 
-int CServerManagerService::ShutdownProcess(UINT ProcessID, bool IsForce)
+int CServerManagerService::ShutdownProcess(UINT ProcessID, int ShutdownType)
 {
+	switch (ShutdownType)
+	{	
+	case SERVICE_SHUTDOWN_TYPE_NORMAL:
 #ifdef WIN32
-	if (IsForce)
-	{
-		HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, ProcessID);
-		if (hProcess != NULL)
 		{
-			bool Ret = TerminateProcess(hProcess, 0) != FALSE;
-			CloseHandle(hProcess);
-			Log("%s终止进程%u%s", IsForce ? "强制" : "", ProcessID, Ret ? "成功" : "失败");
-			return Ret;
+			HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, ProcessID);
+			if (hProcess != NULL)
+			{
+				bool Ret = TerminateProcess(hProcess, 0) != FALSE;
+				CloseHandle(hProcess);
+				Log("终止进程%u%s(%d)", ProcessID, Ret ? "成功" : "失败", ShutdownType);
+				return Ret;
+			}
+			else
+			{
+				Log("无法打开进程%u", ProcessID);
+			}
 		}
-		else
+#else
 		{
-			Log("无法打开进程%u", ProcessID);
+			int sig = SIGTERM;			
+			if (kill(ProcessID, sig) == 0)
+			{
+				Log("以信号%d终止进程%u成功", sig, ProcessID);
+				return true;
+			}
+			else
+			{
+				Log("以信号%d终止进程%u失败%d", sig, ProcessID, errno);
+				return false;
+			}
 		}
-	}
-	else
-	{
+#endif
+		break;
+	case SERVICE_SHUTDOWN_TYPE_FORCE:
+#ifdef WIN32
 		return PostQuitMsgToProcess(ProcessID);
+#else
+		{
+			int sig = SIGKILL;
+			if (kill(ProcessID, sig) == 0)
+			{
+				Log("以信号%d终止进程%u成功", sig, ProcessID);
+				return true;
+			}
+			else
+			{
+				Log("以信号%d终止进程%u失败%d", sig, ProcessID, errno);
+				return false;
+			}
+		}
+#endif
+		break;
+	case SERVICE_SHUTDOWN_TYPE_SAFE:
+		return false;
+		break;
 	}
 	return false;
-#else
-	int sig = SIGTERM;
-	if (IsForce)
-	{
-		sig = SIGKILL;
-	}
-	if(kill(ProcessID, sig) == 0)
-	{
-		Log("以信号%d终止进程%u成功", sig, ProcessID);
-		return true;
-	}
-	else
-	{
-		Log("以信号%d终止进程%u失败%d", sig, ProcessID, errno);
-		return false;
-	}
-#endif
 }
 
-int CServerManagerService::CheckServiceInfo(const SERVICE_INFO& ServiceInfo)
+int CServerManagerService::CheckServiceInfo(const CServiceInfo& ServiceInfo)
 {
 #ifndef WIN32
-	if (ServiceInfo.Type == SERVICE_TYPE_WIN_SERVICE)
+	if (ServiceInfo.GetType() == SERVICE_TYPE_WIN_SERVICE)
 		return MSG_RESULT_SERVICE_TYPE_NOT_SUPPORT;
 #endif
-	if (ServiceInfo.Type == SERVICE_TYPE_NORMAL || ServiceInfo.Type == SERVICE_TYPE_WIN_SERVICE)
+	if (ServiceInfo.GetType() == SERVICE_TYPE_NORMAL || ServiceInfo.GetType() == SERVICE_TYPE_WIN_SERVICE)
 	{
-		if (!CFileTools::IsFileExist(ServiceInfo.ImageFilePath))
+		if (!CFileTools::IsFileExist(ServiceInfo.GetImageFilePath()))
 			return MSG_RESULT_FILE_NOT_EXIST;
 	}
 
-	if (!CFileTools::IsDirExist(ServiceInfo.WorkDir))
+	if (!CFileTools::IsDirExist(ServiceInfo.GetWorkDir()))
 		return MSG_RESULT_DIR_NOT_EXIST;
 
 	return MSG_RESULT_SUCCEED;
 }
-int CServerManagerService::AddService(const SERVICE_INFO& ServiceInfo)
+int CServerManagerService::AddService(const CServiceInfo& ServiceInfo)
 {
 	int Result = CheckServiceInfo(ServiceInfo);
 	if (Result != MSG_RESULT_SUCCEED)
 		return Result;
 	
-	for (UINT i = 0; i < m_ServiceInfoList.List.GetCount(); i++)
+	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 	{
-		if (m_ServiceInfoList.List[i].ServiceID == ServiceInfo.ServiceID)
+		if (m_ServiceInfoList[i].GetServiceID() == ServiceInfo.GetServiceID())
 			return MSG_RESULT_SERVICE_ID_IS_USED;
 	}
-	m_ServiceInfoList.List.Add(ServiceInfo);
+	
+	CServiceInfoEx SrvInfo;
+	SrvInfo.CloneFrom(ServiceInfo, DOMF_SERVICE_INFO_FULL);
 
-	SERVICE_INFO& SrvInfo = m_ServiceInfoList.List[m_ServiceInfoList.List.GetCount() - 1];
-	SrvInfo.ImageFilePath = CFileTools::MakeFullPath(ServiceInfo.ImageFilePath);
-	SrvInfo.WorkDir.Trim();
-	if (SrvInfo.WorkDir.IsEmpty() && SrvInfo.Type != SERVICE_TYPE_DIRECTORY)
+	SrvInfo.SetImageFilePath(CFileTools::MakeFullPath(SrvInfo.GetImageFilePath()));
+	SrvInfo.GetWorkDir().Trim();
+	if (SrvInfo.GetWorkDir().IsEmpty() && SrvInfo.GetType() != SERVICE_TYPE_DIRECTORY)
 	{
-		SrvInfo.WorkDir = CFileTools::GetPathDirectory(SrvInfo.ImageFilePath);
+		SrvInfo.SetWorkDir(CFileTools::GetPathDirectory(SrvInfo.GetImageFilePath()));
 	}
 	else
 	{
-		SrvInfo.WorkDir = CFileTools::MakeFullPath(SrvInfo.WorkDir);
+		SrvInfo.SetWorkDir(CFileTools::MakeFullPath(SrvInfo.GetWorkDir()));
 	}
-	SrvInfo.WorkDir.TrimRight(DIR_SLASH);
+	SrvInfo.GetWorkDir().TrimRight(DIR_SLASH);
 
-	CMainConfig::GetInstance()->SaveServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList.List);
-	return MSG_RESULT_SUCCEED;
+	if (CFileTools::CreateDirEx(SrvInfo.GetWorkDir()))
+	{
+		m_ServiceInfoList.Add(SrvInfo);
+		CMainConfig::GetInstance()->SaveServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList);
+		return MSG_RESULT_SUCCEED;
+	}
+	else
+	{
+		return MSG_RESULT_DIR_NOT_EXIST;
+	}	
 }
-int CServerManagerService::EditService(const SERVICE_INFO& ServiceInfo)
+int CServerManagerService::EditService(const CServiceInfo& ServiceInfo)
 {
 	int Result = CheckServiceInfo(ServiceInfo);
 	if (Result != MSG_RESULT_SUCCEED)
 		return Result;
 
-	for (UINT i = 0; i < m_ServiceInfoList.List.GetCount(); i++)
+	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 	{
-		if (m_ServiceInfoList.List[i].ServiceID == ServiceInfo.ServiceID)
+		if (m_ServiceInfoList[i].GetServiceID() == ServiceInfo.GetServiceID())
 		{
-			SERVICE_INFO& SrvInfo = m_ServiceInfoList.List[i];
-
-			SrvInfo.Type = ServiceInfo.Type;
-			SrvInfo.Name = ServiceInfo.Name;
-			SrvInfo.ImageFilePath = CFileTools::MakeFullPath(ServiceInfo.ImageFilePath);
-			SrvInfo.WorkDir = ServiceInfo.WorkDir;
-			SrvInfo.StartupParam = ServiceInfo.StartupParam;
-			SrvInfo.LastOperation = ServiceInfo.LastOperation;
-			SrvInfo.RestartupTime = ServiceInfo.RestartupTime;
+			CServiceInfoEx& SrvInfo = m_ServiceInfoList[i];
+			SrvInfo.CloneFrom(ServiceInfo, DOMF_SERVICE_INFO_FOR_EDIT);
 			
-			SrvInfo.WorkDir.Trim();
-			if (SrvInfo.WorkDir.IsEmpty() && SrvInfo.Type != SERVICE_TYPE_DIRECTORY)
+			
+			SrvInfo.SetImageFilePath(CFileTools::MakeFullPath(SrvInfo.GetImageFilePath()));
+			SrvInfo.GetWorkDir().Trim();
+			if (SrvInfo.GetWorkDir().IsEmpty() && SrvInfo.GetType() != SERVICE_TYPE_DIRECTORY)
 			{
-				SrvInfo.WorkDir = CFileTools::GetPathDirectory(SrvInfo.ImageFilePath);
+				SrvInfo.SetWorkDir(CFileTools::GetPathDirectory(SrvInfo.GetImageFilePath()));
 			}
 			else
 			{
-				SrvInfo.WorkDir = CFileTools::MakeFullPath(SrvInfo.WorkDir);
+				SrvInfo.SetWorkDir(CFileTools::MakeFullPath(SrvInfo.GetWorkDir()));
 			}
-			SrvInfo.WorkDir.TrimRight(DIR_SLASH);
+			SrvInfo.GetWorkDir().TrimRight(DIR_SLASH);
 
+			SAFE_DELETE(SrvInfo.pControlPipe);
 
-			CMainConfig::GetInstance()->SaveServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList.List);
+			CMainConfig::GetInstance()->SaveServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList);
 			return MSG_RESULT_SUCCEED;
 		}
 	}
@@ -612,19 +717,116 @@ int CServerManagerService::EditService(const SERVICE_INFO& ServiceInfo)
 }
 int CServerManagerService::DeleteService(UINT ServiceID)
 {
-	for (UINT i = 0; i < m_ServiceInfoList.List.GetCount(); i++)
+	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 	{
-		if (m_ServiceInfoList.List[i].ServiceID == ServiceID)
+		if (m_ServiceInfoList[i].GetServiceID() == ServiceID)
 		{
-			m_ServiceInfoList.List.Delete(i);
-			CMainConfig::GetInstance()->SaveServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList.List);
+			SAFE_DELETE(m_ServiceInfoList[i].pControlPipe);
+			m_ServiceInfoList.Delete(i);
+			CMainConfig::GetInstance()->SaveServiceList(CFileTools::MakeModuleFullPath(NULL, SERVICE_LIST_FILE_NAME), m_ServiceInfoList);
 			return MSG_RESULT_SUCCEED;
 		}
 	}
 	return MSG_RESULT_SERVICE_NOT_EXIST;
 }
 
+//int CServerManagerService::SendCommand(UINT ServiceID, LPCTSTR szCommand)
+//{
+//	SERVICE_INFO_EX * pServiceInfo = GetServiceInfo(ServiceID);
+//	if (pServiceInfo)
+//	{
+//		if (pServiceInfo->pControlPipe)
+//		{
+//			if (pServiceInfo->pControlPipe->IsConnected())
+//			{
+//				if (pServiceInfo->pControlPipe->SendCommand(szCommand))
+//				{
+//					return MSG_RESULT_SUCCEED;
+//				}
+//				else
+//				{
+//					return MSG_RESULT_FAILED;
+//				}
+//			}
+//			else
+//			{
+//				return MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE;
+//			}
+//		}
+//		else
+//		{
+//			return MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE;
+//		}
+//	}
+//	else
+//	{
+//		return MSG_RESULT_SERVICE_NOT_EXIST;
+//	}
+//}
 
+int CServerManagerService::EnableLogRecv(UINT ServiceID, bool Enable)
+{
+	//遍历所有链接确定最终状态
+	void * Pos = m_ClientPool.GetFirstObjectPos();
+	while (Pos)
+	{
+		CServerManagerClient * pClient = m_ClientPool.GetNextObject(Pos);
+		Enable = Enable | pClient->IsLogRecv(ServiceID);
+	}
+
+	CServiceInfoEx * pServiceInfo = GetServiceInfo(ServiceID);
+	if (pServiceInfo)
+	{
+		if (pServiceInfo->pControlPipe)
+		{
+			if (pServiceInfo->pControlPipe->QueryEnableLogRecv(Enable))
+			{
+				return MSG_RESULT_SUCCEED;
+			}
+			else
+			{
+				return MSG_RESULT_FAILED;
+			}
+		}
+		else
+		{
+			return MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE;
+		}
+	}
+	else
+	{
+		return MSG_RESULT_SERVICE_NOT_EXIST;
+	}
+}
+
+void CServerManagerService::OnGetServiceWorkStatus(UINT ServiceID, BYTE WorkStatus)
+{
+	CServiceInfoEx * pServiceInfo = GetServiceInfo(ServiceID);
+	if (pServiceInfo)
+	{
+		pServiceInfo->SetWorkStatus(WorkStatus);
+	}
+}
+
+void CServerManagerService::OnServerLogMsg(UINT ServiceID, LPCTSTR szLogMsg)
+{
+	void * Pos = m_ClientPool.GetFirstObjectPos();
+	while (Pos)
+	{
+		CServerManagerClient * pClient = m_ClientPool.GetNextObject(Pos);
+		if (pClient->IsLogRecv(ServiceID))
+		{
+			CServerManagerAckMsgCaller MsgCaller(pClient);
+
+			MsgCaller.ConsoleLogNotify(ServiceID, szLogMsg);
+		}
+	}
+}
+
+void CServerManagerService::OnSendCommandResult(UINT ServiceID, short Result)
+{
+
+}
 void CServerManagerService::InitNetAdapterInfo()
 {
 	m_NetAdapterInfos.Init();

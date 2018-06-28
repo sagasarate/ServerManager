@@ -9,9 +9,11 @@ public:
 	
 	enum SERVER_MANAGER_METHODS
 	{
+		METHOD_LOGIN=23,
 		METHOD_GET_SERVICE_LIST=1,
 		METHOD_GET_PROCESS_LIST=2,
 		METHOD_GET_NET_ADAPTER_LIST=15,
+		METHOD_GET_SERVICE_INFO=30,
 		METHOD_SERVICE_STARTUP=3,
 		METHOD_SERVICE_SHUTDOWN=4,
 		METHOD_RUN_PROGRAM=14,
@@ -30,9 +32,27 @@ public:
 		METHOD_ADD_SERVICE=20,
 		METHOD_EDIT_SERVICE=21,
 		METHOD_DELETE_SERVICE=22,
+		METHOD_SEND_COMMAND=24,
+		METHOD_ENABLE_LOG_RECV=25,
+		METHOD_CONSOLE_LOG_NOTIFY=26,
+		METHOD_GET_SERVER_STATUS=27,
+		METHOD_GET_ALL_SERVER_STATUS=28,
+		METHOD_GET_SERVER_STATUS_FORMAT=29,
 	
 	};
 	
+	
+	
+	/*************************************************
+	函数名:	Login
+	用途:	
+	参数:
+		UserName				
+		Password				
+	返回值:无特别意义
+	*************************************************/
+	virtual int Login(LPCTSTR UserName ,LPCTSTR Password ) {return COMMON_RESULT_FAILED;}
+		
 	
 	
 	/*************************************************
@@ -70,6 +90,17 @@ public:
 	
 	
 	/*************************************************
+	函数名:	GetServiceInfo
+	用途:	
+	参数:
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServiceInfo(UINT ServiceID ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
 	函数名:	ServiceStartup
 	用途:	
 	参数:
@@ -85,10 +116,10 @@ public:
 	用途:	
 	参数:
 		ServiceID				
-		IsForce				
+		ShutdownType				
 	返回值:无特别意义
 	*************************************************/
-	virtual int ServiceShutdown(UINT ServiceID ,bool IsForce ) {return COMMON_RESULT_FAILED;}
+	virtual int ServiceShutdown(UINT ServiceID ,BYTE ShutdownType ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -111,10 +142,10 @@ public:
 	用途:	
 	参数:
 		ProcessID				
-		IsForce				
+		ShutdownType				
 	返回值:无特别意义
 	*************************************************/
-	virtual int ProcessShutdown(UINT ProcessID ,bool IsForce ) {return COMMON_RESULT_FAILED;}
+	virtual int ProcessShutdown(UINT ProcessID ,BYTE ShutdownType ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -261,7 +292,7 @@ public:
 		ServiceInfo				
 	返回值:无特别意义
 	*************************************************/
-	virtual int AddService(const SERVICE_INFO& ServiceInfo ) {return COMMON_RESULT_FAILED;}
+	virtual int AddService(const CSmartStruct& ServiceInfo ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -272,7 +303,7 @@ public:
 		ServiceInfo				
 	返回值:无特别意义
 	*************************************************/
-	virtual int EditService(const SERVICE_INFO& ServiceInfo ) {return COMMON_RESULT_FAILED;}
+	virtual int EditService(const CSmartStruct& ServiceInfo ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -287,8 +318,72 @@ public:
 		
 	
 	
+	/*************************************************
+	函数名:	SendCommand
+	用途:	
+	参数:
+		ServiceID				
+		Command				
+	返回值:无特别意义
+	*************************************************/
+	virtual int SendCommand(UINT ServiceID ,LPCTSTR Command ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	EnableLogRecv
+	用途:	
+	参数:
+		ServiceID				
+		Enable				
+	返回值:无特别意义
+	*************************************************/
+	virtual int EnableLogRecv(UINT ServiceID ,bool Enable ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatus
+	用途:	
+	参数:
+		ServiceID				
+		StatusListPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatus(UINT ServiceID ,const CSmartStruct& StatusListPacket ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	GetAllServerStatus
+	用途:	
+	参数:
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetAllServerStatus(UINT ServiceID ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatusFormat
+	用途:	
+	参数:
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatusFormat(UINT ServiceID ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
 protected:	
 	
+	enum SERVER_MANAGER_LOGIN_MEMBER_IDS
+	{
+		SST_LOGIN_USER_NAME=1,
+		SST_LOGIN_PASSWORD=2,
+	
+	};
 	enum SERVER_MANAGER_GET_SERVICE_LIST_MEMBER_IDS
 	{
 		
@@ -303,6 +398,11 @@ protected:
 	{
 		
 	};
+	enum SERVER_MANAGER_GET_SERVICE_INFO_MEMBER_IDS
+	{
+		SST_GET_SERVICE_INFO_SERVICE_ID=1,
+	
+	};
 	enum SERVER_MANAGER_SERVICE_STARTUP_MEMBER_IDS
 	{
 		SST_SERVICE_STARTUP_SERVICE_ID=1,
@@ -311,7 +411,7 @@ protected:
 	enum SERVER_MANAGER_SERVICE_SHUTDOWN_MEMBER_IDS
 	{
 		SST_SERVICE_SHUTDOWN_SERVICE_ID=1,
-		SST_SERVICE_SHUTDOWN_IS_FORCE=4,
+		SST_SERVICE_SHUTDOWN_SHUTDOWN_TYPE=4,
 	
 	};
 	enum SERVER_MANAGER_RUN_PROGRAM_MEMBER_IDS
@@ -325,7 +425,7 @@ protected:
 	enum SERVER_MANAGER_PROCESS_SHUTDOWN_MEMBER_IDS
 	{
 		SST_PROCESS_SHUTDOWN_PROCESS_ID=1,
-		SST_PROCESS_SHUTDOWN_IS_FORCE=4,
+		SST_PROCESS_SHUTDOWN_SHUTDOWN_TYPE=4,
 	
 	};
 	enum SERVER_MANAGER_EXECUTE_SCRIPT_MEMBER_IDS
@@ -410,6 +510,34 @@ protected:
 	enum SERVER_MANAGER_DELETE_SERVICE_MEMBER_IDS
 	{
 		SST_DELETE_SERVICE_SERVICE_ID=1,
+	
+	};
+	enum SERVER_MANAGER_SEND_COMMAND_MEMBER_IDS
+	{
+		SST_SEND_COMMAND_SERVICE_ID=1,
+		SST_SEND_COMMAND_COMMAND=2,
+	
+	};
+	enum SERVER_MANAGER_ENABLE_LOG_RECV_MEMBER_IDS
+	{
+		SST_ENABLE_LOG_RECV_SERVICE_ID=4,
+		SST_ENABLE_LOG_RECV_ENABLE=1,
+	
+	};
+	enum SERVER_MANAGER_GET_SERVER_STATUS_MEMBER_IDS
+	{
+		SST_GET_SERVER_STATUS_SERVICE_ID=4,
+		SST_GET_SERVER_STATUS_STATUS_LIST_PACKET=1,
+	
+	};
+	enum SERVER_MANAGER_GET_ALL_SERVER_STATUS_MEMBER_IDS
+	{
+		SST_GET_ALL_SERVER_STATUS_SERVICE_ID=3,
+	
+	};
+	enum SERVER_MANAGER_GET_SERVER_STATUS_FORMAT_MEMBER_IDS
+	{
+		SST_GET_SERVER_STATUS_FORMAT_SERVICE_ID=3,
 	
 	};
 };

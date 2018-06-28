@@ -266,8 +266,9 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DataObjectEmpty.h" />
     <ClInclude Include="DataObjectModifyFlags.h" />
+    <ClInclude Include="ProcessInfo.h" />
+    <ClInclude Include="ProcessInfoList.h" />
     <ClInclude Include="Protocol.h" />
     <ClInclude Include="ServerManagerAckInterface.h" />
     <ClInclude Include="ServerManagerAckMsgCaller.h" />
@@ -275,6 +276,8 @@
     <ClInclude Include="ServerManagerInterface.h" />
     <ClInclude Include="ServerManagerMsgCaller.h" />
     <ClInclude Include="ServerManagerMsgHandler.h" />
+    <ClInclude Include="ServiceInfo.h" />
+    <ClInclude Include="ServiceInfoList.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SvrMgrDataStructs.h" />
     <ClInclude Include="SvrMgrInterfaces.h" />
@@ -285,11 +288,14 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DataObjectEmpty.cpp" />
+    <ClCompile Include="ProcessInfo.cpp" />
+    <ClCompile Include="ProcessInfoList.cpp" />
     <ClCompile Include="ServerManagerAckMsgCaller.cpp" />
     <ClCompile Include="ServerManagerAckMsgHandler.cpp" />
     <ClCompile Include="ServerManagerMsgCaller.cpp" />
     <ClCompile Include="ServerManagerMsgHandler.cpp" />
+    <ClCompile Include="ServiceInfo.cpp" />
+    <ClCompile Include="ServiceInfoList.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugUnicode|x64'">Create</PrecompiledHeader>

@@ -26,7 +26,7 @@
     <Filter Include="对话框">
       <UniqueIdentifier>{2a002699-ecae-49ad-bbc8-478d9da7787e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="文件传输队列">
+    <Filter Include="任务队列">
       <UniqueIdentifier>{ab098440-99ea-40a2-9c37-9c8900256751}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -61,14 +61,23 @@
     <ClCompile Include="DlgWorkDirBowser.cpp">
       <Filter>对话框</Filter>
     </ClCompile>
-    <ClCompile Include="FileTransferQueue.cpp">
-      <Filter>文件传输队列</Filter>
-    </ClCompile>
     <ClCompile Include="DlgListSelector.cpp">
       <Filter>对话框</Filter>
     </ClCompile>
     <ClCompile Include="DlgServiceEditor.cpp">
       <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgServerConsole.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgServerStatus.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgServerUpdate.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskQueue.cpp">
+      <Filter>任务队列</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,14 +117,23 @@
     <ClInclude Include="DlgWorkDirBowser.h">
       <Filter>对话框</Filter>
     </ClInclude>
-    <ClInclude Include="FileTransferQueue.h">
-      <Filter>文件传输队列</Filter>
-    </ClInclude>
     <ClInclude Include="DlgListSelector.h">
       <Filter>对话框</Filter>
     </ClInclude>
     <ClInclude Include="DlgServiceEditor.h">
       <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgServerConsole.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgServerStatus.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgServerUpdate.h">
+      <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskQueue.h">
+      <Filter>任务队列</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

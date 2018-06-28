@@ -26,6 +26,8 @@ CDlgServerManage::CDlgServerManage(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgServerManage::IDD, pParent)
 	, m_IP(_T(""))
 	, m_Port(8300)
+	, m_UserName(_T(""))
+	, m_Password(_T(""))
 {
 
 }
@@ -37,9 +39,11 @@ CDlgServerManage::~CDlgServerManage()
 void CDlgServerManage::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST1, m_lvServerList);
+	DDX_Control(pDX, IDC_LIST, m_lvServerList);
 	DDX_Text(pDX, IDC_EDIT_IP, m_IP);
 	DDX_Text(pDX, IDC_EDIT_PORT, m_Port);
+	DDX_Text(pDX, IDC_EDIT_USER_NAME, m_UserName);
+	DDX_Text(pDX, IDC_EDIT_PASSWORD, m_Password);
 }
 
 
@@ -49,7 +53,7 @@ BEGIN_MESSAGE_MAP(CDlgServerManage, CDialog)
 	ON_BN_CLICKED(IDC_EDIT_SERVER, &CDlgServerManage::OnBnClickedEditServer)
 	ON_BN_CLICKED(IDOK, &CDlgServerManage::OnBnClickedOk)
 //	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &CDlgServerManage::OnHdnItemdblclickList1)
-	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CDlgServerManage::OnNMDblclkList1)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST, &CDlgServerManage::OnNMDblclkList1)
 END_MESSAGE_MAP()
 
 
@@ -62,7 +66,7 @@ void CDlgServerManage::OnBnClickedAddServer()
 	m_IP.Trim();
 	if(!m_IP.IsEmpty())
 	{
-		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->AddServerConnection(m_IP, m_Port);
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->AddServerConnection(m_IP, m_Port, m_UserName, m_Password);
 		if (pConnection)
 		{
 			int Item = m_lvServerList.InsertItem(m_lvServerList.GetItemCount(), pConnection->GetServerAddress());
@@ -117,7 +121,7 @@ void CDlgServerManage::OnBnClickedEditServer()
 			CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConnectionID);
 			if (pConnection)
 			{
-				if(pConnection->Reconnection(m_IP, m_Port))
+				if (pConnection->Reconnection(m_IP, m_Port, m_UserName, m_Password))
 				{
 					m_lvServerList.SetItemText(Item, 0, m_IP);
 					CString Temp;
@@ -199,9 +203,15 @@ void CDlgServerManage::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	if(Pos)
 	{
 		int Item=m_lvServerList.GetNextSelectedItem(Pos);
-		m_IP=m_lvServerList.GetItemText(Item,0);
-		CString Temp=m_lvServerList.GetItemText(Item,1);
-		m_Port=_ttoi(Temp);
-		UpdateData(false);
+		UINT ConnectionID = m_lvServerList.GetItemData(Item);
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConnectionID);
+		if (pConnection)
+		{
+			m_IP = pConnection->GetServerAddress();
+			m_Port = pConnection->GetServerPort();
+			m_UserName = pConnection->GetUserName();
+			m_Password = pConnection->GetPassword();
+			UpdateData(false);
+		}
 	}
 }

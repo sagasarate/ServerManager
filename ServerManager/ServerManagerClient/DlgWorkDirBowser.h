@@ -43,6 +43,8 @@ protected:
 
 	CEasyTimer					m_RefreshTimer;
 
+	CDlgEditBox					m_TextEditBox;
+
 
 	DECLARE_DYNAMIC(CDlgWorkDirBowser)
 
@@ -117,6 +119,7 @@ public:
 	//void OnDeleteFileResult(int Result);
 
 	void DoEdit();
+	void FinishEdit(LPCTSTR Content);
 	
 protected:
 	static int CALLBACK ItemSortCallBack(LPARAM lParam1, LPARAM lParam2,LPARAM lParamSort);

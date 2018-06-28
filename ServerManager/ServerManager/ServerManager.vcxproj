@@ -107,6 +107,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -180,6 +181,7 @@
     <ClCompile Include="ScriptExecutor.cpp" />
     <ClCompile Include="ServerManagerClient.cpp" />
     <ClCompile Include="ServerManagerService.cpp" />
+    <ClCompile Include="ServiceControlPipe.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -195,6 +197,7 @@
     <ClInclude Include="ScriptExecutor.h" />
     <ClInclude Include="ServerManagerClient.h" />
     <ClInclude Include="ServerManagerService.h" />
+    <ClInclude Include="ServiceControlPipe.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

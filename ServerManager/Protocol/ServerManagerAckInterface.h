@@ -11,6 +11,17 @@ public:
 	
 	
 	/*************************************************
+	函数名:	LoginAck
+	用途:	
+	参数:
+		Result				
+	返回值:无特别意义
+	*************************************************/
+	virtual int LoginAck(short Result ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
 	函数名:	GetServiceListAck
 	用途:	
 	参数:
@@ -46,6 +57,18 @@ public:
 	返回值:无特别意义
 	*************************************************/
 	virtual int GetNetAdapterListAck(short Result ,const CSmartStruct& NetAdapterListData ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	GetServiceInfoAck
+	用途:	
+	参数:
+		Result				
+		ServiceInfoPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServiceInfoAck(short Result ,const CSmartStruct& ServiceInfoPacket ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -279,8 +302,76 @@ public:
 		
 	
 	
+	/*************************************************
+	函数名:	SendCommandAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int SendCommandAck(short Result ,UINT ServiceID ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	EnableLogRecvAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		Enable				
+	返回值:无特别意义
+	*************************************************/
+	virtual int EnableLogRecvAck(short Result ,UINT ServiceID ,bool Enable ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	ConsoleLogNotify
+	用途:	
+	参数:
+		ServiceID				
+		LogMsg				
+	返回值:无特别意义
+	*************************************************/
+	virtual int ConsoleLogNotify(UINT ServiceID ,LPCTSTR LogMsg ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatusAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		StatusListPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatusAck(short Result ,UINT ServiceID ,const CSmartStruct& StatusListPacket ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatusFormatAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		StatusFormatPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatusFormatAck(short Result ,UINT ServiceID ,const CSmartStruct& StatusFormatPacket ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
 protected:	
 	
+	enum SERVER_MANAGER_ACK_LOGIN_ACK_MEMBER_IDS
+	{
+		SST_LOGIN_ACK_RESULT=3,
+	
+	};
 	enum SERVER_MANAGER_ACK_GET_SERVICE_LIST_ACK_MEMBER_IDS
 	{
 		SST_GET_SERVICE_LIST_ACK_RESULT=1,
@@ -300,6 +391,12 @@ protected:
 	{
 		SST_GET_NET_ADAPTER_LIST_ACK_RESULT=1,
 		SST_GET_NET_ADAPTER_LIST_ACK_NET_ADAPTER_LIST_DATA=2,
+	
+	};
+	enum SERVER_MANAGER_ACK_GET_SERVICE_INFO_ACK_MEMBER_IDS
+	{
+		SST_GET_SERVICE_INFO_ACK_RESULT=2,
+		SST_GET_SERVICE_INFO_ACK_SERVICE_INFO_PACKET=3,
 	
 	};
 	enum SERVER_MANAGER_ACK_SERVICE_STARTUP_ACK_MEMBER_IDS
@@ -422,6 +519,39 @@ protected:
 	{
 		SST_DELETE_SERVICE_ACK_RESULT=2,
 		SST_DELETE_SERVICE_ACK_SERVICE_ID=3,
+	
+	};
+	enum SERVER_MANAGER_ACK_SEND_COMMAND_ACK_MEMBER_IDS
+	{
+		SST_SEND_COMMAND_ACK_RESULT=3,
+		SST_SEND_COMMAND_ACK_SERVICE_ID=4,
+	
+	};
+	enum SERVER_MANAGER_ACK_ENABLE_LOG_RECV_ACK_MEMBER_IDS
+	{
+		SST_ENABLE_LOG_RECV_ACK_RESULT=2,
+		SST_ENABLE_LOG_RECV_ACK_SERVICE_ID=5,
+		SST_ENABLE_LOG_RECV_ACK_ENABLE=3,
+	
+	};
+	enum SERVER_MANAGER_ACK_CONSOLE_LOG_NOTIFY_MEMBER_IDS
+	{
+		SST_CONSOLE_LOG_NOTIFY_SERVICE_ID=2,
+		SST_CONSOLE_LOG_NOTIFY_LOG_MSG=1,
+	
+	};
+	enum SERVER_MANAGER_ACK_GET_SERVER_STATUS_ACK_MEMBER_IDS
+	{
+		SST_GET_SERVER_STATUS_ACK_RESULT=2,
+		SST_GET_SERVER_STATUS_ACK_SERVICE_ID=5,
+		SST_GET_SERVER_STATUS_ACK_STATUS_LIST_PACKET=3,
+	
+	};
+	enum SERVER_MANAGER_ACK_GET_SERVER_STATUS_FORMAT_ACK_MEMBER_IDS
+	{
+		SST_GET_SERVER_STATUS_FORMAT_ACK_RESULT=1,
+		SST_GET_SERVER_STATUS_FORMAT_ACK_SERVICE_ID=4,
+		SST_GET_SERVER_STATUS_FORMAT_ACK_STATUS_FORMAT_PACKET=2,
 	
 	};
 };

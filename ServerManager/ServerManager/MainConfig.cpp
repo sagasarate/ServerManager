@@ -71,7 +71,25 @@ bool CMainConfig::LoadConfig(LPCTSTR FileName)
 			}			
 
 			
-			
+			xml_node UserList = Config;
+			if (UserList.moveto_child("UserList"))
+			{
+				for (UINT i = 0; i < UserList.children(); i++)
+				{
+					xml_node UserInfo = UserList.child(i);
+					if (_tcsicmp(UserInfo.name(), "User") == 0)
+					{
+						if (UserInfo.has_attribute("Name") && UserInfo.has_attribute("Password"))
+						{
+							USER_INFO Info;
+							Info.UserName = UserInfo.attribute("Name").getvalue();
+							Info.Password = UserInfo.attribute("Password").getvalue();
+
+							m_UserList.Add(Info);
+						}
+					}
+				}
+			}
 		}
 		else
 		{
@@ -88,7 +106,7 @@ bool CMainConfig::LoadConfig(LPCTSTR FileName)
 	return true;
 }
 
-bool CMainConfig::LoadServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& ServiceList)
+bool CMainConfig::LoadServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& ServiceList)
 {
 	xml_parser Parser;
 
@@ -105,59 +123,86 @@ bool CMainConfig::LoadServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& Se
 				{
 					if (Service.has_attribute("ID"))
 					{
-						SERVICE_INFO ServiceInfo;
+						CServiceInfoEx * pServiceInfo = ServiceList.AddEmpty();
 
-						ServiceInfo.ServiceID = Service.attribute("ID");
+						pServiceInfo->SetServiceID(Service.attribute("ID"));
 						if (Service.has_attribute("Type"))
 						{
-							ServiceInfo.Type = Service.attribute("Type");
+							pServiceInfo->SetType(Service.attribute("Type"));
 						}
 						if (Service.has_attribute("Name"))
 						{
-							ServiceInfo.Name = Service.attribute("Name").getvalue();
+							pServiceInfo->SetName(Service.attribute("Name").getvalue());
 						}
 						if (Service.has_attribute("ImageFilePath"))
 						{
-							ServiceInfo.ImageFilePath = CFileTools::MakeFullPath(Service.attribute("ImageFilePath").getvalue());
+							pServiceInfo->SetImageFilePath(CFileTools::MakeFullPath(Service.attribute("ImageFilePath").getvalue()));
 						}
 						if (Service.has_attribute("WorkDir"))
 						{
-							ServiceInfo.WorkDir = Service.attribute("WorkDir").getvalue();
-							ServiceInfo.WorkDir.Trim();
-							if (ServiceInfo.WorkDir.IsEmpty() && ServiceInfo.Type != SERVICE_TYPE_DIRECTORY)
+							CEasyString WorkDir = Service.attribute("WorkDir").getvalue();
+							WorkDir.Trim();
+							if (WorkDir.IsEmpty() && pServiceInfo->GetType() != SERVICE_TYPE_DIRECTORY)
 							{
-								ServiceInfo.WorkDir = CFileTools::GetPathDirectory(ServiceInfo.ImageFilePath);
+								WorkDir = CFileTools::GetPathDirectory(pServiceInfo->GetImageFilePath());
 							}
 							else
 							{
-								ServiceInfo.WorkDir = CFileTools::MakeFullPath(ServiceInfo.WorkDir);
+								WorkDir = CFileTools::MakeFullPath(WorkDir);
 							}
-							ServiceInfo.WorkDir.TrimRight(DIR_SLASH);
+							WorkDir.TrimRight(DIR_SLASH);
+							pServiceInfo->SetWorkDir(WorkDir);
 						}
 						if (Service.has_attribute("StartupParam"))
 						{
-							ServiceInfo.StartupParam = Service.attribute("StartupParam").getvalue();
+							pServiceInfo->SetStartupParam(Service.attribute("StartupParam").getvalue());
 						}
 
 						if (Service.has_attribute("KeepRunning"))
 						{
 							bool KeepRunning = Service.attribute("KeepRunning");
 							if (KeepRunning)
-								ServiceInfo.LastOperation = SERVICE_OPERATION_STARTUP;
+								pServiceInfo->SetLastOperation(SERVICE_OPERATION_STARTUP);
 							else
-								ServiceInfo.LastOperation = SERVICE_OPERATION_SHUTDOWN;
+								pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
 						}
 						else
 						{
-							ServiceInfo.LastOperation = SERVICE_OPERATION_STARTUP;
+							pServiceInfo->SetLastOperation(SERVICE_OPERATION_STARTUP);
 						}
 
 						if (Service.has_attribute("RestartupTime"))
 						{
-							ServiceInfo.RestartupTime = Service.attribute("RestartupTime");
+							pServiceInfo->SetRestartupTime(Service.attribute("RestartupTime"));
+						}
+						if (Service.has_attribute("ControlPipeName"))
+						{
+							pServiceInfo->SetControlPipeName(Service.attribute("ControlPipeName").getvalue());
+						}
+						if (Service.has_attribute("ShutdownCmd"))
+						{
+							pServiceInfo->SetShutdownCmd(Service.attribute("ShutdownCmd").getvalue());
+						}
+						if (Service.has_attribute("CharSet"))
+						{
+							pServiceInfo->SetCharSet(Service.attribute("CharSet"));
 						}
 
-						ServiceList.Add(ServiceInfo);
+						xml_node OtherExecFileList = Service;
+						if (OtherExecFileList.moveto_child("OtherExecFileList"))
+						{
+							for (UINT j = 0; j < OtherExecFileList.children(); j++)
+							{
+								xml_node ExecFile = OtherExecFileList.child(j);
+								if (_stricmp(ExecFile.name(), "ExecFile") == 0)
+								{
+									if (ExecFile.has_attribute("FilePath"))
+									{
+										pServiceInfo->GetOtherExecFileList().Add(ExecFile.attribute("FilePath").getvalue());
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -170,7 +215,7 @@ bool CMainConfig::LoadServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& Se
 
 	return false;
 }
-bool CMainConfig::SaveServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& ServiceList)
+bool CMainConfig::SaveServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& ServiceList)
 {
 	pug::xml_parser Xml;
 
@@ -188,18 +233,43 @@ bool CMainConfig::SaveServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& Se
 	{
 		xml_node Service = SrvList.append_child(node_element, _T("Service"));
 
-		Service.append_attribute(_T("ID"), ServiceList[i].ServiceID);
-		Service.append_attribute(_T("Type"), ServiceList[i].Type);
-		Service.append_attribute(_T("Name"), (LPCTSTR)ServiceList[i].Name);
-		Service.append_attribute(_T("ImageFilePath"), (LPCTSTR)ServiceList[i].ImageFilePath);
-		Service.append_attribute(_T("WorkDir"), (LPCTSTR)ServiceList[i].WorkDir);
-		Service.append_attribute(_T("StartupParam"), (LPCTSTR)ServiceList[i].StartupParam);
-		if (ServiceList[i].LastOperation == SERVICE_OPERATION_STARTUP)
+		Service.append_attribute(_T("ID"), ServiceList[i].GetServiceID());
+		Service.append_attribute(_T("Type"), ServiceList[i].GetType());
+		Service.append_attribute(_T("Name"), (LPCTSTR)ServiceList[i].GetName());
+		Service.append_attribute(_T("ImageFilePath"), (LPCTSTR)ServiceList[i].GetImageFilePath());
+		Service.append_attribute(_T("WorkDir"), (LPCTSTR)ServiceList[i].GetWorkDir());
+		Service.append_attribute(_T("StartupParam"), (LPCTSTR)ServiceList[i].GetStartupParam());
+		if (ServiceList[i].GetLastOperation() == SERVICE_OPERATION_STARTUP)
 			Service.append_attribute(_T("KeepRunning"), true);
 		else
 			Service.append_attribute(_T("KeepRunning"), false);
-		Service.append_attribute(_T("RestartupTime"), ServiceList[i].RestartupTime);
+		Service.append_attribute(_T("RestartupTime"), ServiceList[i].GetRestartupTime());
+		Service.append_attribute(_T("ControlPipeName"), (LPCTSTR)ServiceList[i].GetControlPipeName());
+		Service.append_attribute(_T("ShutdownCmd"), (LPCTSTR)ServiceList[i].GetShutdownCmd());
+		Service.append_attribute(_T("CharSet"), ServiceList[i].GetCharSet());
+
+		xml_node OtherExecFileList = Service.append_child(node_element, _T("OtherExecFileList"));
+
+		for (UINT j = 0; j < ServiceList[i].GetOtherExecFileList().GetCount(); j++)
+		{
+			xml_node ExecFile = OtherExecFileList.append_child(node_element, _T("ExecFile"));
+
+			ExecFile.append_attribute(_T("FilePath"), ServiceList[i].GetOtherExecFileList()[j]);
+		}
 	}
 
 	return Xml.SaveToFile(Xml.document(), FileName, CP_UTF8);
+}
+
+bool CMainConfig::VerfyUser(LPCTSTR UserName, LPCTSTR Password)
+{
+	for (UINT i = 0; i < m_UserList.GetCount(); i++)
+	{
+		USER_INFO& Info = m_UserList[i];
+		if (Info.UserName.CompareNoCase(UserName) == 0 && Info.Password.Compare(Password) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
 }

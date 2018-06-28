@@ -13,6 +13,17 @@ public:
 	
 	
 	/*************************************************
+	函数名:	LoginAck
+	用途:	
+	参数:
+		Result				
+	返回值:无特别意义
+	*************************************************/
+	virtual int LoginAck(short Result );
+		
+	
+	
+	/*************************************************
 	函数名:	GetServiceListAck
 	用途:	
 	参数:
@@ -48,6 +59,18 @@ public:
 	返回值:无特别意义
 	*************************************************/
 	virtual int GetNetAdapterListAck(short Result ,const CSmartStruct& NetAdapterListData );
+		
+	
+	
+	/*************************************************
+	函数名:	GetServiceInfoAck
+	用途:	
+	参数:
+		Result				
+		ServiceInfoPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServiceInfoAck(short Result ,const CSmartStruct& ServiceInfoPacket );
 		
 	
 	
@@ -280,9 +303,74 @@ public:
 	virtual int DeleteServiceAck(short Result ,UINT ServiceID );
 		
 	
+	
+	/*************************************************
+	函数名:	SendCommandAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int SendCommandAck(short Result ,UINT ServiceID );
+		
+	
+	
+	/*************************************************
+	函数名:	EnableLogRecvAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		Enable				
+	返回值:无特别意义
+	*************************************************/
+	virtual int EnableLogRecvAck(short Result ,UINT ServiceID ,bool Enable );
+		
+	
+	
+	/*************************************************
+	函数名:	ConsoleLogNotify
+	用途:	
+	参数:
+		ServiceID				
+		LogMsg				
+	返回值:无特别意义
+	*************************************************/
+	virtual int ConsoleLogNotify(UINT ServiceID ,LPCTSTR LogMsg );
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatusAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		StatusListPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatusAck(short Result ,UINT ServiceID ,const CSmartStruct& StatusListPacket );
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatusFormatAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		StatusFormatPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatusFormatAck(short Result ,UINT ServiceID ,const CSmartStruct& StatusFormatPacket );
+		
+	
+	static bool PackMsgLoginAck(CSmartStruct& Packet,short Result );
 	static bool PackMsgGetServiceListAck(CSmartStruct& Packet,short Result ,const CSmartStruct& ServiceListData );
 	static bool PackMsgGetProcessListAck(CSmartStruct& Packet,short Result ,short Page ,short PageLen ,short TotalPage ,const CSmartStruct& ProcessListData );
 	static bool PackMsgGetNetAdapterListAck(CSmartStruct& Packet,short Result ,const CSmartStruct& NetAdapterListData );
+	static bool PackMsgGetServiceInfoAck(CSmartStruct& Packet,short Result ,const CSmartStruct& ServiceInfoPacket );
 	static bool PackMsgServiceStartupAck(CSmartStruct& Packet,short Result ,UINT ServiceID );
 	static bool PackMsgServiceShutdownAck(CSmartStruct& Packet,short Result ,UINT ServiceID );
 	static bool PackMsgRunProgramAck(CSmartStruct& Packet,short Result );
@@ -301,5 +389,10 @@ public:
 	static bool PackMsgAddServiceAck(CSmartStruct& Packet,short Result );
 	static bool PackMsgEditServiceAck(CSmartStruct& Packet,short Result );
 	static bool PackMsgDeleteServiceAck(CSmartStruct& Packet,short Result ,UINT ServiceID );
+	static bool PackMsgSendCommandAck(CSmartStruct& Packet,short Result ,UINT ServiceID );
+	static bool PackMsgEnableLogRecvAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,bool Enable );
+	static bool PackMsgConsoleLogNotify(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR LogMsg );
+	static bool PackMsgGetServerStatusAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CSmartStruct& StatusListPacket );
+	static bool PackMsgGetServerStatusFormatAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CSmartStruct& StatusFormatPacket );
 	
 };

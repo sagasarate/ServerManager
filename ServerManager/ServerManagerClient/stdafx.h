@@ -57,14 +57,18 @@
 #define DIR_BROWSE_PAGE_LEN			50
 #define MAX_MSG_SIZE				650000
 #define FILE_TRANSFER_BLOCK_SIZE	300000
+#define MAX_SERVER_STATUS_NAME_LEN	128
 
+#define MAX_CONTROL_PANEL_MSG_LEN	5000
+#define SERVICE_STARTUP_TIMEOUT		(5*60*1000)
 
 #include "../../Libs/Utils/Utils.h"
 #include "../../Libs/NetLib/NetLib.h"
 #include "../../Libs/MFCExtensionLib/MFCExtensionLib.h"
 //#include "../../Libs/zlib/zlib.h"
 #include "../Protocol/Protocol.h"
-
+//#include "../../Libs/ServerFrameWork/BaseProtocol.h"
+#include "../../Libs/ServerFrameWork/ServerConsoleProtocol.h"
 
 
 
@@ -89,7 +93,7 @@ struct SELECT_ITEM_INFO
 
 
 
-
+#include "TaskQueue.h"
 #include "ServerConnection.h"
 
 #include "Resource.h"
@@ -97,18 +101,22 @@ struct SELECT_ITEM_INFO
 #include "DlgInput.h"
 #include "DlgEditBox.h"
 
-#include "FileTransferQueue.h"
+
 
 #include "DlgServerManage.h"
 #include "DlgWorkDirBowser.h"
 #include "DlgListSelector.h"
 #include "DlgServiceEditor.h"
+#include "DlgServerStatus.h"
+#include "DlgServerConsole.h"
+#include "DlgServerUpdate.h"
 
 #include "ServerManagerClientView.h"
 #include "ServerManagerClientDoc.h"
 #include "MainFrm.h"
 
 #include "ServerManagerClient.h"
+#include <afxcontrolbars.h>
 
 
 inline CServerManagerClientView * GetMainView()
@@ -121,6 +129,19 @@ inline CServerManagerClientView * GetMainView()
 	return NULL;
 }
 
+inline LPCTSTR GetResultStr(short Result)
+{
+	static TCHAR ResultStr[128];
+	if (Result >= 0 && Result < MSG_RESULT_MAX)
+	{
+		return g_szMSG_RESULT[Result];
+	}
+	else
+	{
+		_tcprintf_s(ResultStr, 128, "%d", Result);
+		return ResultStr;
+	}
+}
 
 #ifdef _UNICODE
 #if defined _M_IX86

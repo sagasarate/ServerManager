@@ -60,10 +60,19 @@
     <ClInclude Include="Protocol.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DataObjectEmpty.h">
+    <ClInclude Include="DataObjectModifyFlags.h">
       <Filter>数据对象</Filter>
     </ClInclude>
-    <ClInclude Include="DataObjectModifyFlags.h">
+    <ClInclude Include="ProcessInfo.h">
+      <Filter>数据对象</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessInfoList.h">
+      <Filter>数据对象</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceInfo.h">
+      <Filter>数据对象</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceInfoList.h">
       <Filter>数据对象</Filter>
     </ClInclude>
   </ItemGroup>
@@ -83,7 +92,16 @@
     <ClCompile Include="ServerManagerMsgHandler.cpp">
       <Filter>ServerManager</Filter>
     </ClCompile>
-    <ClCompile Include="DataObjectEmpty.cpp">
+    <ClCompile Include="ProcessInfo.cpp">
+      <Filter>数据对象</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessInfoList.cpp">
+      <Filter>数据对象</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceInfo.cpp">
+      <Filter>数据对象</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceInfoList.cpp">
       <Filter>数据对象</Filter>
     </ClCompile>
   </ItemGroup>

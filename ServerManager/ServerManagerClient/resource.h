@@ -17,14 +17,17 @@
 #define IDR_TRANSFER_LOCAL_LIST_POPUP   137
 #define IDD_DIALOG_LIST_SELECTOR        138
 #define IDD_DIALOG_SERVICE_EDITOR       139
+#define IDD_DIALOG_CONSOLE              140
+#define IDD_DIALOG_SERVER_STATUS        141
+#define IDD_DIALOG_SERVER_UPDATE        142
 #define IDC_TYPE_TREE                   1000
 #define IDC_SERVICE_LIST                1001
 #define IDC_EDIT_LOG                    1002
-#define IDC_LIST1                       1003
 #define IDC_TASK_LIST                   1003
 #define IDC_EDIT_IP                     1004
 #define IDC_ADD_SERVER                  1005
 #define IDC_LIST_FILES                  1006
+#define IDC_EDIT_USER_NAME              1006
 #define IDC_EDIT_PORT                   1007
 #define IDC_LIST_FILES_LOCAL            1007
 #define IDC_DEL_SERVER                  1008
@@ -34,6 +37,7 @@
 #define IDC_EDIT1                       1009
 #define IDC_EDIT_TEXT                   1010
 #define IDC_RETURN_UP                   1010
+#define IDC_EDIT_PASSWORD               1010
 #define IDC_TRANSFER_PROGRESS           1011
 #define IDC_STATIC_TRANSFER_RATE        1012
 #define IDC_CHECK_SELECT_ALL            1013
@@ -45,6 +49,27 @@
 #define IDC_EDIT_STARTUP_PARAM          1019
 #define IDC_CHECK_KEEP_RUNNING          1020
 #define IDC_EDIT_RESTARTUP_TIME         1021
+#define IDC_BUTTON_EXEC                 1022
+#define IDC_EDIT_EXEC_FILE              1022
+#define IDC_BUTTON_SHOW_LOG             1023
+#define IDC_EDIT_CHAR_SET               1023
+#define IDC_BUTTON_HIDE_LOG             1024
+#define IDC_EDIT_CONTROL_PIPE_NAME      1024
+#define IDC_BUTTON_SERVER_STATUS        1025
+#define IDC_EDIT_CHAR_SET3              1025
+#define IDC_EDIT_SHUTDOWN_CMD           1025
+#define IDC_EDIT_CMD                    1028
+#define IDC_CHECK_UPDATE_CONFIG         1029
+#define IDC_CHECK_UPDATE_EXEC           1030
+#define IDC_BUTTON_SET                  1031
+#define IDC_BUTTON_SET_ALL              1032
+#define IDC_BUTTON_START_UPDATE         1033
+#define IDC_BUTTON_LOAD_UPDATE_LIST     1034
+#define IDC_BUTTON_UPDATE_EXEC          1035
+#define IDC_BUTTON_UPDATE_CONFIG        1036
+#define IDC_BUTTON_ADD_EXEC_FILE        1036
+#define IDC_BUTTON_DEL_EXEC_FILE        1037
+#define IDC_LIST                        10211
 #define ID_32771                        32771
 #define ID_SERVER_MANAGE                32772
 #define ID_POPUP_32773                  32773
@@ -81,14 +106,27 @@
 #define ID_POPUP_ADD_SERVICE            32804
 #define ID_POPUP_EDIT_SERVICE           32805
 #define ID_POPUP_DEL_SERVICE            32806
+#define ID_POPUP_32807                  32807
+#define ID_POPUP_UPLOAD_BATCH           32808
+#define ID_POPUP_32809                  32809
+#define ID_SHUTDOWN_SERVICE_SAFE        32810
+#define ID_Menu                         32811
+#define ID_RELOAD_CONFIG_DATA           32812
+#define ID_POPUP_32813                  32813
+#define ID_POPUP_32814                  32814
+#define ID_POPUP_OPEN_CONSOLE           32815
+#define ID_POPUP_OPEN_SERVER_STATUS     32816
+#define ID_POPUP_OPEN_SERVER_CONSOLE    32817
+#define ID_32818                        32818
+#define ID_SERVER_UPDATE                32819
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        140
-#define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_COMMAND_VALUE         32820
+#define _APS_NEXT_CONTROL_VALUE         1037
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

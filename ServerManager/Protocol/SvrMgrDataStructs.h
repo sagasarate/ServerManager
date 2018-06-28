@@ -6,7 +6,10 @@
 #include "SvrMgrMainConsts.h"
 #include "SvrMgrMainEnums.h"
 #include "SvrMgrMainStructs.h"
-#include "DataObjectEmpty.h"
+#include "ProcessInfo.h"
+#include "ProcessInfoList.h"
+#include "ServiceInfo.h"
+#include "ServiceInfoList.h"
 #include "DataObjectModifyFlags.h"
 
 

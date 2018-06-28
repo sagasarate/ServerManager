@@ -30,8 +30,10 @@ class CServerManagerClientApp : public CWinApp
 protected:
 
 	CNetServer						m_Server;
-	CIDStorage<CServerConnection>	m_ConnectionPool;	
-	CFileTransferQueue				m_FileTransferQueue;
+	CIDStorage<CServerConnection>	m_ConnectionPool;		
+	CEasyString						m_ServerUpdateListFile;
+
+	CDlgServerUpdate				m_DlgServerUpdate;
 public:
 	CServerManagerClientApp();
 
@@ -42,7 +44,7 @@ public:
 	virtual int ExitInstance();
 	virtual BOOL OnIdle(LONG lCount);
 
-	CServerConnection * AddServerConnection(LPCTSTR Address,UINT Port);
+	CServerConnection * AddServerConnection(LPCTSTR Address, UINT Port, LPCTSTR UserName, LPCTSTR Password);
 	CServerConnection * GetServerConnection(LPCTSTR ServerAddress);
 	CServerConnection * GetServerConnection(UINT ConnectionID);
 
@@ -55,15 +57,30 @@ public:
 		return m_ConnectionPool.GetNextObject(Pos);
 	}
 	bool DeleteServerConnection(UINT ConnectionID);
-
-	CFileTransferQueue& GetFileTransferQueue()
-	{
-		return m_FileTransferQueue;
-	}
+	
 
 	void StartupService(UINT ConnectionID,UINT ServiceID);
-	void ShutdownService(UINT ConnectionID, UINT ServiceID, bool IsForce);
+	void ShutdownService(UINT ConnectionID, UINT ServiceID, BYTE ShutDownType);
 	void BrowseWorkDir(UINT ConnectionID, UINT ServiceID, LPCTSTR Dir);
+
+	LPCTSTR GetServerUpdateListFile()
+	{
+		return m_ServerUpdateListFile;
+	}
+	void SetServerUpdateListFile(LPCTSTR szFileName)
+	{
+		m_ServerUpdateListFile = szFileName;
+		SaveConfig();
+	}
+
+	UINT AddDownloadTask(UINT ConnectionID, UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, bool ContinueTransfer);
+	UINT AddUploadTask(UINT ConnectionID, UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, bool ContinueTransfer);
+	UINT AddDeleteFileTask(UINT ConnectionID, UINT ServiceID, LPCTSTR TargetFilePath);
+	UINT AddCreateDirTask(UINT ConnectionID, UINT ServiceID, LPCTSTR TargetFilePath);
+	UINT AddChangeFileTask(UINT ConnectionID, UINT ServiceID, LPCTSTR TargetFilePath, UINT FileMode);
+	UINT AddStartupServiceTask(UINT ConnectionID, UINT ServiceID, bool ClearQueueOnFailed);
+	UINT AddShutdownServiceTask(UINT ConnectionID, UINT ServiceID, bool ClearQueueOnFailed);
+	UINT AddReloadConfigDataTask(UINT ConnectionID, UINT ServiceID);
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -75,6 +92,8 @@ protected:
 	void LoadConfig();
 	void SaveConfig();
 	
+public:
+	afx_msg void OnServerUpdate();
 };
 
 extern CServerManagerClientApp theApp;

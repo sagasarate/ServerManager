@@ -81,7 +81,8 @@
 #define DIR_BROWSE_TIMEOUT				30000
 #define SERVICE_KEEP_TIME				5000
 #define MAX_OPERATION_WAIT_TIME			30
-
+#define CONTROL_PIPE_BUFFER_SIZE		8192
+#define CONTROL_PIPE_RECREATE_TIME		(5*1000)
 
 //#include "Protocol.h"
 //
@@ -143,7 +144,29 @@
 //};
 
 
+
+
+struct USER_INFO
+{
+	CEasyString	UserName;
+	CEasyString	Password;
+};
+
+#include "ServiceControlPipe.h"
+
+class CServiceInfoEx :public CServiceInfo
+{
+public:
+	CServiceControlPipe	*	pControlPipe;
+	CServiceInfoEx()
+	{
+		pControlPipe = NULL;
+	}
+};
+
 #include "MainConfig.h"
+
+
 
 #include "ScriptExecutor.h"
 #include "ServerManagerClient.h"

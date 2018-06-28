@@ -26,7 +26,7 @@ CDlgEditBox::CDlgEditBox(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgEditBox::IDD, pParent)
 	, m_Text(_T(""))
 {
-
+	m_pParent = NULL;
 }
 
 CDlgEditBox::~CDlgEditBox()
@@ -41,6 +41,8 @@ void CDlgEditBox::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CDlgEditBox, CDialog)
+	ON_BN_CLICKED(IDOK, &CDlgEditBox::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &CDlgEditBox::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -52,6 +54,34 @@ BOOL CDlgEditBox::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
+}
+
+void CDlgEditBox::StartEdit(CDlgWorkDirBowser * pParent, LPCTSTR Content)
+{
+	m_pParent = pParent;
+	m_Text = Content;
+	UpdateData(false);
+	ShowWindow(SW_SHOW);
+}
+
+
+void CDlgEditBox::OnBnClickedOk()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (m_pParent)
+	{
+		UpdateData(true);
+		m_pParent->FinishEdit(m_Text);
+	}
+	CDialog::OnOK();
+}
+
+
+void CDlgEditBox::OnBnClickedCancel()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	CDialog::OnCancel();
 }

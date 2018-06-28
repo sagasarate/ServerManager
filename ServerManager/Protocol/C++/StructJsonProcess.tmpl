@@ -1,0 +1,19 @@
+bool ToJson(rapidjson::Value& StructNode, rapidjson::Document::AllocatorType& Alloc)
+{
+	<IfHaveBaseClass>
+	if (!<BaseClass>::ToJson(StructNode))
+		return false;
+	</IfHaveBaseClass>
+	<ToJsonOperations>
+	return true;
+}
+bool FromJson(rapidjson::Value& StructNode)
+{
+	UINT FailCount=0;
+	<IfHaveBaseClass>
+	if (!<BaseClass>::FromJson(StructNode))
+		return false;
+	</IfHaveBaseClass>
+	<FromJsonOperations>
+	return FailCount==0;
+}

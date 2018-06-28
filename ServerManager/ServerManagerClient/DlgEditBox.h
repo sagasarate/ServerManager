@@ -13,11 +13,16 @@
 
 
 // CDlgEditBox 对话框
+class CDlgWorkDirBowser;
 
 class CDlgEditBox : public CDialog
 {
-	DECLARE_DYNAMIC(CDlgEditBox)
+protected:
+	CDlgWorkDirBowser * m_pParent;
+	CString m_Text;
 
+
+	DECLARE_DYNAMIC(CDlgEditBox)
 public:
 	CDlgEditBox(CWnd* pParent = NULL);   // 标准构造函数
 	virtual ~CDlgEditBox();
@@ -30,6 +35,10 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	CString m_Text;
+	
 	virtual BOOL OnInitDialog();
+
+	void StartEdit(CDlgWorkDirBowser * pParent, LPCTSTR Content);
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCancel();
 };

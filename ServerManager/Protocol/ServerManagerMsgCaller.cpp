@@ -11,6 +11,54 @@ CServerManagerMsgCaller::~CServerManagerMsgCaller(void)
 }
 
 
+int CServerManagerMsgCaller::Login(LPCTSTR UserName ,LPCTSTR Password )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+(UserName!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(UserName)):0)
+		+(Password!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(Password)):0);
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_LOGIN,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgLogin(Packet, UserName , Password ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
 int CServerManagerMsgCaller::GetServiceList()
 {
 	if(m_pNet==NULL)
@@ -153,6 +201,53 @@ int CServerManagerMsgCaller::GetNetAdapterList()
 	
 }
 
+int CServerManagerMsgCaller::GetServiceInfo(UINT ServiceID )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVICE_INFO,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetServiceInfo(Packet, ServiceID ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
 int CServerManagerMsgCaller::ServiceStartup(UINT ServiceID )
 {
 	if(m_pNet==NULL)
@@ -200,7 +295,7 @@ int CServerManagerMsgCaller::ServiceStartup(UINT ServiceID )
 	
 }
 
-int CServerManagerMsgCaller::ServiceShutdown(UINT ServiceID ,bool IsForce )
+int CServerManagerMsgCaller::ServiceShutdown(UINT ServiceID ,BYTE ShutdownType )
 {
 	if(m_pNet==NULL)
 	{
@@ -227,7 +322,7 @@ int CServerManagerMsgCaller::ServiceShutdown(UINT ServiceID ,bool IsForce )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgServiceShutdown(Packet, ServiceID , IsForce ))
+	if(PackMsgServiceShutdown(Packet, ServiceID , ShutdownType ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -298,7 +393,7 @@ int CServerManagerMsgCaller::RunProgram(UINT ServiceID ,const CEasyString& FileP
 	
 }
 
-int CServerManagerMsgCaller::ProcessShutdown(UINT ProcessID ,bool IsForce )
+int CServerManagerMsgCaller::ProcessShutdown(UINT ProcessID ,BYTE ShutdownType )
 {
 	if(m_pNet==NULL)
 	{
@@ -325,7 +420,7 @@ int CServerManagerMsgCaller::ProcessShutdown(UINT ProcessID ,bool IsForce )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgProcessShutdown(Packet, ProcessID , IsForce ))
+	if(PackMsgProcessShutdown(Packet, ProcessID , ShutdownType ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -646,7 +741,7 @@ int CServerManagerMsgCaller::FileUploadData(UINT64 Offset ,UINT Length ,const CE
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize(FileData.GetUsedSize());
+		+CSmartStruct::GetStringMemberSizeA(FileData.GetUsedSize());
 
 	WORD MsgFlag=0;
 		
@@ -878,7 +973,7 @@ int CServerManagerMsgCaller::ChangeFileMode(UINT ServiceID ,const CEasyString& F
 	
 }
 
-int CServerManagerMsgCaller::AddService(const SERVICE_INFO& ServiceInfo )
+int CServerManagerMsgCaller::AddService(const CSmartStruct& ServiceInfo )
 {
 	if(m_pNet==NULL)
 	{
@@ -886,8 +981,7 @@ int CServerManagerMsgCaller::AddService(const SERVICE_INFO& ServiceInfo )
 	}
 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
-		+CSmartStruct::GetStructMemberSize(ServiceInfo.GetSmartStructSize())
-		;
+		+CSmartStruct::GetStructMemberSize(ServiceInfo.GetLength());
 
 	WORD MsgFlag=0;
 		
@@ -926,7 +1020,7 @@ int CServerManagerMsgCaller::AddService(const SERVICE_INFO& ServiceInfo )
 	
 }
 
-int CServerManagerMsgCaller::EditService(const SERVICE_INFO& ServiceInfo )
+int CServerManagerMsgCaller::EditService(const CSmartStruct& ServiceInfo )
 {
 	if(m_pNet==NULL)
 	{
@@ -934,8 +1028,7 @@ int CServerManagerMsgCaller::EditService(const SERVICE_INFO& ServiceInfo )
 	}
 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
-		+CSmartStruct::GetStructMemberSize(ServiceInfo.GetSmartStructSize())
-		;
+		+CSmartStruct::GetStructMemberSize(ServiceInfo.GetLength());
 
 	WORD MsgFlag=0;
 		
@@ -1021,6 +1114,267 @@ int CServerManagerMsgCaller::DeleteService(UINT ServiceID )
 	
 }
 
+int CServerManagerMsgCaller::SendCommand(UINT ServiceID ,LPCTSTR Command )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+(Command!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(Command)):0);
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SEND_COMMAND,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgSendCommand(Packet, ServiceID , Command ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::EnableLogRecv(UINT ServiceID ,bool Enable )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_ENABLE_LOG_RECV,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgEnableLogRecv(Packet, ServiceID , Enable ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::GetServerStatus(UINT ServiceID ,const CSmartStruct& StatusListPacket )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetStructMemberSize(StatusListPacket.GetLength());
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetServerStatus(Packet, ServiceID , StatusListPacket ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::GetAllServerStatus(UINT ServiceID )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_ALL_SERVER_STATUS,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetAllServerStatus(Packet, ServiceID ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+int CServerManagerMsgCaller::GetServerStatusFormat(UINT ServiceID )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS_FORMAT,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgGetServerStatusFormat(Packet, ServiceID ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
+
+bool CServerManagerMsgCaller::PackMsgLogin(CSmartStruct& Packet,LPCTSTR UserName ,LPCTSTR Password )
+{
+	UINT FailCount=0;
+
+	{
+		if( UserName != NULL)
+		{
+			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_LOGIN_USER_NAME,UserName),FailCount);
+		}
+	}
+	
+	{
+		if( Password != NULL)
+		{
+			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_LOGIN_PASSWORD,Password),FailCount);
+		}
+	}
+	
+	
+
+	return FailCount==0;
+}
 
 bool CServerManagerMsgCaller::PackMsgGetServiceList(CSmartStruct& Packet)
 {
@@ -1057,6 +1411,19 @@ bool CServerManagerMsgCaller::PackMsgGetNetAdapterList(CSmartStruct& Packet)
 	return FailCount==0;
 }
 
+bool CServerManagerMsgCaller::PackMsgGetServiceInfo(CSmartStruct& Packet,UINT ServiceID )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_SERVICE_INFO_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
 bool CServerManagerMsgCaller::PackMsgServiceStartup(CSmartStruct& Packet,UINT ServiceID )
 {
 	UINT FailCount=0;
@@ -1070,7 +1437,7 @@ bool CServerManagerMsgCaller::PackMsgServiceStartup(CSmartStruct& Packet,UINT Se
 	return FailCount==0;
 }
 
-bool CServerManagerMsgCaller::PackMsgServiceShutdown(CSmartStruct& Packet,UINT ServiceID ,bool IsForce )
+bool CServerManagerMsgCaller::PackMsgServiceShutdown(CSmartStruct& Packet,UINT ServiceID ,BYTE ShutdownType )
 {
 	UINT FailCount=0;
 
@@ -1079,7 +1446,7 @@ bool CServerManagerMsgCaller::PackMsgServiceShutdown(CSmartStruct& Packet,UINT S
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SERVICE_SHUTDOWN_IS_FORCE,IsForce),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SERVICE_SHUTDOWN_SHUTDOWN_TYPE,ShutdownType),FailCount);
 	}
 	
 	
@@ -1112,7 +1479,7 @@ bool CServerManagerMsgCaller::PackMsgRunProgram(CSmartStruct& Packet,UINT Servic
 	return FailCount==0;
 }
 
-bool CServerManagerMsgCaller::PackMsgProcessShutdown(CSmartStruct& Packet,UINT ProcessID ,bool IsForce )
+bool CServerManagerMsgCaller::PackMsgProcessShutdown(CSmartStruct& Packet,UINT ProcessID ,BYTE ShutdownType )
 {
 	UINT FailCount=0;
 
@@ -1121,7 +1488,7 @@ bool CServerManagerMsgCaller::PackMsgProcessShutdown(CSmartStruct& Packet,UINT P
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_PROCESS_SHUTDOWN_IS_FORCE,IsForce),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_PROCESS_SHUTDOWN_SHUTDOWN_TYPE,ShutdownType),FailCount);
 	}
 	
 	
@@ -1328,16 +1695,12 @@ bool CServerManagerMsgCaller::PackMsgChangeFileMode(CSmartStruct& Packet,UINT Se
 	return FailCount==0;
 }
 
-bool CServerManagerMsgCaller::PackMsgAddService(CSmartStruct& Packet,const SERVICE_INFO& ServiceInfo )
+bool CServerManagerMsgCaller::PackMsgAddService(CSmartStruct& Packet,const CSmartStruct& ServiceInfo )
 {
 	UINT FailCount=0;
 
 	{
-		UINT BufferSize;
-		void * pBuffer=Packet.PrepareMember(BufferSize);
-		CSmartStruct SubPacket(pBuffer,BufferSize,true);
-		if(!ServiceInfo.MakePacket(SubPacket)) FailCount++;
-		Packet.FinishMember(SST_ADD_SERVICE_SERVICE_INFO,SubPacket.GetDataLen());
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_ADD_SERVICE_SERVICE_INFO,ServiceInfo),FailCount);
 	}
 	
 	
@@ -1345,16 +1708,12 @@ bool CServerManagerMsgCaller::PackMsgAddService(CSmartStruct& Packet,const SERVI
 	return FailCount==0;
 }
 
-bool CServerManagerMsgCaller::PackMsgEditService(CSmartStruct& Packet,const SERVICE_INFO& ServiceInfo )
+bool CServerManagerMsgCaller::PackMsgEditService(CSmartStruct& Packet,const CSmartStruct& ServiceInfo )
 {
 	UINT FailCount=0;
 
 	{
-		UINT BufferSize;
-		void * pBuffer=Packet.PrepareMember(BufferSize);
-		CSmartStruct SubPacket(pBuffer,BufferSize,true);
-		if(!ServiceInfo.MakePacket(SubPacket)) FailCount++;
-		Packet.FinishMember(SST_EDIT_SERVICE_SERVICE_INFO,SubPacket.GetDataLen());
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_EDIT_SERVICE_SERVICE_INFO,ServiceInfo),FailCount);
 	}
 	
 	
@@ -1368,6 +1727,86 @@ bool CServerManagerMsgCaller::PackMsgDeleteService(CSmartStruct& Packet,UINT Ser
 
 	{
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_DELETE_SERVICE_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgSendCommand(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR Command )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SEND_COMMAND_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		if( Command != NULL)
+		{
+			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SEND_COMMAND_COMMAND,Command),FailCount);
+		}
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgEnableLogRecv(CSmartStruct& Packet,UINT ServiceID ,bool Enable )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_ENABLE_LOG_RECV_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_ENABLE_LOG_RECV_ENABLE,Enable),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgGetServerStatus(CSmartStruct& Packet,UINT ServiceID ,const CSmartStruct& StatusListPacket )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_SERVER_STATUS_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_SERVER_STATUS_STATUS_LIST_PACKET,StatusListPacket),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgGetAllServerStatus(CSmartStruct& Packet,UINT ServiceID )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_ALL_SERVER_STATUS_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgGetServerStatusFormat(CSmartStruct& Packet,UINT ServiceID )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_SERVER_STATUS_FORMAT_SERVICE_ID,ServiceID),FailCount);
 	}
 	
 	

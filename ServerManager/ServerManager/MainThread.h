@@ -48,6 +48,8 @@ public:
 	void SetServerStatus(int Status);
 	int GetServerStatus();
 
+	CServerManagerService *	GetService();
+
 	
 protected:
 	
@@ -64,3 +66,7 @@ inline int CMainThread::GetServerStatus()
 	return m_Status;
 }
 
+inline CServerManagerService *	CMainThread::GetService()
+{
+	return m_pServerManagerService;
+}

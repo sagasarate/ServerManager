@@ -21,6 +21,8 @@ protected:
 	CListCtrl					m_lvServerList;
 	CString						m_IP;
 	UINT						m_Port;
+	CString						m_UserName;
+	CString						m_Password;
 
 
 	DECLARE_DYNAMIC(CDlgServerManage)
@@ -47,4 +49,5 @@ protected:
 public:
 //	afx_msg void OnHdnItemdblclickList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult);
+	
 };

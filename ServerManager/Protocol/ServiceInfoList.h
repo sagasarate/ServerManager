@@ -4,43 +4,49 @@
 //
 //<GenerateArea1End>
 
-class CDataObjectEmpty{
+class CServiceInfoList{
 protected:
 	UINT64	m_ModifyFlag;
 	
 //<GenerateArea2Start>	   
+	CEasyArray<CServiceInfo>	m_List;
 	
 //<GenerateArea2End>
 	
 public:
 //<GenerateArea3Start>
 	
-	enum DATA_OBJECT_EMPTY_MEMBER_IDS
+	enum SERVICE_INFO_LIST_MEMBER_IDS
 	{
-		
+		SST_SRVIL_LIST=401,
+	
 	};
 	
-	enum DATA_OBJECT_EMPTY_MODIFY_FLAGS:UINT64
+	enum SERVICE_INFO_LIST_MODIFY_FLAGS:UINT64
 	{
-		MF_ALL=0x0,
+		MF_LIST=(((UINT64)1)<<0),
+		MF_ALL=0x1,
 	
 	};
 //<GenerateArea3End>
 
 public:
 //<GenerateArea4Start>
-	CDataObjectEmpty();
-	CDataObjectEmpty(const CDataObjectEmpty& Object)
+	CServiceInfoList();
+	CServiceInfoList(const CServiceInfoList& Object)
 	{
 		*this=Object;
 	}
-	virtual ~CDataObjectEmpty();
+	virtual ~CServiceInfoList();
 	virtual void Clear();
 	
 	void SetModifyFlag(UINT64 RemoveFlags,UINT64 AddFlags);
 	 
+	void SetList(const CEasyArray<CServiceInfo>& Value);
 	
 		   
+	 CEasyArray<CServiceInfo>& GetList() ;
+	const CEasyArray<CServiceInfo>& GetList() const;
 	
 
 	
@@ -50,9 +56,9 @@ public:
 	virtual bool MakeUpdatePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
 	virtual bool MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
 	virtual void ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
-	virtual void CloneFrom(const CDataObjectEmpty& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
+	virtual void CloneFrom(const CServiceInfoList& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
 	virtual UINT GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
-	CDataObjectEmpty& operator=(const CDataObjectEmpty& DataObject);
+	CServiceInfoList& operator=(const CServiceInfoList& DataObject);
 	
 //<GenerateArea4End>
 
@@ -61,14 +67,27 @@ public:
 
 //<GenerateArea5Start>
 
-inline void CDataObjectEmpty::SetModifyFlag(UINT64 RemoveFlags,UINT64 AddFlags)
+inline void CServiceInfoList::SetModifyFlag(UINT64 RemoveFlags,UINT64 AddFlags)
 {
 	m_ModifyFlag&=~RemoveFlags;
 	m_ModifyFlag|=AddFlags;
 }
 
+inline void CServiceInfoList::SetList(const CEasyArray<CServiceInfo>& Value)
+{
+	m_List=Value;
+	m_ModifyFlag|=MF_LIST;
+}
 
 		   
+inline  CEasyArray<CServiceInfo>& CServiceInfoList::GetList() 
+{
+	return m_List;
+}
+inline const CEasyArray<CServiceInfo>& CServiceInfoList::GetList() const
+{
+	return m_List;
+}
 
 
 //<GenerateArea5End>

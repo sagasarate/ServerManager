@@ -36,6 +36,8 @@ protected: // 仅从序列化创建
 
 	CDlgWorkDirBowser		m_DlgWorkDirBowser;
 	CDlgServiceEditor		m_DlgServiceEditor;
+	CDlgServerStatus		m_DlgServerStatus;
+	CDlgServerConsole		m_DlgServerConsole;
 	CTreeCtrl				m_tvServers;
 	CListCtrl				m_lvServiceInfos;
 	CListCtrl				m_lvTask;
@@ -60,19 +62,30 @@ public:
 	void RefreshConnection();
 	void PrintLogVL(LPCTSTR szFormat,va_list vl);
 	void PrintLog(LPCTSTR szFormat,...);
-	void SetServiceInfo(CServerConnection * pConnection, const SERVICE_INFO& ServiceInfo);
+	void SetServiceInfo(CServerConnection * pConnection, const CServiceInfo& ServiceInfo);
 	void SetInternetAdapterInfo(UINT ConnectionID, float SendFlux, float RecvFlux);
 	void SetIntranetAdapterInfo(UINT ConnectionID, float SendFlux, float RecvFlux);
 	void ConnectNotify(CServerConnection * pConnection);
 	void DisconnectNotify(CServerConnection * pConnection);
-	void OnAddFileTask(UINT ID, CFileTransferQueue::FILE_TRANSFER_TYPE Type, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath);
-	void OnDeleteFileTask(UINT ID);
-	void OnFileTaskUpdate(UINT ID, float Progress);
-	void OnDeleteAllFileTask();
-
+	void OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& TaskInfo);
+	void OnDeleteTask(UINT ConID, UINT TaskID);
+	void OnTaskUpdate(UINT ConID, UINT TaskID, float Progress);
+	void OnDeleteAllTask(UINT ConID);
+	CDlgServiceEditor * GetServiceEditor()
+	{
+		return &m_DlgServiceEditor;
+	}
 	CDlgWorkDirBowser * GetWorkDirBrowser()
 	{
 		return &m_DlgWorkDirBowser;
+	}
+	CDlgServerStatus * GetDlgServerStatus()
+	{
+		return &m_DlgServerStatus;
+	}
+	CDlgServerConsole * GetServerConsole()
+	{
+		return &m_DlgServerConsole;
 	}
 // 重写
 public:
@@ -100,19 +113,26 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);	
 	afx_msg void OnNMRClickServiceList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnStartupService();
+	afx_msg void OnShutdownServiceSafe();
 	afx_msg void OnShutdownServce();
+	afx_msg void OnShutDownServiceForce();
 	afx_msg void OnLvnColumnclickServiceList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnPopupBrowseWorkDir();
-public:
+
 	afx_msg void OnShowHideService();
 	afx_msg void OnUpdateShowHideService(CCmdUI *pCmdUI);
 	
-	afx_msg void OnShutDownServiceForce();
 	afx_msg void OnNMDblclkServiceList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnSelchangedTypeTree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnPopupAddService();
 	afx_msg void OnPopupEditService();
 	afx_msg void OnPopupDelService();
+	afx_msg void OnPopupUploadBatch();
+	
+public:
+	afx_msg void OnReloadConfigData();
+	afx_msg void OnPopupOpenServerConsole();
+	afx_msg void OnPopupOpenServerStatus();
 };
 
 #ifndef _DEBUG  // ServerManagerClientView.cpp 中的调试版本

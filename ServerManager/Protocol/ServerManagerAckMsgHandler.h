@@ -9,9 +9,11 @@ public:
 
 	void InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INFO>& MsgMap);	
 
+	int HandleMsgLoginAck(CSmartStruct& Packet);
 	int HandleMsgGetServiceListAck(CSmartStruct& Packet);
 	int HandleMsgGetProcessListAck(CSmartStruct& Packet);
 	int HandleMsgGetNetAdapterListAck(CSmartStruct& Packet);
+	int HandleMsgGetServiceInfoAck(CSmartStruct& Packet);
 	int HandleMsgServiceStartupAck(CSmartStruct& Packet);
 	int HandleMsgServiceShutdownAck(CSmartStruct& Packet);
 	int HandleMsgRunProgramAck(CSmartStruct& Packet);
@@ -30,6 +32,11 @@ public:
 	int HandleMsgAddServiceAck(CSmartStruct& Packet);
 	int HandleMsgEditServiceAck(CSmartStruct& Packet);
 	int HandleMsgDeleteServiceAck(CSmartStruct& Packet);
+	int HandleMsgSendCommandAck(CSmartStruct& Packet);
+	int HandleMsgEnableLogRecvAck(CSmartStruct& Packet);
+	int HandleMsgConsoleLogNotify(CSmartStruct& Packet);
+	int HandleMsgGetServerStatusAck(CSmartStruct& Packet);
+	int HandleMsgGetServerStatusFormatAck(CSmartStruct& Packet);
 	
 
 };

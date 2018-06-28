@@ -12,6 +12,9 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 {
 	MSG_HANDLE_INFO MsgHandleInfo;
 	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgLoginAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_LOGIN,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgGetServiceListAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVICE_LIST,true),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
@@ -20,6 +23,9 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgGetNetAdapterListAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_NET_ADAPTER_LIST,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgGetServiceInfoAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVICE_INFO,true),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgServiceStartupAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SERVICE_STARTUP,true),MsgHandleInfo);
@@ -74,9 +80,53 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgDeleteServiceAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_DELETE_SERVICE,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgSendCommandAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_SEND_COMMAND,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_ENABLE_LOG_RECV,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_CONSOLE_LOG_NOTIFY,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgGetServerStatusAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS_FORMAT,true),MsgHandleInfo);
 	
 }
 
+int CServerManagerAckMsgHandler::HandleMsgLoginAck(CSmartStruct& Packet)
+{
+	short		Result;
+	
+	
+	Result=0;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_LOGIN_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return LoginAck( Result );
+}
 int CServerManagerAckMsgHandler::HandleMsgGetServiceListAck(CSmartStruct& Packet)
 {
 	short			Result;
@@ -211,6 +261,43 @@ int CServerManagerAckMsgHandler::HandleMsgGetNetAdapterListAck(CSmartStruct& Pac
 		
 
 	return GetNetAdapterListAck( Result , NetAdapterListData );
+}
+int CServerManagerAckMsgHandler::HandleMsgGetServiceInfoAck(CSmartStruct& Packet)
+{
+	short			Result;
+	CSmartStruct	ServiceInfoPacket;
+	
+	
+	Result=0;
+	ServiceInfoPacket.Clear();
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_SERVICE_INFO_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		case SST_GET_SERVICE_INFO_ACK_SERVICE_INFO_PACKET:
+			{
+				ServiceInfoPacket.CloneFrom(Value);
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetServiceInfoAck( Result , ServiceInfoPacket );
 }
 int CServerManagerAckMsgHandler::HandleMsgServiceStartupAck(CSmartStruct& Packet)
 {
@@ -990,4 +1077,213 @@ int CServerManagerAckMsgHandler::HandleMsgDeleteServiceAck(CSmartStruct& Packet)
 		
 
 	return DeleteServiceAck( Result , ServiceID );
+}
+int CServerManagerAckMsgHandler::HandleMsgSendCommandAck(CSmartStruct& Packet)
+{
+	short		Result;
+	UINT		ServiceID;
+	
+	
+	Result=0;
+	ServiceID=0;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_SEND_COMMAND_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		case SST_SEND_COMMAND_ACK_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return SendCommandAck( Result , ServiceID );
+}
+int CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck(CSmartStruct& Packet)
+{
+	short		Result;
+	UINT		ServiceID;
+	bool		Enable;
+	
+	
+	Result=0;
+	ServiceID=0;
+	Enable=false;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_ENABLE_LOG_RECV_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		case SST_ENABLE_LOG_RECV_ACK_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_ENABLE_LOG_RECV_ACK_ENABLE:
+			{
+				Enable=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return EnableLogRecvAck( Result , ServiceID , Enable );
+}
+int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(CSmartStruct& Packet)
+{
+	UINT		ServiceID;
+	LPCTSTR		LogMsg;
+	
+	
+	ServiceID=0;
+	LogMsg=NULL;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_CONSOLE_LOG_NOTIFY_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_CONSOLE_LOG_NOTIFY_LOG_MSG:
+			{
+				LogMsg=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return ConsoleLogNotify( ServiceID , LogMsg );
+}
+int CServerManagerAckMsgHandler::HandleMsgGetServerStatusAck(CSmartStruct& Packet)
+{
+	short			Result;
+	UINT			ServiceID;
+	CSmartStruct	StatusListPacket;
+	
+	
+	Result=0;
+	ServiceID=0;
+	StatusListPacket.Clear();
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_SERVER_STATUS_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		case SST_GET_SERVER_STATUS_ACK_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_GET_SERVER_STATUS_ACK_STATUS_LIST_PACKET:
+			{
+				StatusListPacket.CloneFrom(Value);
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetServerStatusAck( Result , ServiceID , StatusListPacket );
+}
+int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(CSmartStruct& Packet)
+{
+	short			Result;
+	UINT			ServiceID;
+	CSmartStruct	StatusFormatPacket;
+	
+	
+	Result=0;
+	ServiceID=0;
+	StatusFormatPacket.Clear();
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_GET_SERVER_STATUS_FORMAT_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		case SST_GET_SERVER_STATUS_FORMAT_ACK_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_GET_SERVER_STATUS_FORMAT_ACK_STATUS_FORMAT_PACKET:
+			{
+				StatusFormatPacket.CloneFrom(Value);
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return GetServerStatusFormatAck( Result , ServiceID , StatusFormatPacket );
 }

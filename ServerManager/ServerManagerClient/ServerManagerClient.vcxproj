@@ -35,7 +35,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -207,10 +207,13 @@
     <ClCompile Include="DlgEditBox.cpp" />
     <ClCompile Include="DlgInput.cpp" />
     <ClCompile Include="DlgListSelector.cpp" />
+    <ClCompile Include="DlgServerConsole.cpp" />
     <ClCompile Include="DlgServerManage.cpp" />
+    <ClCompile Include="DlgServerStatus.cpp" />
+    <ClCompile Include="DlgServerUpdate.cpp" />
     <ClCompile Include="DlgServiceEditor.cpp" />
     <ClCompile Include="DlgWorkDirBowser.cpp" />
-    <ClCompile Include="FileTransferQueue.cpp" />
+    <ClCompile Include="TaskQueue.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="ServerConnection.cpp" />
     <ClCompile Include="ServerManagerClient.cpp" />
@@ -227,10 +230,13 @@
     <ClInclude Include="DlgEditBox.h" />
     <ClInclude Include="DlgInput.h" />
     <ClInclude Include="DlgListSelector.h" />
+    <ClInclude Include="DlgServerConsole.h" />
     <ClInclude Include="DlgServerManage.h" />
+    <ClInclude Include="DlgServerStatus.h" />
+    <ClInclude Include="DlgServerUpdate.h" />
     <ClInclude Include="DlgServiceEditor.h" />
     <ClInclude Include="DlgWorkDirBowser.h" />
-    <ClInclude Include="FileTransferQueue.h" />
+    <ClInclude Include="TaskQueue.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ServerConnection.h" />

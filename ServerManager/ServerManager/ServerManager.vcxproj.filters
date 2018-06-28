@@ -25,6 +25,9 @@
     <Filter Include="脚本执行">
       <UniqueIdentifier>{5579bdb1-091c-48ca-8f68-1c001553356b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="控制管道">
+      <UniqueIdentifier>{fd129b01-5c60-46e0-b7be-cb03744f9ff6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="ScriptExecutor.cpp">
       <Filter>脚本执行</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceControlPipe.cpp">
+      <Filter>控制管道</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="ScriptExecutor.h">
       <Filter>脚本执行</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceControlPipe.h">
+      <Filter>控制管道</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

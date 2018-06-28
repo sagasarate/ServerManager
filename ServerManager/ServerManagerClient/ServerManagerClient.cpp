@@ -12,6 +12,7 @@
 // ServerManagerClient.cpp : 定义应用程序的类行为。
 //
 #include "stdafx.h"
+#include "ServerManagerClient.h"
 
 
 #ifdef _DEBUG
@@ -26,6 +27,7 @@ BEGIN_MESSAGE_MAP(CServerManagerClientApp, CWinApp)
 	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
 	ON_COMMAND(ID_SERVER_MANAGE, &CServerManagerClientApp::OnServerManage)
+	ON_COMMAND(ID_SERVER_UPDATE, &CServerManagerClientApp::OnServerUpdate)
 END_MESSAGE_MAP()
 
 
@@ -126,8 +128,14 @@ BOOL CServerManagerClientApp::InitInstance()
 	{
 		pView = (CServerManagerClientView *)pMainFrame->GetActiveView();
 	}
-	m_FileTransferQueue.Init(pView);
+
+	m_DlgServerUpdate.Create(m_DlgServerUpdate.IDD, pMainFrame);
+
+
 	LoadConfig();
+
+	
+	
 	return TRUE;
 }
 
@@ -138,7 +146,7 @@ int CServerManagerClientApp::ExitInstance()
 	
 	m_ConnectionPool.Destory();
 
-	m_FileTransferQueue.SafeTerminate(5000);
+	
 
 	m_Server.ShutDown();
 
@@ -155,7 +163,7 @@ BOOL CServerManagerClientApp::OnIdle(LONG lCount)
 
 	int ProcessCount=0;
 
-	m_FileTransferQueue.Update();
+	
 
 	void * Pos = m_ConnectionPool.GetFirstObjectPos();
 	while (Pos)
@@ -180,7 +188,14 @@ void CServerManagerClientApp::OnServerManage()
 	SaveConfig();
 	GetMainView()->RefreshConnection();
 }
+void CServerManagerClientApp::OnServerUpdate()
+{
+	// TODO:  在此添加命令处理程序代码
 
+	m_DlgServerUpdate.ShowWindow(SW_SHOW);
+
+	m_DlgServerUpdate.LoadUpdateList(m_ServerUpdateListFile);
+}
 //void CServerManagerClientApp::CheckServerConnections()
 //{
 //	for(UINT i=0;i<m_ServerList.GetCount();i++)
@@ -249,6 +264,8 @@ void CServerManagerClientApp::LoadConfig()
 		xml_node Setting=Xml.document();
 		if(Setting.moveto_child(_T("Setting")))
 		{
+			if (Setting.has_attribute(_T("ServerUpdateListFile")))
+				m_ServerUpdateListFile = Setting.attribute(_T("ServerUpdateListFile")).getvalue();
 			xml_node ServerList=Setting;
 			if(ServerList.moveto_child(_T("ServerList")))
 			{				
@@ -258,8 +275,10 @@ void CServerManagerClientApp::LoadConfig()
 					
 					CEasyString ServerAddress=Server.attribute(_T("Address")).getvalue();
 					UINT ServerPort=Server.attribute(_T("Port"));
+					CEasyString UserName = Server.attribute(_T("UserName")).getvalue();
+					CEasyString Password = Server.attribute(_T("Password")).getvalue();
 					
-					CServerConnection * pConnection = AddServerConnection(ServerAddress, ServerPort);
+					CServerConnection * pConnection = AddServerConnection(ServerAddress, ServerPort, UserName, Password);
 				}
 				GetMainView()->RefreshConnection();
 			}			
@@ -285,6 +304,8 @@ void CServerManagerClientApp::SaveConfig()
 
 	xml_node Setting = Doc.append_child(node_element, _T("Setting"));
 
+	Setting.append_attribute(_T("ServerUpdateListFile"), m_ServerUpdateListFile);
+
 	xml_node ServerList = Setting.append_child(node_element, _T("ServerList"));
 
 	void * Pos = m_ConnectionPool.GetFirstObjectPos();
@@ -294,6 +315,8 @@ void CServerManagerClientApp::SaveConfig()
 		xml_node Server = ServerList.append_child(node_element, _T("Server"));
 		Server.append_attribute(_T("Address"), pConnection->GetServerAddress());
 		Server.append_attribute(_T("Port"), pConnection->GetServerPort());
+		Server.append_attribute(_T("UserName"), pConnection->GetUserName());
+		Server.append_attribute(_T("Password"), pConnection->GetPassword());
 	}
 
 	if (!Xml.SaveToFile(Doc, CFileTools::MakeModuleFullPath(NULL, SETTING_FILE_NAME)))
@@ -301,7 +324,7 @@ void CServerManagerClientApp::SaveConfig()
 		AfxGetMainWnd()->MessageBox(_T("保存配置失败！"));
 	}
 }
-CServerConnection * CServerManagerClientApp::AddServerConnection(LPCTSTR Address, UINT Port)
+CServerConnection * CServerManagerClientApp::AddServerConnection(LPCTSTR Address, UINT Port, LPCTSTR UserName, LPCTSTR Password)
 {
 	CMainFrame * pMainFrame = (CMainFrame *)AfxGetMainWnd();
 	CServerManagerClientView * pView = NULL;
@@ -313,7 +336,7 @@ CServerConnection * CServerManagerClientApp::AddServerConnection(LPCTSTR Address
 	CServerConnection * pConnection = m_ConnectionPool.NewObject();
 	if (pConnection)
 	{
-		if (pConnection->Init(pView, &m_Server, Address, Port))
+		if (pConnection->Init(pView, &m_Server, Address, Port, UserName, Password))
 		{
 			return pConnection;
 		}
@@ -360,12 +383,12 @@ void CServerManagerClientApp::StartupService(UINT ConnectionID, UINT ServiceID)
 	}
 }
 
-void CServerManagerClientApp::ShutdownService(UINT ConnectionID, UINT ServiceID, bool IsForce)
+void CServerManagerClientApp::ShutdownService(UINT ConnectionID, UINT ServiceID, BYTE ShutDownType)
 {
 	CServerConnection * pConnection = GetServerConnection(ConnectionID);
 	if (pConnection)
 	{
-		pConnection->QueryShutDownService(ServiceID, IsForce);
+		pConnection->QueryShutDownService(ServiceID, ShutDownType);
 	}		
 }
 
@@ -376,6 +399,80 @@ void CServerManagerClientApp::BrowseWorkDir(UINT ConnectionID, UINT ServiceID, L
 	{
 		pConnection->QueryBrowseWorkDir(ServiceID, Dir);
 	}
+}
+
+
+UINT CServerManagerClientApp::AddDownloadTask(UINT ConnectionID, UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, bool ContinueTransfer)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddDownloadTask(ServiceID, SourceFilePath, TargetFilePath, ContinueTransfer);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddUploadTask(UINT ConnectionID, UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, bool ContinueTransfer)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddUploadTask(ServiceID, SourceFilePath, TargetFilePath, ContinueTransfer);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddDeleteFileTask(UINT ConnectionID, UINT ServiceID, LPCTSTR TargetFilePath)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddDeleteFileTask(ServiceID, TargetFilePath);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddCreateDirTask(UINT ConnectionID, UINT ServiceID, LPCTSTR TargetFilePath)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddCreateDirTask(ServiceID, TargetFilePath);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddChangeFileTask(UINT ConnectionID, UINT ServiceID, LPCTSTR TargetFilePath, UINT FileMode)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddChangeFileTask(ServiceID, TargetFilePath, FileMode);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddStartupServiceTask(UINT ConnectionID, UINT ServiceID, bool ClearQueueOnFailed)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddStartupServiceTask(ServiceID, ClearQueueOnFailed);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddShutdownServiceTask(UINT ConnectionID, UINT ServiceID, bool ClearQueueOnFailed)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddShutdownServiceTask(ServiceID, ClearQueueOnFailed);
+	}
+	return 0;
+}
+UINT CServerManagerClientApp::AddReloadConfigDataTask(UINT ConnectionID, UINT ServiceID)
+{
+	CServerConnection * pConnection = GetServerConnection(ConnectionID);
+	if (pConnection)
+	{
+		return pConnection->GetTaskQueue().AddReloadConfigDataTask(ServiceID);
+	}
+	return 0;
 }
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -417,4 +514,7 @@ void CServerManagerClientApp::OnAppAbout()
 
 
 // CServerManagerClientApp 消息处理程序
+
+
+
 

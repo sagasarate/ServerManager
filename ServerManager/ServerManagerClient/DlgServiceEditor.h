@@ -1,5 +1,6 @@
 #pragma once
 #include "afxwin.h"
+#include "afxcmn.h"
 
 
 // CDlgServiceEditor ¶Ô»°¿ò
@@ -9,7 +10,7 @@ class CDlgServiceEditor : public CDialog
 	DECLARE_DYNAMIC(CDlgServiceEditor)
 protected:
 	CServerConnection *		m_pConnection;
-	SERVICE_INFO			m_ServiceInfo;
+	CServiceInfo			m_ServiceInfo;
 	CComboBox				m_cbServiceType;
 	bool					m_IsAddNew;
 public:
@@ -24,9 +25,13 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	bool Init(CServerConnection * pConnection, UINT ServiceID);
+	bool Init(CServerConnection * pConnection, CServiceInfo * pServiceInfo);
 	
 	virtual BOOL OnInitDialog();
-	
+	void FillList();
 	afx_msg void OnBnClickedOk();
+	CString m_ExecFile;
+	CListCtrl m_lvList;
+	afx_msg void OnBnClickedButtonAddExecFile();
+	afx_msg void OnBnClickedButtonDelExecFile();
 };

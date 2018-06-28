@@ -25,6 +25,7 @@ protected:
 	CEasyBuffer								m_AssembleBuffer;
 	CEasyBuffer								m_SendBuffer;
 	bool									m_WantDelete;
+	bool									m_IsLogined;
 
 	CEasyTimer								m_KeepAliveTimer;
 	UINT									m_KeepAliveCount;
@@ -52,6 +53,8 @@ protected:
 
 	CScriptExecutor			m_ScriptExecutor;
 	bool					m_IsInScriptExecute;
+	bool					m_EnableLogRecv;
+	UINT					m_LogRecvServiceID;
 
 	
 
@@ -74,6 +77,8 @@ public:
 	void OnSystemMsg(CMessage * pMsg);
 	bool WantDelete();
 
+	bool IsLogRecv(UINT ServiceID);
+
 	//virtual void OnGetFile(FILE_CACHE * pFileCache);
 	void OnScriptExcute(int ErrorCode, int LastLine, UINT Param);
 
@@ -82,13 +87,15 @@ public:
 	virtual bool ReleaseMessage(CMessage * pMsg);
 	virtual bool SendMessage(CMessage * pMsg);
 protected:
+	virtual int Login(LPCTSTR UserName, LPCTSTR Password) override;
 	virtual int GetServiceList() override;
 	virtual int GetProcessList(short Page, short PageLen) override;
 	virtual int GetNetAdapterList() override;
+	virtual int GetServiceInfo(UINT ServiceID) override;
 	virtual int ServiceStartup(UINT ServiceID) override;
-	virtual int ServiceShutdown(UINT ServiceID, bool IsForce) override;
+	virtual int ServiceShutdown(UINT ServiceID, BYTE ShutdownType) override;
 	virtual int RunProgram(UINT ServiceID, const CEasyString& FilePath, const CEasyString& WorkDir, const CEasyString& Param) override;
-	virtual int ProcessShutdown(UINT ProcessID, bool IsForce) override;
+	virtual int ProcessShutdown(UINT ProcessID, BYTE ShutdownType) override;
 	virtual int ExecuteScript(UINT ServiceID, const CEasyString& Script, bool FromFile) override;
 	virtual int BrowseServiceDir(UINT ServiceID, const CEasyString& Dir, short Page, short PageLen) override;
 	virtual int FileDownloadStart(UINT ServiceID, const CEasyString& FilePath) override;
@@ -100,11 +107,14 @@ protected:
 	virtual int CreateDir(UINT ServiceID, const CEasyString& Dir) override;
 	virtual int DeleteFile(UINT ServiceID, const CEasyString& FilePath, bool IsRecursive) override;
 	virtual int ChangeFileMode(UINT ServiceID, const CEasyString& FilePath, UINT Mode) override;
-	virtual int AddService(const SERVICE_INFO& ServiceInfo) override;
-	virtual int EditService(const SERVICE_INFO& ServiceInfo) override;
+	virtual int AddService(const CSmartStruct& ServiceInfo) override;
+	virtual int EditService(const CSmartStruct& ServiceInfo) override;
 	virtual int DeleteService(UINT ServiceID) override;
-
-
+	virtual int SendCommand(UINT ServiceID, LPCTSTR Command) override;
+	virtual int EnableLogRecv(UINT ServiceID, bool Enable) override;
+	virtual int GetServerStatus(UINT ServiceID, const CSmartStruct& StatusListPacket) override;
+	virtual int GetAllServerStatus(UINT ServiceID) override;
+	virtual int GetServerStatusFormat(UINT ServiceID) override;
 protected:
 
 	//UINT PackServiceInfo(CEasyArray<SERVICE_INFO>& ServiceList,UINT StartIndex,CSmartStruct& Packet,WORD MemberID);
@@ -116,4 +126,11 @@ protected:
 inline bool CServerManagerClient::WantDelete()
 {
 	return m_WantDelete;
+}
+
+inline bool CServerManagerClient::IsLogRecv(UINT ServiceID)
+{
+	if (m_EnableLogRecv)
+		return m_LogRecvServiceID == ServiceID;
+	return false;
 }

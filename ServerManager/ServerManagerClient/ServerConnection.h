@@ -24,15 +24,23 @@ protected:
 	CEasyBuffer								m_SendBuffer;
 	CEasyString								m_ServerAddress;
 	UINT									m_ServerPort;
+	CEasyString								m_UserName;
+	CEasyString								m_Password;
 	CEasyTimer								m_ConnectTimer;
 	CEasyTimer								m_ServiceInfoFetchTimer;
 
 	CEasyTimer								m_KeepAliveTimer;
 	UINT									m_KeepAliveCount;
 
-	SERVICE_INFO_LIST						m_ServiceList;
+	CServiceInfoList						m_ServiceList;
 
 	CEasyMap<MSG_ID_TYPE, MSG_HANDLE_INFO>	m_MsgFnMap;
+
+	bool									m_IsLogined;
+
+	CTaskQueue								m_TaskQueue;
+
+	CSmartStruct							m_PacketBuffer;
 
 	//IFileAccessor *							m_pDataLogFile;
 	
@@ -40,8 +48,8 @@ public:
 	CServerConnection();
 	~CServerConnection(void);
 
-	bool Init(CServerManagerClientView * pView, CNetServer * pServer, LPCTSTR szServerAddress, UINT ServerPort);
-	bool Reconnection(LPCTSTR szServerAddress, UINT ServerPort);
+	bool Init(CServerManagerClientView * pView, CNetServer * pServer, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password);
+	bool Reconnection(LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password);
 
 	virtual void OnConnection(bool IsSucceed);
 	virtual void OnDisconnection();
@@ -52,9 +60,12 @@ public:
 
 	const CEasyString& GetServerAddress();
 	UINT GetServerPort();
+	LPCTSTR GetUserName();
+	LPCTSTR GetPassword();
 
-	const CEasyArray<SERVICE_INFO>& GetServiceList();
-	const SERVICE_INFO * GetServiceInfo(UINT ServiceID);
+	const CEasyArray<CServiceInfo>& GetServiceList();
+	const CServiceInfo * GetServiceInfo(UINT ServiceID);
+	CTaskQueue& GetTaskQueue();
 
 	void PrintLog(LPCTSTR szFormat,...);
 	
@@ -69,7 +80,7 @@ public:
 
 	void QueryServiceList();
 	void QueryStartupService(UINT ServiceID);
-	void QueryShutDownService(UINT ServiceID, bool IsForce);
+	void QueryShutDownService(UINT ServiceID, BYTE ShutDownType);
 	void QueryBrowseWorkDir(UINT ServiceID, LPCTSTR Dir);
 
 	void QueryStartDownload(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath);
@@ -88,13 +99,24 @@ public:
 	void QueryNetAdapterInfo();
 	void QueryRunScript(UINT ServiceID, LPCTSTR FilePath);
 
-	void QueryAddService(const SERVICE_INFO& ServiceInfo);
-	void QueryEditService(const SERVICE_INFO& ServiceInfo);
+	void QueryAddService(const CServiceInfo& ServiceInfo);
+	void QueryEditService(const CServiceInfo& ServiceInfo);
 	void QueryDelService(UINT ServiceID);
+
+	void QueryProcessList(short Page, short PageLen);
+
+	void QuerySendCommand(UINT ServiceID, LPCTSTR szCommand);
+	void QueryAllServerStatus(UINT ServiceID);
+	void QueryServerStatusFormat(UINT ServiceID);
+	void QueryEnableLogRecv(UINT ServiceID, bool Enable);
+
+	void QueryServiceInfo(UINT ServiceID);
 protected:
+	virtual int LoginAck(short Result) override;
 	virtual int GetServiceListAck(short Result, const CSmartStruct& ServiceListData) override;
 	virtual int GetProcessListAck(short Result, short Page, short PageLen, short TotalPage, const CSmartStruct& ProcessListData) override;
 	virtual int GetNetAdapterListAck(short Result, const CSmartStruct& NetAdapterListData) override;
+	virtual int GetServiceInfoAck(short Result, const CSmartStruct& ServiceInfoPacket) override;
 	virtual int ServiceStartupAck(short Result, UINT ServiceID) override;
 	virtual int ServiceShutdownAck(short Result, UINT ServiceID) override;
 	virtual int RunProgramAck(short Result) override;
@@ -113,6 +135,11 @@ protected:
 	virtual int AddServiceAck(short Result) override;
 	virtual int EditServiceAck(short Result) override;
 	virtual int DeleteServiceAck(short Result, UINT ServiceID) override;
+	virtual int SendCommandAck(short Result, UINT ServiceID) override;
+	virtual int EnableLogRecvAck(short Result, UINT ServiceID, bool Enable) override;
+	virtual int ConsoleLogNotify(UINT ServiceID, LPCTSTR LogMsg) override;
+	virtual int GetServerStatusAck(short Result, UINT ServiceID, const CSmartStruct& StatusListPacket) override;
+	virtual int GetServerStatusFormatAck(short Result, UINT ServiceID, const CSmartStruct& StatusFormatPacket) override;
 
 };
 
@@ -124,19 +151,31 @@ inline UINT CServerConnection::GetServerPort()
 {
 	return m_ServerPort;
 }
-inline const CEasyArray<SERVICE_INFO>& CServerConnection::GetServiceList()
+inline LPCTSTR CServerConnection::GetUserName()
 {
-	return m_ServiceList.List;
+	return m_UserName;
+}
+inline LPCTSTR CServerConnection::GetPassword()
+{
+	return m_Password;
+}
+inline const CEasyArray<CServiceInfo>& CServerConnection::GetServiceList()
+{
+	return m_ServiceList.GetList();
 }
 
-inline const SERVICE_INFO * CServerConnection::GetServiceInfo(UINT ServiceID)
+inline const CServiceInfo * CServerConnection::GetServiceInfo(UINT ServiceID)
 {
-	for (UINT i = 0; i < m_ServiceList.List.GetCount(); i++)
+	for (UINT i = 0; i < m_ServiceList.GetList().GetCount(); i++)
 	{
-		if (m_ServiceList.List[i].ServiceID == ServiceID)
+		if (m_ServiceList.GetList()[i].GetServiceID() == ServiceID)
 		{
-			return m_ServiceList.List.GetObject(i);
+			return m_ServiceList.GetList().GetObject(i);
 		}
 	}
 	return NULL;
+}
+inline CTaskQueue& CServerConnection::GetTaskQueue()
+{
+	return m_TaskQueue;
 }

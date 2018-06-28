@@ -22,18 +22,17 @@ protected:
 	UINT						m_RecvBufferSize;
 	UINT						m_SendBufferSize;
 	UINT						m_KeepAliveTime;
-	UINT						m_KeepAliveCount;
-	
+	UINT						m_KeepAliveCount;	
 	UINT						m_ProcessInfoFetchTime;
-
+	CEasyArray<USER_INFO>		m_UserList;
 	
 public:
 	CMainConfig(void);
 	~CMainConfig(void);
 
 	bool LoadConfig(LPCTSTR FileName);	
-	bool LoadServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& ServiceList);
-	bool SaveServiceList(LPCTSTR FileName, CEasyArray<SERVICE_INFO>& ServiceList);
+	bool LoadServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& ServiceList);
+	bool SaveServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& ServiceList);
 	
 	CIPAddress& GetListenAddress()
 	{
@@ -63,4 +62,9 @@ public:
 	{
 		return m_ProcessInfoFetchTime;
 	}	
+	const CEasyArray<USER_INFO>& GetUserList()
+	{
+		return m_UserList;
+	}
+	bool VerfyUser(LPCTSTR UserName, LPCTSTR Password);
 };

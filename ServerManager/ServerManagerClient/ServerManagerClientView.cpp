@@ -42,6 +42,11 @@ BEGIN_MESSAGE_MAP(CServerManagerClientView, CFormView)
 	ON_COMMAND(ID_POPUP_ADD_SERVICE, &CServerManagerClientView::OnPopupAddService)
 	ON_COMMAND(ID_POPUP_EDIT_SERVICE, &CServerManagerClientView::OnPopupEditService)
 	ON_COMMAND(ID_POPUP_DEL_SERVICE, &CServerManagerClientView::OnPopupDelService)
+	ON_COMMAND(ID_POPUP_UPLOAD_BATCH, &CServerManagerClientView::OnPopupUploadBatch)
+	ON_COMMAND(ID_SHUTDOWN_SERVICE_SAFE, &CServerManagerClientView::OnShutdownServiceSafe)
+	ON_COMMAND(ID_RELOAD_CONFIG_DATA, &CServerManagerClientView::OnReloadConfigData)
+	ON_COMMAND(ID_POPUP_OPEN_SERVER_CONSOLE, &CServerManagerClientView::OnPopupOpenServerConsole)
+	ON_COMMAND(ID_POPUP_OPEN_SERVER_STATUS, &CServerManagerClientView::OnPopupOpenServerStatus)
 END_MESSAGE_MAP()
 
 // CServerManagerClientView 构造/析构
@@ -120,17 +125,18 @@ void CServerManagerClientView::OnInitialUpdate()
 	m_lvServiceInfos.InsertColumn(0,_T("服务器"),LVCFMT_LEFT,120);
 	m_lvServiceInfos.InsertColumn(1,_T("服务名称"),LVCFMT_LEFT,200);
 	m_lvServiceInfos.InsertColumn(2,_T("状态"),LVCFMT_CENTER,50);
-	m_lvServiceInfos.InsertColumn(3,_T("CPU占用率"),LVCFMT_RIGHT,100);
-	m_lvServiceInfos.InsertColumn(4,_T("内存占用"),LVCFMT_RIGHT,90);
-	m_lvServiceInfos.InsertColumn(5,_T("虚拟内存占用"),LVCFMT_RIGHT,100);
-	m_lvServiceInfos.InsertColumn(6,_T("外网流量(发送/接收)"),LVCFMT_RIGHT,130);
-	m_lvServiceInfos.InsertColumn(7,_T("内网流量(发送/接收)"),LVCFMT_RIGHT,130);
-	m_lvServiceInfos.InsertColumn(8,_T("可执行文件日期"),LVCFMT_CENTER,130);
-	m_lvServiceInfos.InsertColumn(9,_T("可执行文件路径"),LVCFMT_LEFT,300);
+	m_lvServiceInfos.InsertColumn(3, _T("工作状态"), LVCFMT_CENTER, 60);
+	m_lvServiceInfos.InsertColumn(4,_T("CPU占用率"),LVCFMT_RIGHT,100);
+	m_lvServiceInfos.InsertColumn(5,_T("内存占用"),LVCFMT_RIGHT,90);
+	m_lvServiceInfos.InsertColumn(6,_T("虚拟内存占用"),LVCFMT_RIGHT,100);
+	m_lvServiceInfos.InsertColumn(7,_T("外网流量(发送/接收)"),LVCFMT_RIGHT,130);
+	m_lvServiceInfos.InsertColumn(8,_T("内网流量(发送/接收)"),LVCFMT_RIGHT,130);
+	m_lvServiceInfos.InsertColumn(9,_T("可执行文件日期"),LVCFMT_CENTER,130);
+	m_lvServiceInfos.InsertColumn(10,_T("可执行文件路径"),LVCFMT_LEFT,300);
 	
 
 	m_lvTask.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
-	m_lvTask.InsertColumn(0, _T("类型"), LVCFMT_LEFT, 60);
+	m_lvTask.InsertColumn(0, _T("类型"), LVCFMT_LEFT, 80);
 	m_lvTask.InsertColumn(1, _T("进度"), LVCFMT_LEFT, 60);
 	m_lvTask.InsertColumn(2, _T("源文件"), LVCFMT_LEFT, 300);
 	m_lvTask.InsertColumn(3, _T("目标文件"), LVCFMT_LEFT, 300);
@@ -138,6 +144,8 @@ void CServerManagerClientView::OnInitialUpdate()
 
 	m_DlgWorkDirBowser.Create(m_DlgWorkDirBowser.IDD, AfxGetMainWnd());
 	m_DlgServiceEditor.Create(m_DlgServiceEditor.IDD, AfxGetMainWnd());
+	m_DlgServerStatus.Create(m_DlgServerStatus.IDD, AfxGetMainWnd());
+	m_DlgServerConsole.Create(m_DlgServerConsole.IDD, AfxGetMainWnd());
 
 }
 
@@ -184,7 +192,7 @@ void CServerManagerClientView::RefreshConnection()
 	{
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
 		CEasyString Temp;
-		Temp.Format(_T("%s(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
+		Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
 		HTREEITEM hItem = m_tvServers.InsertItem(Temp, m_hAllServer);
 		m_tvServers.SetItemData(hItem, pConnection->GetID());
 	}
@@ -257,9 +265,9 @@ void CServerManagerClientView::PrintLog(LPCTSTR szFormat,...)
 	va_end(vl);
 }
 
-void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, const SERVICE_INFO& ServiceInfo)
+void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, const CServiceInfo& ServiceInfo)
 {
-	if ((!m_ShowHideService) && ServiceInfo.ServiceID == 0)
+	if ((!m_ShowHideService) && ServiceInfo.GetServiceID() == 0)
 		return;
 	if (m_SelectedConnectionID != 0 && m_SelectedConnectionID != pConnection->GetID())
 		return;
@@ -269,7 +277,7 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 		UINT Param = m_lvServiceInfos.GetItemData(i);
 		UINT ConID = Param >> 16;
 		UINT SrvID = Param & 0xFFFF;
-		if (pConnection->GetID() == ConID && ServiceInfo.ServiceID == SrvID)
+		if (pConnection->GetID() == ConID && ServiceInfo.GetServiceID() == SrvID)
 		{
 			Item=i;
 		}
@@ -277,16 +285,16 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 	if(Item<0)
 	{
 		Item = m_lvServiceInfos.InsertItem(m_lvServiceInfos.GetItemCount(), pConnection->GetServerAddress());
-		UINT Param = ((pConnection->GetID() & 0xFFFF) << 16) | (ServiceInfo.ServiceID & 0xFFFF);
+		UINT Param = ((pConnection->GetID() & 0xFFFF) << 16) | (ServiceInfo.GetServiceID() & 0xFFFF);
 		m_lvServiceInfos.SetItemData(Item, Param);
 	}
 	if(Item>=0)
 	{
 		CEasyString Temp;
 		m_lvServiceInfos.SetItemText(Item, 0, pConnection->GetServerAddress());
-		Temp.Format(_T("[%u]%s"), ServiceInfo.ServiceID, (LPCTSTR)ServiceInfo.Name);
+		Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), (LPCTSTR)ServiceInfo.GetName());
 		m_lvServiceInfos.SetItemText(Item,1,Temp);
-		switch (ServiceInfo.Status)
+		switch (ServiceInfo.GetStatus())
 		{
 		case SERVICE_STATUS_NONE:
 			Temp = _T("无");
@@ -307,24 +315,43 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 			Temp = _T("未知");
 			break;
 		}		
-		m_lvServiceInfos.SetItemText(Item,2,Temp);
-		Temp.Format(_T("%.5g%%"), ServiceInfo.CPUUsed * 100);
+		m_lvServiceInfos.SetItemText(Item, 2, Temp);
+		switch (ServiceInfo.GetWorkStatus())
+		{
+		case 0:
+			Temp = _T("无");
+			break;
+		case 1:
+			Temp = _T("启动中");
+			break;
+		case 2:
+			Temp = _T("运行中");
+			break;
+		case 3:
+			Temp = _T("关闭中");
+			break;		
+		default:
+			Temp = _T("未知");
+			break;
+		}
 		m_lvServiceInfos.SetItemText(Item,3,Temp);
-		Temp = FormatNumberWords(ServiceInfo.MemoryUsed);
+		Temp.Format(_T("%.5g%%"), ServiceInfo.GetCPUUsed() * 100);
 		m_lvServiceInfos.SetItemText(Item,4,Temp);
-		Temp = FormatNumberWords(ServiceInfo.VirtualMemoryUsed);
-		m_lvServiceInfos.SetItemText(Item,5,Temp);		
-		if (ServiceInfo.ImageFileTime == -1)
+		Temp = FormatNumberWords(ServiceInfo.GetMemoryUsed());
+		m_lvServiceInfos.SetItemText(Item,5,Temp);
+		Temp = FormatNumberWords(ServiceInfo.GetVirtualMemoryUsed());
+		m_lvServiceInfos.SetItemText(Item,6,Temp);		
+		if (ServiceInfo.GetImageFileTime() == -1)
 		{
 			Temp=_T("无");
 		}
 		else
 		{
-			CEasyTime Time(ServiceInfo.ImageFileTime);
+			CEasyTime Time(ServiceInfo.GetImageFileTime());
 			Time.Format(Temp,_T("%Y-%m-%d %H:%M:%S"));
 		}		
-		m_lvServiceInfos.SetItemText(Item,8,Temp);
-		m_lvServiceInfos.SetItemText(Item, 9, ServiceInfo.ImageFilePath);
+		m_lvServiceInfos.SetItemText(Item,9,Temp);
+		m_lvServiceInfos.SetItemText(Item, 10, ServiceInfo.GetImageFilePath());
 
 	}
 }
@@ -341,7 +368,7 @@ void CServerManagerClientView::SetInternetAdapterInfo(UINT ConnectionID, float S
 			Temp.Format(_T("%s/%s"),
 				(LPCTSTR)FormatNumberWordsFloat(SendFlux,true),
 				(LPCTSTR)FormatNumberWordsFloat(RecvFlux,true));
-			m_lvServiceInfos.SetItemText(i,6,Temp);
+			m_lvServiceInfos.SetItemText(i,7,Temp);
 		}
 	}
 }
@@ -358,7 +385,7 @@ void CServerManagerClientView::SetIntranetAdapterInfo(UINT ConnectionID, float S
 			Temp.Format(_T("%s/%s"),
 				(LPCTSTR)FormatNumberWordsFloat(SendFlux,true),
 				(LPCTSTR)FormatNumberWordsFloat(RecvFlux,true));
-			m_lvServiceInfos.SetItemText(i,7,Temp);
+			m_lvServiceInfos.SetItemText(i,8,Temp);
 		}
 	}
 }
@@ -372,7 +399,7 @@ void CServerManagerClientView::ConnectNotify(CServerConnection * pConnection)
 		if (ConnectionID == pConnection->GetID())
 		{
 			CEasyString Temp;
-			Temp.Format(_T("%s(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
+			Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
 			m_tvServers.SetItemText(hItem, Temp);
 			break;
 		}
@@ -389,7 +416,7 @@ void CServerManagerClientView::DisconnectNotify(CServerConnection * pConnection)
 		if (ConnectionID == pConnection->GetID())
 		{
 			CEasyString Temp;
-			Temp.Format(_T("%s(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
+			Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
 			m_tvServers.SetItemText(hItem, Temp);
 			break;
 		}
@@ -410,38 +437,101 @@ void CServerManagerClientView::DisconnectNotify(CServerConnection * pConnection)
 
 
 
-void CServerManagerClientView::OnAddFileTask(UINT ID, CFileTransferQueue::FILE_TRANSFER_TYPE Type, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath)
+void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& TaskInfo)
 {
 	CString Temp;
-	switch (Type)
+	switch (TaskInfo.Type)
 	{
-	case CFileTransferQueue::FILE_TRANSFER_TYPE_DOWNLOAD:
-		Temp = _T("下载");
+	case CTaskQueue::TASK_TYPE_DOWNLOAD:
+		{
+			Temp.Format(_T("下载(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemText(Item, 1, _T("0%"));
+			m_lvTask.SetItemText(Item, 2, TaskInfo.SourceFilePath);
+			m_lvTask.SetItemText(Item, 3, TaskInfo.TargetFilePath);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 		break;
-	case CFileTransferQueue::FILE_TRANSFER_TYPE_UPLOAD:
-		Temp = _T("上传");
+	case CTaskQueue::TASK_TYPE_UPLOAD:
+		{
+			Temp.Format(_T("上传(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemText(Item, 1, _T("0%"));
+			m_lvTask.SetItemText(Item, 2, TaskInfo.SourceFilePath);
+			m_lvTask.SetItemText(Item, 3, TaskInfo.TargetFilePath);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 		break;
-	case CFileTransferQueue::FILE_TRANSFER_TYPE_DELETE:
-		Temp = _T("删除");
+	case CTaskQueue::TASK_TYPE_DELETE_FILE:
+		{
+			Temp.Format(_T("删除(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemText(Item, 1, _T("0%"));
+			m_lvTask.SetItemText(Item, 2, TaskInfo.TargetFilePath);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 		break;
-	case CFileTransferQueue::FILE_TRANSFER_TYPE_CREATE_DIR:
-		Temp = _T("建目录");
+	case CTaskQueue::TASK_TYPE_CREATE_DIR:
+		{
+			Temp.Format(_T("建目录(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemText(Item, 1, _T("0%"));
+			m_lvTask.SetItemText(Item, 2, TaskInfo.TargetFilePath);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 		break;
-	case CFileTransferQueue::FILE_TRANSFER_TYPE_CHANGE_FILE_MODE:
-		Temp = _T("改属性");
+	case CTaskQueue::TASK_TYPE_CHANGE_FILE_MODE:
+		{
+			Temp.Format(_T("改属性(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemText(Item, 1, _T("0%"));
+			m_lvTask.SetItemText(Item, 2, TaskInfo.TargetFilePath);
+			Temp.Format(_T("0x%X"), TaskInfo.FileMode);
+			m_lvTask.SetItemText(Item, 3, Temp);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
+		break;
+	case CTaskQueue::TASK_TYPE_STARTUP_SERVICE:
+		{
+			Temp.Format(_T("启动服务(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			Temp.Format(_T("%u"), TaskInfo.ServiceID);
+			m_lvTask.SetItemText(Item, 1, Temp);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
+		break;
+	case CTaskQueue::TASK_TYPE_SHUTDOWN_SERVICE:
+		{
+			Temp.Format(_T("关闭服务(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			Temp.Format(_T("%u"), TaskInfo.ServiceID);
+			m_lvTask.SetItemText(Item, 1, Temp);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
+		break;
+	case CTaskQueue::TASK_TYPE_RELOAD_CONFIG_DATA:
+		{
+			Temp.Format(_T("重新加载配置数据(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			Temp.Format(_T("%u"), TaskInfo.ServiceID);
+			m_lvTask.SetItemText(Item, 1, Temp);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 		break;
 	default:
-		Temp = _T("未知");
+		{
+			Temp.Format(_T("未知(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 		break;
 	}
-	int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
-	m_lvTask.SetItemText(Item, 1, _T("0%"));
-	m_lvTask.SetItemText(Item, 2, SourceFilePath);
-	m_lvTask.SetItemText(Item, 3, TargetFilePath);
-	m_lvTask.SetItemData(Item, ID);
+	
+	
 }
-void CServerManagerClientView::OnDeleteFileTask(UINT ID)
+void CServerManagerClientView::OnDeleteTask(UINT ConID, UINT TaskID)
 {
+	UINT ID = MAKELONG(ConID, TaskID);
 	for (int i = 0; i < m_lvTask.GetItemCount(); i++)
 	{
 		if ((UINT)m_lvTask.GetItemData(i) == ID)
@@ -451,8 +541,9 @@ void CServerManagerClientView::OnDeleteFileTask(UINT ID)
 		}
 	}
 }
-void CServerManagerClientView::OnFileTaskUpdate(UINT ID, float Progress)
+void CServerManagerClientView::OnTaskUpdate(UINT ConID, UINT TaskID, float Progress)
 {
+	UINT ID = MAKELONG(ConID, TaskID);
 	for (int i = 0; i < m_lvTask.GetItemCount(); i++)
 	{
 		if ((UINT)m_lvTask.GetItemData(i) == ID)
@@ -465,9 +556,15 @@ void CServerManagerClientView::OnFileTaskUpdate(UINT ID, float Progress)
 	}
 }
 
-void CServerManagerClientView::OnDeleteAllFileTask()
+void CServerManagerClientView::OnDeleteAllTask(UINT ConID)
 {
-	m_lvTask.DeleteAllItems();
+	for (int i = m_lvTask.GetItemCount() - 1; i >= 0; i--)
+	{
+		if (HIWORD(m_lvTask.GetItemData(i)) == ConID)
+		{
+			m_lvTask.DeleteItem(i);
+		}
+	}
 }
 
 void CServerManagerClientView::OnNMRClickServiceList(NMHDR *pNMHDR, LRESULT *pResult)
@@ -508,6 +605,21 @@ void CServerManagerClientView::OnStartupService()
 	}
 }
 
+void CServerManagerClientView::OnShutdownServiceSafe()
+{
+	// TODO:  在此添加命令处理程序代码
+	POSITION Pos = m_lvServiceInfos.GetFirstSelectedItemPosition();
+
+	while (Pos)
+	{
+		int Item = m_lvServiceInfos.GetNextSelectedItem(Pos);
+		UINT Param = m_lvServiceInfos.GetItemData(Item);
+		UINT ConID = Param >> 16;
+		UINT SrvID = Param & 0xFFFF;
+		CServerManagerClientApp::GetInstance()->ShutdownService(ConID, SrvID, SERVICE_SHUTDOWN_TYPE_SAFE);
+	}
+}
+
 void CServerManagerClientView::OnShutdownServce()
 {
 	// TODO: 在此添加命令处理程序代码
@@ -519,7 +631,7 @@ void CServerManagerClientView::OnShutdownServce()
 		UINT Param = m_lvServiceInfos.GetItemData(Item);
 		UINT ConID = Param >> 16;
 		UINT SrvID = Param & 0xFFFF;
-		CServerManagerClientApp::GetInstance()->ShutdownService(ConID, SrvID, false);
+		CServerManagerClientApp::GetInstance()->ShutdownService(ConID, SrvID, SERVICE_SHUTDOWN_TYPE_NORMAL);
 	}
 }
 
@@ -534,7 +646,7 @@ void CServerManagerClientView::OnShutDownServiceForce()
 		UINT Param = m_lvServiceInfos.GetItemData(Item);
 		UINT ConID = Param >> 16;
 		UINT SrvID = Param & 0xFFFF;
-		CServerManagerClientApp::GetInstance()->ShutdownService(ConID, SrvID, true);
+		CServerManagerClientApp::GetInstance()->ShutdownService(ConID, SrvID, SERVICE_SHUTDOWN_TYPE_FORCE);
 	}
 }
 
@@ -619,7 +731,7 @@ void CServerManagerClientView::OnTvnSelchangedTypeTree(NMHDR *pNMHDR, LRESULT *p
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(m_SelectedConnectionID);
 		if (pConnection)
 		{
-			const CEasyArray<SERVICE_INFO>& ServiceList = pConnection->GetServiceList();
+			const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
 			for (UINT i = 0; i < ServiceList.GetCount(); i++)
 			{
 				SetServiceInfo(pConnection, ServiceList[i]);
@@ -632,7 +744,7 @@ void CServerManagerClientView::OnTvnSelchangedTypeTree(NMHDR *pNMHDR, LRESULT *p
 		while (Pos)
 		{
 			CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
-			const CEasyArray<SERVICE_INFO>& ServiceList = pConnection->GetServiceList();
+			const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
 			for (UINT i = 0; i < ServiceList.GetCount(); i++)
 			{
 				SetServiceInfo(pConnection, ServiceList[i]);
@@ -652,7 +764,7 @@ void CServerManagerClientView::OnPopupAddService()
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConnectionID);
 		if (pConnection)
 		{
-			if (m_DlgServiceEditor.Init(pConnection, 0))
+			if (m_DlgServiceEditor.Init(pConnection, NULL))
 			{
 				m_DlgServiceEditor.ShowWindow(SW_SHOW);
 				return;
@@ -677,10 +789,7 @@ void CServerManagerClientView::OnPopupEditService()
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConID);
 		if (pConnection)
 		{
-			if (m_DlgServiceEditor.Init(pConnection, SrvID))
-			{
-				m_DlgServiceEditor.ShowWindow(SW_SHOW);
-			}
+			pConnection->QueryServiceInfo(SrvID);
 		}
 	}
 	else
@@ -704,14 +813,170 @@ void CServerManagerClientView::OnPopupDelService()
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConID);
 		if (pConnection)
 		{
-			const SERVICE_INFO * pServiceInfo = pConnection->GetServiceInfo(SrvID);
+			const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(SrvID);
 			if (pServiceInfo)
 			{
 				if (AfxMessageBoxEx(MB_YESNO, 0, _T("是否要删除[%s]上的服务[%s]?"),
-					(LPCTSTR)pConnection->GetServerAddress(), (LPCTSTR)pServiceInfo->Name) == IDYES)
+					(LPCTSTR)pConnection->GetServerAddress(), (LPCTSTR)pServiceInfo->GetName()) == IDYES)
 				{
-					pConnection->QueryDelService(pServiceInfo->ServiceID);
+					pConnection->QueryDelService(pServiceInfo->GetServiceID());
 				}
+			}
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("请选择一个服务"));
+	}
+}
+
+
+void CServerManagerClientView::OnPopupUploadBatch()
+{
+	// TODO:  在此添加命令处理程序代码
+	POSITION Pos = m_lvServiceInfos.GetFirstSelectedItemPosition();
+
+	if (Pos)
+	{
+		int Item = m_lvServiceInfos.GetNextSelectedItem(Pos);
+		UINT Param = m_lvServiceInfos.GetItemData(Item);
+		UINT ConID = Param >> 16;
+		UINT SrvID = Param & 0xFFFF;
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConID);
+		if (pConnection)
+		{
+			const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(SrvID);
+			if (pServiceInfo)
+			{
+				CFileDialog Dlg(true, _T("*.csv"), _T("*.csv"));
+
+				if (Dlg.DoModal() == IDOK)
+				{
+					CCSVReader CSVReader;
+
+					if (CSVReader.Open(Dlg.GetPathName()))
+					{
+						for (UINT i = 0; i < CSVReader.GetRowCount(); i++)
+						{
+							LPCTSTR szFileName = CSVReader.GetDataString(i, _T("FileName"), _T(""));
+							LPCTSTR szSrcDir = CSVReader.GetDataString(i, _T("SrcDir"), _T(""));
+							LPCTSTR szDestDir = CSVReader.GetDataString(i, _T("DestDir"), _T(""));
+							CEasyString SrcPath;
+							CEasyString DestPath;
+							if (CFileTools::IsAbsolutePath(szSrcDir))
+								SrcPath.Format(_T("%s\\%s"), szSrcDir, szFileName);
+							else
+								SrcPath.Format(_T("%s\\%s\\%s"), (LPCTSTR)CFileTools::GetModulePath(NULL), szSrcDir, szFileName);
+
+							SrcPath = CFileTools::MakeFullPath(SrcPath);
+							DestPath.Format(_T("%s/%s"), szDestDir, szFileName);
+							
+							if (!CFileTools::IsFileExist(SrcPath))
+							{
+								if (AfxMessageBoxEx(MB_YESNO, 0, _T("文件%s不存在，是否继续传输剩下的文件？"), (LPCTSTR)SrcPath) == IDNO)
+									break;
+							}
+							else
+							{
+								CServerManagerClientApp::GetInstance()->AddUploadTask(ConID, SrvID, SrcPath, DestPath, false);
+							}
+						}
+					}
+					else
+					{
+						AfxMessageBox(_T("文件无法打开"));
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("请选择一个服务"));
+	}
+
+	
+}
+
+
+
+
+
+void CServerManagerClientView::OnReloadConfigData()
+{
+	// TODO:  在此添加命令处理程序代码
+
+	POSITION Pos = m_lvServiceInfos.GetFirstSelectedItemPosition();
+
+	if (Pos)
+	{
+		int Item = m_lvServiceInfos.GetNextSelectedItem(Pos);
+		UINT Param = m_lvServiceInfos.GetItemData(Item);
+		UINT ConID = Param >> 16;
+		UINT SrvID = Param & 0xFFFF;
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConID);
+		if (pConnection)
+		{
+			const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(SrvID);
+			if (pServiceInfo)
+			{
+				pConnection->QuerySendCommand(SrvID, _T("ReloadAllData()"));
+			}
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("请选择一个服务"));
+	}
+}
+
+
+void CServerManagerClientView::OnPopupOpenServerConsole()
+{
+	// TODO:  在此添加命令处理程序代码
+	POSITION Pos = m_lvServiceInfos.GetFirstSelectedItemPosition();
+
+	if (Pos)
+	{
+		int Item = m_lvServiceInfos.GetNextSelectedItem(Pos);
+		UINT Param = m_lvServiceInfos.GetItemData(Item);
+		UINT ConID = Param >> 16;
+		UINT SrvID = Param & 0xFFFF;
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConID);
+		if (pConnection)
+		{
+			const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(SrvID);
+			if (pServiceInfo)
+			{
+				m_DlgServerConsole.Open(pConnection->GetID(), pServiceInfo->GetServiceID(), pConnection->GetServerAddress(), pServiceInfo->GetName(), pServiceInfo->GetCharSet());
+			}
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("请选择一个服务"));
+	}
+}
+
+
+void CServerManagerClientView::OnPopupOpenServerStatus()
+{
+	// TODO:  在此添加命令处理程序代码
+	POSITION Pos = m_lvServiceInfos.GetFirstSelectedItemPosition();
+
+	if (Pos)
+	{
+		int Item = m_lvServiceInfos.GetNextSelectedItem(Pos);
+		UINT Param = m_lvServiceInfos.GetItemData(Item);
+		UINT ConID = Param >> 16;
+		UINT SrvID = Param & 0xFFFF;
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConID);
+		if (pConnection)
+		{
+			const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(SrvID);
+			if (pServiceInfo)
+			{
+				m_DlgServerStatus.Open(pConnection->GetID(), pServiceInfo->GetServiceID(), pConnection->GetServerAddress(), pServiceInfo->GetName(), pServiceInfo->GetCharSet());
 			}
 		}
 	}

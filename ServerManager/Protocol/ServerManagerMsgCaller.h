@@ -13,6 +13,18 @@ public:
 	
 	
 	/*************************************************
+	函数名:	Login
+	用途:	
+	参数:
+		UserName				
+		Password				
+	返回值:无特别意义
+	*************************************************/
+	virtual int Login(LPCTSTR UserName ,LPCTSTR Password );
+		
+	
+	
+	/*************************************************
 	函数名:	GetServiceList
 	用途:	
 	参数:
@@ -47,6 +59,17 @@ public:
 	
 	
 	/*************************************************
+	函数名:	GetServiceInfo
+	用途:	
+	参数:
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServiceInfo(UINT ServiceID );
+		
+	
+	
+	/*************************************************
 	函数名:	ServiceStartup
 	用途:	
 	参数:
@@ -62,10 +85,10 @@ public:
 	用途:	
 	参数:
 		ServiceID				
-		IsForce				
+		ShutdownType				
 	返回值:无特别意义
 	*************************************************/
-	virtual int ServiceShutdown(UINT ServiceID ,bool IsForce );
+	virtual int ServiceShutdown(UINT ServiceID ,BYTE ShutdownType );
 		
 	
 	
@@ -88,10 +111,10 @@ public:
 	用途:	
 	参数:
 		ProcessID				
-		IsForce				
+		ShutdownType				
 	返回值:无特别意义
 	*************************************************/
-	virtual int ProcessShutdown(UINT ProcessID ,bool IsForce );
+	virtual int ProcessShutdown(UINT ProcessID ,BYTE ShutdownType );
 		
 	
 	
@@ -238,7 +261,7 @@ public:
 		ServiceInfo				
 	返回值:无特别意义
 	*************************************************/
-	virtual int AddService(const SERVICE_INFO& ServiceInfo );
+	virtual int AddService(const CSmartStruct& ServiceInfo );
 		
 	
 	
@@ -249,7 +272,7 @@ public:
 		ServiceInfo				
 	返回值:无特别意义
 	*************************************************/
-	virtual int EditService(const SERVICE_INFO& ServiceInfo );
+	virtual int EditService(const CSmartStruct& ServiceInfo );
 		
 	
 	
@@ -263,13 +286,73 @@ public:
 	virtual int DeleteService(UINT ServiceID );
 		
 	
+	
+	/*************************************************
+	函数名:	SendCommand
+	用途:	
+	参数:
+		ServiceID				
+		Command				
+	返回值:无特别意义
+	*************************************************/
+	virtual int SendCommand(UINT ServiceID ,LPCTSTR Command );
+		
+	
+	
+	/*************************************************
+	函数名:	EnableLogRecv
+	用途:	
+	参数:
+		ServiceID				
+		Enable				
+	返回值:无特别意义
+	*************************************************/
+	virtual int EnableLogRecv(UINT ServiceID ,bool Enable );
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatus
+	用途:	
+	参数:
+		ServiceID				
+		StatusListPacket				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatus(UINT ServiceID ,const CSmartStruct& StatusListPacket );
+		
+	
+	
+	/*************************************************
+	函数名:	GetAllServerStatus
+	用途:	
+	参数:
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetAllServerStatus(UINT ServiceID );
+		
+	
+	
+	/*************************************************
+	函数名:	GetServerStatusFormat
+	用途:	
+	参数:
+		ServiceID				
+	返回值:无特别意义
+	*************************************************/
+	virtual int GetServerStatusFormat(UINT ServiceID );
+		
+	
+	static bool PackMsgLogin(CSmartStruct& Packet,LPCTSTR UserName ,LPCTSTR Password );
 	static bool PackMsgGetServiceList(CSmartStruct& Packet);
 	static bool PackMsgGetProcessList(CSmartStruct& Packet,short Page ,short PageLen );
 	static bool PackMsgGetNetAdapterList(CSmartStruct& Packet);
+	static bool PackMsgGetServiceInfo(CSmartStruct& Packet,UINT ServiceID );
 	static bool PackMsgServiceStartup(CSmartStruct& Packet,UINT ServiceID );
-	static bool PackMsgServiceShutdown(CSmartStruct& Packet,UINT ServiceID ,bool IsForce );
+	static bool PackMsgServiceShutdown(CSmartStruct& Packet,UINT ServiceID ,BYTE ShutdownType );
 	static bool PackMsgRunProgram(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,const CEasyString& WorkDir ,const CEasyString& Param );
-	static bool PackMsgProcessShutdown(CSmartStruct& Packet,UINT ProcessID ,bool IsForce );
+	static bool PackMsgProcessShutdown(CSmartStruct& Packet,UINT ProcessID ,BYTE ShutdownType );
 	static bool PackMsgExecuteScript(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Script ,bool FromFile );
 	static bool PackMsgBrowseServiceDir(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Dir ,short Page ,short PageLen );
 	static bool PackMsgFileDownloadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath );
@@ -281,8 +364,13 @@ public:
 	static bool PackMsgCreateDir(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Dir );
 	static bool PackMsgDeleteFile(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,bool IsRecursive );
 	static bool PackMsgChangeFileMode(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,UINT Mode );
-	static bool PackMsgAddService(CSmartStruct& Packet,const SERVICE_INFO& ServiceInfo );
-	static bool PackMsgEditService(CSmartStruct& Packet,const SERVICE_INFO& ServiceInfo );
+	static bool PackMsgAddService(CSmartStruct& Packet,const CSmartStruct& ServiceInfo );
+	static bool PackMsgEditService(CSmartStruct& Packet,const CSmartStruct& ServiceInfo );
 	static bool PackMsgDeleteService(CSmartStruct& Packet,UINT ServiceID );
+	static bool PackMsgSendCommand(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR Command );
+	static bool PackMsgEnableLogRecv(CSmartStruct& Packet,UINT ServiceID ,bool Enable );
+	static bool PackMsgGetServerStatus(CSmartStruct& Packet,UINT ServiceID ,const CSmartStruct& StatusListPacket );
+	static bool PackMsgGetAllServerStatus(CSmartStruct& Packet,UINT ServiceID );
+	static bool PackMsgGetServerStatusFormat(CSmartStruct& Packet,UINT ServiceID );
 	
 };

@@ -34,9 +34,11 @@
 			<Add option="-W" />
 			<Add option="-fPIC" />
 		</Compiler>
-		<Unit filename="DataObjectEmpty.cpp" />
-		<Unit filename="DataObjectEmpty.h" />
 		<Unit filename="DataObjectModifyFlags.h" />
+		<Unit filename="ProcessInfo.cpp" />
+		<Unit filename="ProcessInfo.h" />
+		<Unit filename="ProcessInfoList.cpp" />
+		<Unit filename="ProcessInfoList.h" />
 		<Unit filename="Protocol.h" />
 		<Unit filename="ServerManagerAckInterface.h" />
 		<Unit filename="ServerManagerAckMsgCaller.cpp" />
@@ -48,6 +50,10 @@
 		<Unit filename="ServerManagerMsgCaller.h" />
 		<Unit filename="ServerManagerMsgHandler.cpp" />
 		<Unit filename="ServerManagerMsgHandler.h" />
+		<Unit filename="ServiceInfo.cpp" />
+		<Unit filename="ServiceInfo.h" />
+		<Unit filename="ServiceInfoList.cpp" />
+		<Unit filename="ServiceInfoList.h" />
 		<Unit filename="SvrMgrDataStructs.h" />
 		<Unit filename="SvrMgrInterfaces.h" />
 		<Unit filename="SvrMgrMainConsts.h" />

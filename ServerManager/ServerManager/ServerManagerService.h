@@ -18,10 +18,10 @@ protected:
 	CIDStorage<CServerManagerClient>			m_ClientPool;
 
 	CProcessSnapshot							m_ProcessSnapshot;
-	PROCESS_INFO_LIST							m_ProcessInfoList;	
+	CProcessInfoList							m_ProcessInfoList;	
 	CEasyTimer									m_ProcessInfoFetchTimer;
 
-	SERVICE_INFO_LIST							m_ServiceInfoList;
+	CEasyArray<CServiceInfoEx>					m_ServiceInfoList;
 	//UINT64										m_RecentTime;
 	//UINT64										m_RecentTimeSpan;
 	
@@ -30,7 +30,6 @@ protected:
 
 	CEasyBuffer									m_WorkBuffer;
 
-	CEasyTimer									m_ServiceKeepTimer;
 
 	DECLARE_CLASS_INFO_STATIC(CServerManagerService);
 public:
@@ -43,27 +42,36 @@ public:
 	virtual CBaseNetConnection * CreateConnection(CIPAddress& RemoteAddress);
 	virtual bool DeleteConnection(CBaseNetConnection * pConnection);
 
+	CServerManagerClient * GetConnection(UINT ConnectionID);
+
 	virtual int Update(int ProcessPacketLimit=DEFAULT_SERVER_PROCESS_PACKET_LIMIT);
 
 	UINT GetClientCount();
 
-	SERVICE_INFO_LIST& GetServiceInfoList();
-	PROCESS_INFO_LIST& GetProcessInfoList();
+	CEasyArray<CServiceInfoEx>& GetServiceInfoList();
+	CProcessInfoList& GetProcessInfoList();
 	NET_ADAPTER_INFO_LIST& GetNetAdapterInfo();
 
-	SERVICE_INFO * GetServiceInfo(UINT ServiceID);
+	CServiceInfoEx * GetServiceInfo(UINT ServiceID);
+	LPCTSTR GetServiceWorkDir(UINT ServiceID);
 
 	int StartupService(UINT ServiceID);
-	int ShutdownService(UINT ServiceID, bool IsForce);
+	int ShutdownService(UINT ServiceID, int ShutdownType);
 
 	int StartupProcess(LPCTSTR szImageFileName, LPCTSTR szWorkDir, LPCTSTR szStartupParam);
-	int ShutdownProcess(UINT ProcessID, bool IsForce);
+	int ShutdownProcess(UINT ProcessID, int ShutdownType);
 
-	int CheckServiceInfo(const SERVICE_INFO& ServiceInfo);
-	int AddService(const SERVICE_INFO& ServiceInfo);
-	int EditService(const SERVICE_INFO& ServiceInfo);
+	int CheckServiceInfo(const CServiceInfo& ServiceInfo);
+	int AddService(const CServiceInfo& ServiceInfo);
+	int EditService(const CServiceInfo& ServiceInfo);
 	int DeleteService(UINT ServiceID);
 
+	//int SendCommand(UINT ServiceID, LPCTSTR szCommand);
+	int EnableLogRecv(UINT ServiceID, bool Enable);
+
+	void OnGetServiceWorkStatus(UINT ServiceID, BYTE WorkStatus);
+	void OnServerLogMsg(UINT ServiceID, LPCTSTR szLogMsg);
+	void OnSendCommandResult(UINT ServiceID, short Result);
 protected:
 	BOOL DoListen(CIPAddress& ListenAddress);
 	void FetchProcessInfo();
@@ -83,18 +91,22 @@ protected:
 
 };
 
+inline CServerManagerClient * CServerManagerService::GetConnection(UINT ConnectionID)
+{
+	return m_ClientPool.GetObject(ConnectionID);
+}
 
 inline UINT CServerManagerService::GetClientCount()
 {
 	return m_ClientPool.GetObjectCount();
 }
 
-inline SERVICE_INFO_LIST& CServerManagerService::GetServiceInfoList()
+inline CEasyArray<CServiceInfoEx>& CServerManagerService::GetServiceInfoList()
 {
 	return m_ServiceInfoList;
 }
 
-inline PROCESS_INFO_LIST& CServerManagerService::GetProcessInfoList()
+inline CProcessInfoList& CServerManagerService::GetProcessInfoList()
 {
 	return m_ProcessInfoList;
 }

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="gb2312" ?>
 <Main ServerID="6-0-0-1">
-  <ClientListen IP="0" Port="8700" MaxClient="500" RecvBufferSize="655360" SendBufferSize="655360" />
+  <ClientListen IP="0" Port="8300" MaxClient="500" RecvBufferSize="655360" SendBufferSize="655360" />
   <ProcessMonitor ProcessInfoFetchTime="5000" MaxProcessCount="256" />
+  <UserList>
+    <User Name="Test" Password="123"/>
+  </UserList>
 
   <System>
     <UDPControlAddress IP="0" Port="9600" />

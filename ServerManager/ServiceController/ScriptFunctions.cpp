@@ -57,7 +57,7 @@ int CScriptFunctions::CopyFile(CESThread * pESThread,ES_BOLAN* pResult,ES_BOLAN*
 	strncpy_0(szFileFrom,MAX_PATH,CFileTools::MakeFullPath(pParams[0]),MAX_PATH);
 	szFileFrom[strlen(szFileFrom)+1]=0;
 
-	strncpy_0(szFileTo,MAX_PATH,MakeFullPath(pParams[1]),MAX_PATH);
+	strncpy_0(szFileTo,MAX_PATH,CFileTools::MakeFullPath(pParams[1]),MAX_PATH);
 	szFileTo[strlen(szFileTo)+1]=0;
 
 	Operation.hwnd=NULL;

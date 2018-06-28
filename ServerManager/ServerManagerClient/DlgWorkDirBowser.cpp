@@ -103,6 +103,9 @@ BOOL CDlgWorkDirBowser::OnInitDialog()
 	m_lvLocalFileList.InsertColumn(2,_T("大小"),LVCFMT_RIGHT,100);
 	m_lvLocalFileList.InsertColumn(3, _T("修改日期"), LVCFMT_LEFT, 200);
 	m_lvLocalFileList.InsertColumn(4, _T("创建日期"), LVCFMT_LEFT, 200);
+
+
+	m_TextEditBox.Create(m_TextEditBox.IDD, this);
 	
 
 	BrowseLocal(_T(".\\"));
@@ -466,9 +469,8 @@ void CDlgWorkDirBowser::OnBnClickedUpload()
 			}
 			for (UINT i = 0; i < FileList.GetCount(); i++)
 			{
-				CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-					AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_UPLOAD, m_ConnectionID, m_ServiceID,
-					CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), m_CurDir + DIR_SLASH + FileList[i], 0, false);
+				CServerManagerClientApp::GetInstance()->AddUploadTask(m_ConnectionID, m_ServiceID,
+					CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), m_CurDir + DIR_SLASH + FileList[i], false);
 			}
 		}
 	}
@@ -476,9 +478,8 @@ void CDlgWorkDirBowser::OnBnClickedUpload()
 	{
 		for (UINT i = 0; i < FileList.GetCount(); i++)
 		{
-			CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-				AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_UPLOAD, m_ConnectionID, m_ServiceID,
-				CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), m_CurDir + DIR_SLASH + FileList[i], 0, false);
+			CServerManagerClientApp::GetInstance()->AddUploadTask(m_ConnectionID, m_ServiceID,
+				CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), m_CurDir + DIR_SLASH + FileList[i], false);
 		}
 	}
 }
@@ -541,9 +542,8 @@ void CDlgWorkDirBowser::OnBnClickedDownload()
 			}
 			for (UINT i = 0; i < FileList.GetCount(); i++)
 			{
-				CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-					AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_DOWNLOAD, m_ConnectionID, m_ServiceID,
-					m_CurDir + DIR_SLASH + FileList[i], CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), 0, false);
+				CServerManagerClientApp::GetInstance()->AddDownloadTask(m_ConnectionID, m_ServiceID,
+					m_CurDir + DIR_SLASH + FileList[i], CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), false);
 			}
 		}
 	}
@@ -551,9 +551,8 @@ void CDlgWorkDirBowser::OnBnClickedDownload()
 	{
 		for (UINT i = 0; i < FileList.GetCount(); i++)
 		{
-			CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-				AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_DOWNLOAD, m_ConnectionID, m_ServiceID,
-				m_CurDir + DIR_SLASH + FileList[i], CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), 0, false);
+			CServerManagerClientApp::GetInstance()->AddDownloadTask(m_ConnectionID, m_ServiceID,
+				m_CurDir + DIR_SLASH + FileList[i], CFileTools::MakeFullPath(m_CurLocalDir + DIR_SLASH + FileList[i]), false);
 		}
 	}
 }
@@ -628,9 +627,7 @@ void CDlgWorkDirBowser::OnServerCreateDir()
 	if(Dlg.DoModal()==IDOK)
 	{
 		CEasyString Dir = m_CurDir + DIR_SLASH + (LPCTSTR)Dlg.m_InputText;
-		CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-			AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_CREATE_DIR, m_ConnectionID, m_ServiceID,
-			Dir, _T(""), 0, false);
+		CServerManagerClientApp::GetInstance()->AddCreateDirTask(m_ConnectionID, m_ServiceID, Dir);
 	}
 	
 }
@@ -663,9 +660,7 @@ void CDlgWorkDirBowser::OnServerEditFile()
 					m_CurEditFilePath = m_CurDir + DIR_SLASH + (LPCTSTR)FileName;
 					m_IsInEdit = true;
 
-					CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-						AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_DOWNLOAD, m_ConnectionID, m_ServiceID,
-						m_CurEditFilePath, m_CurEditFileLocalPath, 0, false);
+					CServerManagerClientApp::GetInstance()->AddDownloadTask(m_ConnectionID, m_ServiceID, m_CurEditFilePath, m_CurEditFileLocalPath, false);
 				}
 				else
 				{
@@ -686,27 +681,27 @@ void CDlgWorkDirBowser::DoEdit()
 
 	if (TextFile.LoadFile(m_CurEditFileLocalPath, false))
 	{
-		CDlgEditBox Dlg;
-		Dlg.m_Text.SetString(TextFile.GetData(), TextFile.GetDataLen());
-		if (Dlg.DoModal() == IDOK)
-		{
-			TextFile.LoadFromString(Dlg.m_Text, -1, false);
-			if (TextFile.SaveToFile(m_CurEditFileLocalPath))
-			{
-				CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-					AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_UPLOAD, m_ConnectionID, m_ServiceID,
-					m_CurEditFileLocalPath, m_CurEditFilePath, 0, false);
-			}
-			else
-			{
-				AfxMessageBoxEx(MB_OK, 0, _T("保存文件失败%s"), m_CurEditFileLocalPath);
-			}
-		}
+		m_TextEditBox.StartEdit(this, TextFile.GetData());		
 	}
 	else
 	{
 		AfxMessageBoxEx(MB_OK, 0, _T("打开文件失败%s"), m_CurEditFileLocalPath);
 	}
+}
+
+void CDlgWorkDirBowser::FinishEdit(LPCTSTR Content)
+{
+	CStringFile TextFile;
+	TextFile.LoadFromString(Content, -1, false);
+	if (TextFile.SaveToFile(m_CurEditFileLocalPath))
+	{
+		CServerManagerClientApp::GetInstance()->AddUploadTask(m_ConnectionID, m_ServiceID, m_CurEditFileLocalPath, m_CurEditFilePath, false);
+	}
+	else
+	{
+		AfxMessageBoxEx(MB_OK, 0, _T("保存文件失败%s"), m_CurEditFileLocalPath);
+	}
+
 }
 
 
@@ -801,9 +796,7 @@ void CDlgWorkDirBowser::OnServerDeleteFile()
 				{
 					CEasyString FilePath = m_CurDir + DIR_SLASH + Dlg.m_ItemList[i].Item;
 
-					CServerManagerClientApp::GetInstance()->GetFileTransferQueue().
-						AddTask(CFileTransferQueue::FILE_TRANSFER_TYPE_DELETE, m_ConnectionID, m_ServiceID,
-						FilePath, _T(""), 0, false);
+					CServerManagerClientApp::GetInstance()->AddDeleteFileTask(m_ConnectionID, m_ServiceID, FilePath);
 				}
 			}
 		}
