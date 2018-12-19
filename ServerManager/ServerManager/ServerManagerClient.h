@@ -115,6 +115,7 @@ protected:
 	virtual int GetServerStatus(UINT ServiceID, const CSmartStruct& StatusListPacket) override;
 	virtual int GetAllServerStatus(UINT ServiceID) override;
 	virtual int GetServerStatusFormat(UINT ServiceID) override;
+	virtual int FileCompare(UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize, LPCTSTR FileMD5) override;
 protected:
 
 	//UINT PackServiceInfo(CEasyArray<SERVICE_INFO>& ServiceList,UINT StartIndex,CSmartStruct& Packet,WORD MemberID);

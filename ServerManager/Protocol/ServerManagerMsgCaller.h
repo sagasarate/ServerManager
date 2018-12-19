@@ -344,6 +344,20 @@ public:
 	virtual int GetServerStatusFormat(UINT ServiceID );
 		
 	
+	
+	/*************************************************
+	函数名:	FileCompare
+	用途:	
+	参数:
+		ServiceID				
+		FilePath				
+		FileSize				
+		FileMD5				
+	返回值:无特别意义
+	*************************************************/
+	virtual int FileCompare(UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 );
+		
+	
 	static bool PackMsgLogin(CSmartStruct& Packet,LPCTSTR UserName ,LPCTSTR Password );
 	static bool PackMsgGetServiceList(CSmartStruct& Packet);
 	static bool PackMsgGetProcessList(CSmartStruct& Packet,short Page ,short PageLen );
@@ -372,5 +386,6 @@ public:
 	static bool PackMsgGetServerStatus(CSmartStruct& Packet,UINT ServiceID ,const CSmartStruct& StatusListPacket );
 	static bool PackMsgGetAllServerStatus(CSmartStruct& Packet,UINT ServiceID );
 	static bool PackMsgGetServerStatusFormat(CSmartStruct& Packet,UINT ServiceID );
+	static bool PackMsgFileCompare(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 );
 	
 };

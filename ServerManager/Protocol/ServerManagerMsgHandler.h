@@ -37,6 +37,7 @@ public:
 	int HandleMsgGetServerStatus(CSmartStruct& Packet);
 	int HandleMsgGetAllServerStatus(CSmartStruct& Packet);
 	int HandleMsgGetServerStatusFormat(CSmartStruct& Packet);
+	int HandleMsgFileCompare(CSmartStruct& Packet);
 	
 
 };

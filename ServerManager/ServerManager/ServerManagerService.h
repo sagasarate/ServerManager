@@ -31,6 +31,13 @@ protected:
 	CEasyBuffer									m_WorkBuffer;
 
 
+	CIDStorage<HTTP_REQUEST_INFO>				m_RequestPool;
+	CURLM *										m_CURLMHandle;
+	int											m_HaveRequestRunning;
+
+	CEasyString									m_ServerIP;
+
+
 	DECLARE_CLASS_INFO_STATIC(CServerManagerService);
 public:
 	CServerManagerService(void);
@@ -72,6 +79,7 @@ public:
 	void OnGetServiceWorkStatus(UINT ServiceID, BYTE WorkStatus);
 	void OnServerLogMsg(UINT ServiceID, LPCTSTR szLogMsg);
 	void OnSendCommandResult(UINT ServiceID, short Result);
+	void SendNotify(CServiceInfoEx * pServiceInfo, LPCTSTR szMsg);
 protected:
 	BOOL DoListen(CIPAddress& ListenAddress);
 	void FetchProcessInfo();
@@ -89,6 +97,14 @@ protected:
 	static int ProcessFN(void * pParam);
 #endif
 
+	bool AddRequest(LPCSTR szURL, int RequestType, UINT Param1, UINT Param2, LPCTSTR Param3, LPCTSTR PostContent);
+	bool SendRequest(HTTP_REQUEST_INFO * pRequestInfo);
+	void ProcessRequestEnd(HTTP_REQUEST_INFO * pRequestInfo, CURLcode Result, long ResponseCode);
+	static size_t ReadCallback(void *ptr, size_t size, size_t nmemb, void *userp);
+	int RunCURL();
+	int FinishCURL();
+
+	void OnRequestResult(int RequestType, long ResponseCode, UINT Param1, UINT Param2, LPCTSTR Param3, LPCTSTR Content);
 };
 
 inline CServerManagerClient * CServerManagerService::GetConnection(UINT ConnectionID)

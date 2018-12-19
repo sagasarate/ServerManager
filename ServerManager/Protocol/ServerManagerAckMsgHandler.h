@@ -37,6 +37,7 @@ public:
 	int HandleMsgConsoleLogNotify(CSmartStruct& Packet);
 	int HandleMsgGetServerStatusAck(CSmartStruct& Packet);
 	int HandleMsgGetServerStatusFormatAck(CSmartStruct& Packet);
+	int HandleMsgFileCompareAck(CSmartStruct& Packet);
 	
 
 };

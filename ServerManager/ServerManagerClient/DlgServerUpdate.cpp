@@ -56,7 +56,7 @@ CDlgServerUpdate::UPDATE_INFO * CDlgServerUpdate::GetUpdateInfo(LPCTSTR szServic
 {
 	for (UINT i = 0; i < m_UpdateList.GetCount(); i++)
 	{
-		if (m_UpdateList[i].ServiceName.CompareNoCase(szServiceName) == 0)
+		if (_tcsncmp(szServiceName, m_UpdateList[i].ServiceName, m_UpdateList[i].ServiceName.GetLength()) == 0)
 		{
 			return m_UpdateList.GetObject(i);
 		}
@@ -120,12 +120,24 @@ bool CDlgServerUpdate::LoadUpdateList(LPCTSTR szFileName)
 			const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
 			for (UINT i = 0; i < ServiceList.GetCount(); i++)
 			{
-				if (GetUpdateInfo(ServiceList[i].GetName(), false))
+				CEasyString ServiceName;
+				if (ServiceList[i].GetCharSet() == CP_UTF8)
+				{
+					char Buffer[1024];
+					UINT Len = UTF8ToAnsi(ServiceList[i].GetName(), ServiceList[i].GetName().GetLength(), Buffer, 1000);
+					Buffer[Len] = 0;
+					ServiceName = Buffer;
+				}
+				else
+				{
+					ServiceName = ServiceList[i].GetName();
+				}
+				if (GetUpdateInfo(ServiceName, false))
 				{
 					UPDATE_SERVICE_INFO * pInfo = m_ServiceList.AddEmpty();
 					pInfo->ConnectionID = pConnection->GetID();
 					pInfo->ServiceID = ServiceList[i].GetServiceID();
-					pInfo->ServiceName = ServiceList[i].GetName();
+					pInfo->ServiceName = ServiceName;
 					pInfo->ServerAddress = pConnection->GetServerAddress();
 				}
 			}			
@@ -181,21 +193,26 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateExec()
 				CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ServiceInfo.ConnectionID);
 				if (pUpdateInfo&&pConnection)
 				{
-					if (pUpdateInfo->UpdateFileList.GetCount())
+					const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(ServiceInfo.ServiceID);
+					if (pServiceInfo)
 					{
-						CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
-						
-						TaskQueue.AddShutdownServiceTask(ServiceInfo.ServiceID, true);
-						
-						for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
+						if (pUpdateInfo->UpdateFileList.GetCount())
 						{
-							UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
-							if (FileInfo.UpdateType == UPDTAE_TYPE_EXEC)
+							CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
+
+							if (pServiceInfo->GetStatus() != SERVICE_STATUS_STOP)
+								TaskQueue.AddShutdownServiceTask(ServiceInfo.ServiceID, true);
+
+							for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
 							{
-								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, false);
+								UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
+								if (FileInfo.UpdateType == UPDTAE_TYPE_EXEC)
+								{
+									TaskQueue.AddUploadTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, false);
+								}
 							}
+							TaskQueue.AddStartupServiceTask(ServiceInfo.ServiceID, false);
 						}
-						TaskQueue.AddStartupServiceTask(ServiceInfo.ServiceID, false);
 					}
 				}
 			}

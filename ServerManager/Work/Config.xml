@@ -5,6 +5,10 @@
   <UserList>
     <User Name="Test" Password="123"/>
   </UserList>
+  
+  <Notify GetTokenURL="https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=ww625ae75cfc837b78&corpsecret=NgJPBgCSDy2PzD0sHjle9XaqjWdJGbQXaVaLM7zYcP4" 
+          SendNotifyURL="https://qyapi.weixin.qq.com/cgi-bin/message/send" 
+          SendTarget="qy01cb78cb350ec0289bcbbc6fb8|qy014c78ac3522c0289b1e4c15e7|zhangjing@trinitigames.com|qy01a678433507c0289bf6523cb2|qy01ab78d4353ec0009b540ba6a4|qy013a78a03516c0f29b6fe1bc34|qy01087839351bc0289b58848073" />
 
   <System>
     <UDPControlAddress IP="0" Port="9600" />

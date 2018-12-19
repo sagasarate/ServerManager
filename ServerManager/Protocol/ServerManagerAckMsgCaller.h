@@ -366,6 +366,19 @@ public:
 	virtual int GetServerStatusFormatAck(short Result ,UINT ServiceID ,const CSmartStruct& StatusFormatPacket );
 		
 	
+	
+	/*************************************************
+	函数名:	FileCompareAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		FilePath				
+	返回值:无特别意义
+	*************************************************/
+	virtual int FileCompareAck(short Result ,UINT ServiceID ,LPCTSTR FilePath );
+		
+	
 	static bool PackMsgLoginAck(CSmartStruct& Packet,short Result );
 	static bool PackMsgGetServiceListAck(CSmartStruct& Packet,short Result ,const CSmartStruct& ServiceListData );
 	static bool PackMsgGetProcessListAck(CSmartStruct& Packet,short Result ,short Page ,short PageLen ,short TotalPage ,const CSmartStruct& ProcessListData );
@@ -394,5 +407,6 @@ public:
 	static bool PackMsgConsoleLogNotify(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR LogMsg );
 	static bool PackMsgGetServerStatusAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CSmartStruct& StatusListPacket );
 	static bool PackMsgGetServerStatusFormatAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CSmartStruct& StatusFormatPacket );
+	static bool PackMsgFileCompareAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,LPCTSTR FilePath );
 	
 };

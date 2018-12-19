@@ -1352,6 +1352,56 @@ int CServerManagerMsgCaller::GetServerStatusFormat(UINT ServiceID )
 	
 }
 
+int CServerManagerMsgCaller::FileCompare(UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+(FilePath!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(FilePath)):0)
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
+		+(FileMD5!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(FileMD5)):0);
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_COMPARE,false));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileCompare(Packet, ServiceID , FilePath , FileSize , FileMD5 ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
 
 bool CServerManagerMsgCaller::PackMsgLogin(CSmartStruct& Packet,LPCTSTR UserName ,LPCTSTR Password )
 {
@@ -1807,6 +1857,37 @@ bool CServerManagerMsgCaller::PackMsgGetServerStatusFormat(CSmartStruct& Packet,
 
 	{
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_SERVER_STATUS_FORMAT_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerMsgCaller::PackMsgFileCompare(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		if( FilePath != NULL)
+		{
+			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_FILE_PATH,FilePath),FailCount);
+		}
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_FILE_SIZE,FileSize),FailCount);
+	}
+	
+	{
+		if( FileMD5 != NULL)
+		{
+			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_FILE_MD5,FileMD5),FailCount);
+		}
 	}
 	
 	

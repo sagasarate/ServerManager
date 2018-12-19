@@ -106,6 +106,7 @@ public:
 	void OnDeleteFileFinish(LPCTSTR szSourcePath);
 	void OnCreateDirFinish(LPCTSTR szSourcePath);
 	void OnFileTaskEmpty();
+	void OnFileCompareFinish(int Result, LPCTSTR szSourcePath, LPCTSTR szTargetPath);
 	//void NextUploadFile();
 	//void NextDownloadFile();	
 	//void ContinueUploadFile(bool IsSucceed);

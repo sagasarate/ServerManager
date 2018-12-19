@@ -32,6 +32,10 @@ protected:
 	CNetServer						m_Server;
 	CIDStorage<CServerConnection>	m_ConnectionPool;		
 	CEasyString						m_ServerUpdateListFile;
+	CEasyString						m_SystemServiceName;
+
+	CEasyString						m_AccountName;
+	CEasyString						m_Password;
 
 	CDlgServerUpdate				m_DlgServerUpdate;
 public:
@@ -66,6 +70,10 @@ public:
 	LPCTSTR GetServerUpdateListFile()
 	{
 		return m_ServerUpdateListFile;
+	}
+	LPCTSTR GetSystemServiceName()
+	{
+		return m_SystemServiceName;
 	}
 	void SetServerUpdateListFile(LPCTSTR szFileName)
 	{

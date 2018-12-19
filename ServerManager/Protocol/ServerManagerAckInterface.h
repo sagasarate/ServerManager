@@ -365,6 +365,19 @@ public:
 		
 	
 	
+	/*************************************************
+	函数名:	FileCompareAck
+	用途:	
+	参数:
+		Result				
+		ServiceID				
+		FilePath				
+	返回值:无特别意义
+	*************************************************/
+	virtual int FileCompareAck(short Result ,UINT ServiceID ,LPCTSTR FilePath ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
 protected:	
 	
 	enum SERVER_MANAGER_ACK_LOGIN_ACK_MEMBER_IDS
@@ -552,6 +565,13 @@ protected:
 		SST_GET_SERVER_STATUS_FORMAT_ACK_RESULT=1,
 		SST_GET_SERVER_STATUS_FORMAT_ACK_SERVICE_ID=4,
 		SST_GET_SERVER_STATUS_FORMAT_ACK_STATUS_FORMAT_PACKET=2,
+	
+	};
+	enum SERVER_MANAGER_ACK_FILE_COMPARE_ACK_MEMBER_IDS
+	{
+		SST_FILE_COMPARE_ACK_RESULT=5,
+		SST_FILE_COMPARE_ACK_SERVICE_ID=6,
+		SST_FILE_COMPARE_ACK_FILE_PATH=7,
 	
 	};
 };

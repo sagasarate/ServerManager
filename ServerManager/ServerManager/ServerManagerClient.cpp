@@ -1068,3 +1068,71 @@ int CServerManagerClient::GetServerStatusFormat(UINT ServiceID)
 	}
 	return COMMON_RESULT_SUCCEED;
 }
+
+int CServerManagerClient::FileCompare(UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize, LPCTSTR FileMD5)
+{
+	CServerManagerAckMsgCaller MsgCaller(this);
+
+	LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
+	if (szWorkDir)
+	{
+
+		CEasyString Path;
+		Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)FilePath);
+#ifdef WIN32
+		Path = UTF8ToLocal(Path, Path.GetLength());
+#else
+		Path.Replace('\\', '/');		
+#endif // !WIN32
+		Path = CFileTools::MakeFullPath(Path);
+		CFileInfo FileInfo;
+		if (FileInfo.FetchFileInfo(Path))
+		{
+			if (FileInfo.GetFileSize() == FileSize)
+			{
+				SAFE_RELEASE(m_pCurDownloadFile);
+				m_pCurDownloadFile = CFileSystemManager::GetInstance()->CreateFileAccessor(FILE_CHANNEL_NORMAL1);
+				if (m_pCurDownloadFile)
+				{
+					if (m_pCurDownloadFile->Open(Path, IFileAccessor::modeOpen | IFileAccessor::modeRead | IFileAccessor::shareShareAll))
+					{
+						CHashMD5 MD5;
+						UINT64 ReadLen;
+						do{
+							ReadLen = m_pCurDownloadFile->Read(m_FileTransferBuffer.GetBuffer(), m_FileTransferBuffer.GetBufferSize());
+							MD5.AddData((BYTE *)m_FileTransferBuffer.GetBuffer(), ReadLen);
+						} while (ReadLen >= m_FileTransferBuffer.GetBufferSize());
+						MD5.MD5Final();
+						if (MD5.GetHashCodeString().CompareNoCase(FileMD5) == 0)
+						{
+							MsgCaller.FileCompareAck(MSG_RESULT_SUCCEED, ServiceID, FilePath);
+						}
+						else
+						{
+							MsgCaller.FileCompareAck(MSG_RESULT_FAILED, ServiceID, FilePath);
+						}
+					}
+					else
+					{
+						MsgCaller.FileDownloadStartAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath, 0);
+						Log("打开文件失败%s", (LPCTSTR)Path);
+					}
+					SAFE_RELEASE(m_pCurDownloadFile);
+				}
+			}
+			else
+			{
+				MsgCaller.FileCompareAck(MSG_RESULT_FAILED, ServiceID, FilePath);
+			}
+		}
+		else
+		{
+			MsgCaller.FileCompareAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath);
+		}
+	}
+	else
+	{
+		MsgCaller.FileCompareAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath);
+	}
+	return COMMON_RESULT_SUCCEED;
+}

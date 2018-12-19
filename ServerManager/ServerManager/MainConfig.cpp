@@ -70,6 +70,16 @@ bool CMainConfig::LoadConfig(LPCTSTR FileName)
 					m_ProcessInfoFetchTime=ProcessMonitor.attribute("ProcessInfoFetchTime");
 			}			
 
+			xml_node Notify = Config;
+			if (Notify.moveto_child("Notify"))
+			{
+				if (Notify.has_attribute("GetTokenURL"))
+					m_NotifyConfig.GetTokenURL = Notify.attribute("GetTokenURL").getvalue();
+				if (Notify.has_attribute("SendNotifyURL"))
+					m_NotifyConfig.SendNotifyURL = Notify.attribute("SendNotifyURL").getvalue();
+				if (Notify.has_attribute("SendTarget"))
+					m_NotifyConfig.SendTarget = Notify.attribute("SendTarget").getvalue();
+			}
 			
 			xml_node UserList = Config;
 			if (UserList.moveto_child("UserList"))

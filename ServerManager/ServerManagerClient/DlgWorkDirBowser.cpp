@@ -272,6 +272,11 @@ void CDlgWorkDirBowser::OnFileTaskEmpty()
 	Refresh();
 }
 
+void CDlgWorkDirBowser::OnFileCompareFinish(int Result, LPCTSTR szSourcePath, LPCTSTR szTargetPath)
+{
+
+}
+
 void CDlgWorkDirBowser::OnNMDblclkListFiles(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<NMITEMACTIVATE>(pNMHDR);

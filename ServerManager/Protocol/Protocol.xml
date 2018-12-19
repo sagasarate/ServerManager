@@ -178,7 +178,7 @@
 			</ModifyFlag>
 		</DataObjectModifyFlags>
 	</GlobalDefine>
-	<Interface Name="ServerManager" ID="1" IDSeed="31" Description="">
+	<Interface Name="ServerManager" ID="1" IDSeed="32" Description="">
 		<Method Name="Login" Type="0" ID="23" Flag="0" ParamIDSeed="4" Description="">
 			<CallParam Name="UserName" Type="String" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<CallParam Name="Password" Type="String" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
@@ -363,6 +363,15 @@
 			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 			<AckParam Name="StatusFormatPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+		</Method>
+		<Method Name="FileCompare" Type="0" ID="31" Flag="0" ParamIDSeed="8" Description="">
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="FileSize" Type="UINT64" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="FileMD5" Type="String" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="FilePath" Type="String" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
 		</Method>
 	</Interface>
 	<Prefix Content=""/>

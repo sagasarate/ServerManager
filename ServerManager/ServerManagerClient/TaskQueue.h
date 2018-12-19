@@ -17,6 +17,7 @@ public:
 		TASK_TYPE_STARTUP_SERVICE,
 		TASK_TYPE_SHUTDOWN_SERVICE,
 		TASK_TYPE_RELOAD_CONFIG_DATA,
+		TASK_TYPE_COMPARE,
 	};
 	enum TASK_STATUS
 	{
@@ -31,8 +32,16 @@ public:
 		COMPRESS_WORK_STATUS_NONE,
 		COMPRESS_WORK_STATUS_SAVE,
 		COMPRESS_WORK_STATUS_LOAD,
+		COMPRESS_WORK_STATUS_MD5,
 		COMPRESS_WORK_STATUS_FINISH,
 		COMPRESS_WORK_STATUS_ERROR,
+	};
+	enum TASK_USAGE
+	{
+		TASK_USAGE_NONE,
+		TASK_USAGE_CHECK_BEFORE_UPDATE,
+		TASK_USAGE_UPDATE,
+		TASK_USAGE_CHECK_AFTER_UPDATE,
 	};
 	struct TASK_INFO
 	{
@@ -48,6 +57,7 @@ public:
 		UINT64					TransferSize;
 		bool					ContinueTransfer;
 		UINT					TransferStartTime;
+		UINT					Usage;
 		void Clear()
 		{
 			ID = 0;
@@ -62,6 +72,7 @@ public:
 			TransferSize = 0;
 			ContinueTransfer = false;
 			TransferStartTime = 0;
+			Usage = 0;
 		}
 	};
 protected:
@@ -77,6 +88,7 @@ protected:
 	CEasyBuffer						m_OutputBuffer;
 	CWinFileAccessor				m_CurTransferFile;
 	bool							m_IsInTransfer;
+	CHashMD5						m_HashMD5;
 public:
 	CTaskQueue();
 	~CTaskQueue();
@@ -90,6 +102,7 @@ public:
 	UINT AddStartupServiceTask(UINT ServiceID, bool ClearQueueOnFailed);
 	UINT AddShutdownServiceTask(UINT ServiceID, bool ClearQueueOnFailed);
 	UINT AddReloadConfigDataTask(UINT ServiceID);
+	UINT AddFileCompareTask(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, UINT Usage);
 
 	bool CancelFileTransfer(UINT ID);
 	void DeleteAllTask();
@@ -111,10 +124,12 @@ public:
 	void OnServiceShutdownResult(short Result, UINT ServiceID);
 	void OnSendCommandResult(short Result, UINT ServiceID);
 	void OnServiceInfo(CServiceInfo& ServiceInfo);
+	void OnFileCompareResult(short Result, UINT ServiceID, LPCTSTR FilePath);
 protected:
 	void DeleteTask(UINT ID);
-	void PrintLog(LPCTSTR szFormat, ...);
+	void PrintLog(short Result, LPCTSTR szFormat, ...);
 	void DoDownload(TASK_INFO * pFileInfo);
 	void DoUpload(TASK_INFO * pFileInfo);
+	void DoCompare(TASK_INFO * pTaskInfo);
 };
 

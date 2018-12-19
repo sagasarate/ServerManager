@@ -41,7 +41,9 @@ protected: // 仅从序列化创建
 	CTreeCtrl				m_tvServers;
 	CListCtrl				m_lvServiceInfos;
 	CListCtrl				m_lvTask;
-	CEdit					m_edLog;
+	CRichEditCtrl			m_redLog;
+	CHARFORMAT				m_NormalCharFormat;
+	CHARFORMAT				m_ErrorCharFormat;
 
 	bool					m_ShowHideService;
 	UINT					m_SelectedConnectionID;
@@ -60,8 +62,8 @@ public:
 // 操作
 public:
 	void RefreshConnection();
-	void PrintLogVL(LPCTSTR szFormat,va_list vl);
-	void PrintLog(LPCTSTR szFormat,...);
+	void PrintLogVL(LOG_TYPE LogType, LPCTSTR szFormat, va_list vl);
+	void PrintLog(LOG_TYPE LogType, LPCTSTR szFormat, ...);
 	void SetServiceInfo(CServerConnection * pConnection, const CServiceInfo& ServiceInfo);
 	void SetInternetAdapterInfo(UINT ConnectionID, float SendFlux, float RecvFlux);
 	void SetIntranetAdapterInfo(UINT ConnectionID, float SendFlux, float RecvFlux);

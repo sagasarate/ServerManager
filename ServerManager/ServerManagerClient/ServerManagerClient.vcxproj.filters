@@ -79,6 +79,9 @@
     <ClCompile Include="TaskQueue.cpp">
       <Filter>任务队列</Filter>
     </ClCompile>
+    <ClCompile Include="DlgLogin.cpp">
+      <Filter>对话框</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServerConnection.h">
@@ -134,6 +137,9 @@
     </ClInclude>
     <ClInclude Include="TaskQueue.h">
       <Filter>任务队列</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgLogin.h">
+      <Filter>对话框</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

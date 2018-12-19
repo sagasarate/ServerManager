@@ -188,6 +188,29 @@ UINT CTaskQueue::AddReloadConfigDataTask(UINT ServiceID)
 	return 0;
 }
 
+UINT CTaskQueue::AddFileCompareTask(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, UINT Usage)
+{
+	TASK_INFO * pTaskInfo = NULL;
+	UINT ID = m_TaskQueue.NewObject(&pTaskInfo);
+	if (pTaskInfo)
+	{
+		pTaskInfo->Clear();
+		pTaskInfo->ID = ID;
+		pTaskInfo->Type = TASK_TYPE_COMPARE;
+		pTaskInfo->Status = TASK_STATUS_NONE;
+		pTaskInfo->ServiceID = ServiceID;
+		pTaskInfo->SourceFilePath = SourceFilePath;
+		pTaskInfo->TargetFilePath = TargetFilePath;
+		pTaskInfo->FileSize = 0;
+		pTaskInfo->TransferOffset = 0;
+		pTaskInfo->Usage = Usage;
+		if (m_pView)
+			m_pView->OnAddTask(m_pConnection->GetID(), *pTaskInfo);
+		return ID;
+	}
+	return 0;
+}
+
 bool CTaskQueue::CancelFileTransfer(UINT ID)
 {
 	DeleteTask(ID);
@@ -250,9 +273,13 @@ void CTaskQueue::Update()
 						m_pConnection->QuerySendCommand(pTaskInfo->ServiceID, _T("ReloadAllData()"));
 						pTaskInfo->Status = TASK_STATUS_STARTING;
 						break;
+					case TASK_TYPE_COMPARE:
+						pTaskInfo->Status = TASK_STATUS_STARTING;
+						DoCompare(pTaskInfo);
+						break;
 					default:
 						{							
-							PrintLog(_T("未知的任务类型%d"), pTaskInfo->Type);
+							PrintLog(-1, _T("未知的任务类型%d"), pTaskInfo->Type);
 							DeleteTask(pTaskInfo->ID);							
 						}
 						break;
@@ -260,7 +287,7 @@ void CTaskQueue::Update()
 				}
 				else
 				{					
-					PrintLog(_T("服务器[%u]未连接，任务放弃"), (LPCTSTR)m_pConnection->GetServerAddress());
+					PrintLog(-1, _T("服务器[%u]未连接，任务放弃"), (LPCTSTR)m_pConnection->GetServerAddress());
 					DeleteTask(pTaskInfo->ID);
 				}
 			}
@@ -292,9 +319,14 @@ void CTaskQueue::Update()
 								DoUpload(pTaskInfo);
 							}
 							break;
+						case TASK_TYPE_COMPARE:
+							{
+								m_pConnection->QueryFileCompare(pTaskInfo->ServiceID, pTaskInfo->TargetFilePath, pTaskInfo->FileSize, (LPCTSTR)m_OutputBuffer.GetBuffer());
+							}
+							break;
 						default:
 							{
-								PrintLog(_T("不支持的任务类型%d"), pTaskInfo->Type);
+								PrintLog(-1, _T("不支持的任务类型%d"), pTaskInfo->Type);
 								DeleteTask(pTaskInfo->ID);
 							}
 							break;
@@ -316,7 +348,7 @@ void CTaskQueue::Update()
 							break;
 						default:
 							{
-								PrintLog(_T("不支持的任务类型%d"), pTaskInfo->Type);
+								PrintLog(-1, _T("不支持的任务类型%d"), pTaskInfo->Type);
 								DeleteTask(pTaskInfo->ID);
 							}
 							break;
@@ -333,7 +365,7 @@ void CTaskQueue::Update()
 				case TASK_TYPE_SHUTDOWN_SERVICE:
 					if (GetTimeToTime(pTaskInfo->TransferStartTime, CurTime) >= SERVICE_STARTUP_TIMEOUT)
 					{
-						PrintLog(_T("任务超时%d"), pTaskInfo->Type);
+						PrintLog(-1, _T("任务超时%d"), pTaskInfo->Type);
 						DeleteTask(pTaskInfo->ID);
 					}
 					break;
@@ -417,6 +449,23 @@ BOOL CTaskQueue::OnRun()
 			}
 		}		
 		break;
+	case COMPRESS_WORK_STATUS_MD5:
+		{
+			UINT64 ReadLen = 0;
+			do {
+				ReadLen = m_CurTransferFile.Read(m_InputBuffer.GetBuffer(), FILE_TRANSFER_BLOCK_SIZE);
+				m_HashMD5.AddData((BYTE *)m_InputBuffer.GetBuffer(), ReadLen);
+			} while (ReadLen < FILE_TRANSFER_BLOCK_SIZE);
+			m_HashMD5.MD5Final();
+			CEasyString MD5Str = m_HashMD5.GetHashCodeString();
+			m_OutputBuffer.SetUsedSize(0);
+			m_OutputBuffer.PushBack(MD5Str.GetBuffer(), MD5Str.GetLength()*sizeof(TCHAR));
+			m_OutputBuffer.PushConstBack(0, sizeof(TCHAR));
+			m_CompressWorkStatus = COMPRESS_WORK_STATUS_FINISH;
+		}
+		break;
+	default:
+		DoSleep(1);
 	}
 	return TRUE;
 }
@@ -448,25 +497,25 @@ void CTaskQueue::OnStartDownloadResult(short Result, UINT ServiceID, LPCTSTR Fil
 				}
 				else
 				{
-					PrintLog(_T("OnStartDownloadResult创建文件失败%s"), (LPCTSTR)pTaskInfo->TargetFilePath);
+					PrintLog(-1, _T("OnStartDownloadResult创建文件失败%s"), (LPCTSTR)pTaskInfo->TargetFilePath);
 					m_pConnection->QueryEndDownload();
 				}
 			}
 			else
 			{
-				PrintLog(_T("OnStartDownloadResult请求失败%d"), Result);
+				PrintLog(-1, _T("OnStartDownloadResult请求失败%d"), Result);
 				DeleteTask(pTaskInfo->ID);
 			}
 		}
 		else
 		{
-			PrintLog(_T("OnStartDownloadResult传输任务不相符"));
+			PrintLog(-1, _T("OnStartDownloadResult传输任务不相符"));
 			m_pConnection->QueryEndDownload();
 		}
 	}
 	else
 	{
-		PrintLog(_T("OnStartDownloadResult已无传输任务"));
+		PrintLog(-1, _T("OnStartDownloadResult已无传输任务"));
 		m_pConnection->QueryEndDownload();
 	}	
 }
@@ -491,26 +540,26 @@ void CTaskQueue::OnDownloadData(short Result, UINT64 Offset, UINT Length, const 
 				}
 				else
 				{
-					PrintLog(_T("OnDownloadData数据压缩解压状态错误%d"), m_CompressWorkStatus);
+					PrintLog(-1, _T("OnDownloadData数据压缩解压状态错误%d"), m_CompressWorkStatus);
 					m_pConnection->QueryEndDownload();
 				}
 			}
 			else
 			{
-				PrintLog(_T("OnDownloadData文件定位失败"));
+				PrintLog(-1, _T("OnDownloadData文件定位失败"));
 				m_pConnection->QueryEndDownload();
 			}
 			
 		}
 		else
 		{
-			PrintLog(_T("OnDownloadData已无传输任务"), Result);
+			PrintLog(-1, _T("OnDownloadData已无传输任务"), Result);
 			m_pConnection->QueryEndDownload();
 		}
 	}
 	else
 	{
-		PrintLog(_T("OnDownloadData请求失败%d"), Result);
+		PrintLog(-1, _T("OnDownloadData请求失败%d"), Result);
 		m_pConnection->QueryEndDownload();
 	}
 }
@@ -532,7 +581,7 @@ void CTaskQueue::OnEndDownloadResult(short Result, UINT FileLastWriteTime)
 			UINT TransferTime = GetTimeToTime(pTaskInfo->TransferStartTime, CEasyTimer::GetTime());
 			float TransferRate = TransferTime ? (float)pTaskInfo->TransferSize*1000.0f / (float)TransferTime : 0.0f;
 
-			PrintLog(_T("下载完成，实际传输%s,压缩率%0.2f%%,下载速度%s"),
+			PrintLog(0,_T("下载完成，实际传输%s,压缩率%0.2f%%,下载速度%s"),
 				(LPCTSTR)FormatNumberWords(pTaskInfo->TransferSize),
 				CompressRate,
 				(LPCTSTR)FormatNumberWordsFloat(TransferRate));
@@ -541,7 +590,7 @@ void CTaskQueue::OnEndDownloadResult(short Result, UINT FileLastWriteTime)
 	else
 	{
 		m_CurTransferFile.Close();
-		PrintLog(_T("OnEndDownloadResult请求失败%d"), Result);		
+		PrintLog(-1, _T("OnEndDownloadResult请求失败%d"), Result);
 	}
 
 	if (pTaskInfo)
@@ -582,13 +631,13 @@ void CTaskQueue::OnUploadStartResult(short Result, UINT ServiceID, LPCTSTR FileP
 						}
 						else
 						{
-							PrintLog(_T("OnUploadStartResult文件定位失败"));
+							PrintLog(-1, _T("OnUploadStartResult文件定位失败"));
 							m_pConnection->QueryEndUpload(0);
 						}
 					}
 					else
 					{
-						PrintLog(_T("文件大小为0，文件上传完毕"));
+						PrintLog(-1, _T("文件大小为0，文件上传完毕"));
 						CEasyTime LastWriteTime;
 						if (!m_CurTransferFile.GetLastWriteTime(LastWriteTime))
 							LastWriteTime.FetchLocalTime();
@@ -597,25 +646,25 @@ void CTaskQueue::OnUploadStartResult(short Result, UINT ServiceID, LPCTSTR FileP
 				}
 				else
 				{
-					PrintLog(_T("OnUploadStartResult打开文件失败%s"), (LPCTSTR)pTaskInfo->TargetFilePath);
+					PrintLog(-1, _T("OnUploadStartResult打开文件失败%s"), (LPCTSTR)pTaskInfo->TargetFilePath);
 					m_pConnection->QueryEndUpload(0);
 				}
 			}
 			else
 			{
-				PrintLog(_T("OnUploadStartResult请求失败%d"), Result);
+				PrintLog(-1, _T("OnUploadStartResult请求失败%d"), Result);
 				DeleteTask(pTaskInfo->ID);
 			}
 		}
 		else
 		{
-			PrintLog(_T("OnUploadStartResult传输任务不相符"));
+			PrintLog(-1, _T("OnUploadStartResult传输任务不相符"));
 			m_pConnection->QueryEndUpload(0);
 		}
 	}
 	else
 	{
-		PrintLog(_T("OnUploadStartResult已无传输任务"));
+		PrintLog(-1, _T("OnUploadStartResult已无传输任务"));
 		m_pConnection->QueryEndUpload(0);
 	}
 	
@@ -647,19 +696,19 @@ void CTaskQueue::OnUploadData(short Result, UINT64 Offset, UINT Length)
 					}
 					else
 					{
-						PrintLog(_T("OnUploadData文件定位失败"));
+						PrintLog(-1, _T("OnUploadData文件定位失败"));
 						m_pConnection->QueryEndUpload(0);
 					}
 				}
 				else
 				{
-					PrintLog(_T("OnUploadData数据压缩解压状态错误%d"), m_CompressWorkStatus);
+					PrintLog(-1, _T("OnUploadData数据压缩解压状态错误%d"), m_CompressWorkStatus);
 					m_pConnection->QueryEndUpload(0);
 				}
 			}
 			else
 			{
-				PrintLog(_T("文件上传完毕"));
+				PrintLog(0, _T("文件上传完毕"));
 				CEasyTime LastWriteTime;
 				if (!m_CurTransferFile.GetLastWriteTime(LastWriteTime))
 					LastWriteTime.FetchLocalTime();
@@ -670,13 +719,13 @@ void CTaskQueue::OnUploadData(short Result, UINT64 Offset, UINT Length)
 		}
 		else
 		{
-			PrintLog(_T("OnUploadData已无传输任务"), Result);
+			PrintLog(-1, _T("OnUploadData已无传输任务"), Result);
 			m_pConnection->QueryEndUpload(0);
 		}
 	}
 	else
 	{
-		PrintLog(_T("OnUploadData请求失败%d"), Result);
+		PrintLog(-1, _T("OnUploadData请求失败%d"), Result);
 		m_pConnection->QueryEndUpload(0);
 	}
 }
@@ -697,7 +746,7 @@ void CTaskQueue::OnEndUploadResult(short Result)
 			UINT TransferTime = GetTimeToTime(pTaskInfo->TransferStartTime, CEasyTimer::GetTime());
 			float TransferRate = TransferTime ? (float)pTaskInfo->TransferSize*1000.0f / (float)TransferTime : 0.0f;
 
-			PrintLog(_T("上传完成，实际传输%s,压缩率%0.2f%%,上传速度%s"),
+			PrintLog(0, _T("上传完成，实际传输%s,压缩率%0.2f%%,上传速度%s"),
 				(LPCTSTR)FormatNumberWords(pTaskInfo->TransferSize),
 				CompressRate,
 				(LPCTSTR)FormatNumberWordsFloat(TransferRate));
@@ -705,11 +754,11 @@ void CTaskQueue::OnEndUploadResult(short Result)
 	}
 	else
 	{
-		PrintLog(_T("OnEndUploadResult请求失败%d"), Result);
+		PrintLog(-1, _T("OnEndUploadResult请求失败%d"), Result);
 	}
 	
 	if (pTaskInfo)
-	{
+	{		
 		if (m_pView)
 			m_pView->GetWorkDirBrowser()->OnUploadFinish(pTaskInfo->SourceFilePath, pTaskInfo->TargetFilePath);
 		DeleteTask(pTaskInfo->ID);
@@ -725,7 +774,7 @@ void CTaskQueue::OnDeleteFileResult(short Result, UINT ServiceID, LPCTSTR FilePa
 	}
 	else
 	{
-		PrintLog(_T("OnDeleteFileResult请求失败%d"), Result);
+		PrintLog(-1, _T("OnDeleteFileResult请求失败%d"), Result);
 	}
 
 	void * Pos = m_TaskQueue.GetFirstObjectPos();
@@ -746,7 +795,7 @@ void CTaskQueue::OnCreateDirResult(short Result, UINT ServiceID, LPCTSTR Dir)
 	}
 	else
 	{
-		PrintLog(_T("OnCreateDirResult请求失败%d"), Result);
+		PrintLog(-1, _T("OnCreateDirResult请求失败%d"), Result);
 	}
 
 	void * Pos = m_TaskQueue.GetFirstObjectPos();
@@ -766,7 +815,7 @@ void CTaskQueue::OnChangeFileModeResult(short Result, UINT ServiceID, LPCTSTR Fi
 	}
 	else
 	{
-		PrintLog(_T("OnChangeFileModeResult请求失败%d"), Result);
+		PrintLog(-1, _T("OnChangeFileModeResult请求失败%d"), Result);
 	}
 
 	void * Pos = m_TaskQueue.GetFirstObjectPos();
@@ -794,7 +843,7 @@ void CTaskQueue::OnServiceStartupResult(short Result, UINT ServiceID)
 			}
 			else
 			{
-				PrintLog(_T("OnServiceStartupResult请求失败%d"), Result);
+				PrintLog(-1, _T("OnServiceStartupResult请求失败%d"), Result);
 				if (pTaskInfo->ContinueTransfer)
 					DeleteAllTask();
 				else
@@ -803,7 +852,7 @@ void CTaskQueue::OnServiceStartupResult(short Result, UINT ServiceID)
 		}
 		else
 		{
-			PrintLog(_T("OnServiceStartupResult任务不相符"));
+			PrintLog(-1, _T("OnServiceStartupResult任务不相符"));
 		}
 	}	
 }
@@ -825,7 +874,7 @@ void CTaskQueue::OnServiceShutdownResult(short Result, UINT ServiceID)
 			}
 			else
 			{
-				PrintLog(_T("OnServiceShutdownResult请求失败%d"), Result);
+				PrintLog(-1, _T("OnServiceShutdownResult请求失败%d"), Result);
 				if (pTaskInfo->ContinueTransfer)
 					DeleteAllTask();
 				else
@@ -834,7 +883,7 @@ void CTaskQueue::OnServiceShutdownResult(short Result, UINT ServiceID)
 		}
 		else
 		{
-			PrintLog(_T("OnServiceShutdownResult任务不相符"));
+			PrintLog(-1, _T("OnServiceShutdownResult任务不相符"));
 		}
 	}
 }
@@ -855,7 +904,7 @@ void CTaskQueue::OnSendCommandResult(short Result, UINT ServiceID)
 			}
 			else
 			{
-				PrintLog(_T("OnSendCommandResult请求失败%d"), Result);
+				PrintLog(-1, _T("OnSendCommandResult请求失败%d"), Result);
 				if (pTaskInfo->ContinueTransfer)
 					DeleteAllTask();
 				else
@@ -864,7 +913,7 @@ void CTaskQueue::OnSendCommandResult(short Result, UINT ServiceID)
 		}
 		else
 		{
-			PrintLog(_T("OnSendCommandResult任务不相符"));
+			PrintLog(-1, _T("OnSendCommandResult任务不相符"));
 		}
 	}
 }
@@ -897,20 +946,53 @@ void CTaskQueue::OnServiceInfo(CServiceInfo& ServiceInfo)
 		}
 	}
 }
+void CTaskQueue::OnFileCompareResult(short Result, UINT ServiceID, LPCTSTR FilePath)
+{
+	void * Pos = m_TaskQueue.GetFirstObjectPos();
+	if (Pos)
+	{
+		TASK_INFO * pTaskInfo = m_TaskQueue.GetObject(Pos);		
+		if (pTaskInfo->Usage == TASK_USAGE_CHECK_BEFORE_UPDATE)
+		{
+			if (Result != MSG_RESULT_SUCCEED)
+			{
+				PrintLog(0, _T("%s文件比较结果不相同，需要上传"), (LPCTSTR)pTaskInfo->TargetFilePath);
+				AddUploadTask(ServiceID, pTaskInfo->SourceFilePath, pTaskInfo->TargetFilePath, false);
+				AddFileCompareTask(ServiceID, pTaskInfo->SourceFilePath, pTaskInfo->TargetFilePath, TASK_USAGE_CHECK_AFTER_UPDATE);
+			}
+		}
+		else if (pTaskInfo->Usage == TASK_USAGE_CHECK_AFTER_UPDATE)
+		{
+			if (Result != MSG_RESULT_SUCCEED)
+			{
+				PrintLog(-1, _T("%s文件比较结果不相同，更新没有成功"), (LPCTSTR)pTaskInfo->TargetFilePath);
+			}
+		}
+		else
+		{
+			if (Result != MSG_RESULT_SUCCEED)
+			{
+				PrintLog(-1, _T("%s文件比较结果不相同，更新没有成功"), (LPCTSTR)pTaskInfo->TargetFilePath);
+			}
+			if (m_pView)
+				m_pView->GetWorkDirBrowser()->OnFileCompareFinish(Result, pTaskInfo->SourceFilePath, pTaskInfo->TargetFilePath);
+		}
+	}
+}
 void CTaskQueue::DeleteTask(UINT ID)
 {	
 	m_TaskQueue.DeleteObject(ID);
 	if (m_pView)
 		m_pView->OnDeleteTask(m_pConnection->GetID(), ID);
 }
-void CTaskQueue::PrintLog(LPCTSTR szFormat, ...)
+void CTaskQueue::PrintLog(short Result, LPCTSTR szFormat, ...)
 {
 	if (m_pView)
 	{
 		va_list vl;
 
 		va_start(vl, szFormat);
-		m_pView->PrintLogVL(szFormat, vl);
+		m_pView->PrintLogVL((Result == MSG_RESULT_SUCCEED ? LOG_TYPE_NORMAL : LOG_TYPE_ERROR), szFormat, vl);
 		va_end(vl);
 	}
 }
@@ -942,5 +1024,23 @@ void CTaskQueue::DoUpload(TASK_INFO * pTaskInfo)
 		if (!m_CurTransferFile.GetLastWriteTime(LastWriteTime))
 			LastWriteTime.FetchLocalTime();
 		m_pConnection->QueryEndUpload((time_t)LastWriteTime);
+	}
+}
+
+void CTaskQueue::DoCompare(TASK_INFO * pTaskInfo)
+{
+	if (m_CurTransferFile.Open(pTaskInfo->SourceFilePath, IFileAccessor::modeOpen | IFileAccessor::modeRead | IFileAccessor::shareShareAll))
+	{
+		m_HashMD5.Init();
+
+		pTaskInfo->FileSize = m_CurTransferFile.GetSize();		
+		
+		pTaskInfo->Status = TASK_STATUS_TRANSFER_DATA;
+		m_CompressWorkStatus = COMPRESS_WORK_STATUS_MD5;			
+	}
+	else
+	{
+		PrintLog(-1, _T("OnUploadStartResult打开文件失败%s"), (LPCTSTR)pTaskInfo->TargetFilePath);
+		DeleteTask(pTaskInfo->ID);
 	}
 }

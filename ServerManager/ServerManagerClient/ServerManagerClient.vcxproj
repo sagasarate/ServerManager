@@ -207,6 +207,7 @@
     <ClCompile Include="DlgEditBox.cpp" />
     <ClCompile Include="DlgInput.cpp" />
     <ClCompile Include="DlgListSelector.cpp" />
+    <ClCompile Include="DlgLogin.cpp" />
     <ClCompile Include="DlgServerConsole.cpp" />
     <ClCompile Include="DlgServerManage.cpp" />
     <ClCompile Include="DlgServerStatus.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="DlgEditBox.h" />
     <ClInclude Include="DlgInput.h" />
     <ClInclude Include="DlgListSelector.h" />
+    <ClInclude Include="DlgLogin.h" />
     <ClInclude Include="DlgServerConsole.h" />
     <ClInclude Include="DlgServerManage.h" />
     <ClInclude Include="DlgServerStatus.h" />

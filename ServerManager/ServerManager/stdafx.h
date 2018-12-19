@@ -61,6 +61,21 @@
 #include "../Protocol/Protocol.h"
 //#include "../../Libs/zlib/zlib.h"
 
+
+#if defined(USE_CRT_DETAIL_NEW) && defined(_DEBUG)
+#undef new
+#endif
+
+#include "../../Libs/rapidjson/document.h"
+
+#if defined(USE_CRT_DETAIL_NEW) && defined(_DEBUG)
+#define new new( __FILE__, __LINE__ )
+#endif
+
+
+#define CURL_STATICLIB
+#include "../../Libs/curl/include/curl/curl.h"
+
 #ifdef WIN32
 //#include "Tlhelp32.h"
 #include "Psapi.h"
@@ -83,6 +98,9 @@
 #define MAX_OPERATION_WAIT_TIME			30
 #define CONTROL_PIPE_BUFFER_SIZE		8192
 #define CONTROL_PIPE_RECREATE_TIME		(5*1000)
+
+
+
 
 //#include "Protocol.h"
 //
@@ -143,7 +161,44 @@
 //	float		RecvFlux;
 //};
 
+enum HTTP_REQUEST_TYPE
+{
+	HTTP_REQUEST_TYPE_NONE,
+	HTTP_REQUEST_TYPE_GET_TOKEN,
+	HTTP_REQUEST_TYPE_SEND_NOTIFY,
+};
 
+struct HTTP_REQUEST_INFO
+{
+	UINT						RequestID;
+	CEasyStringA				RequestURL;
+	CEasyStringA				RequestContent;
+	int							RequestType;
+	UINT						Param1;
+	UINT						Param2;
+	CEasyString					Param3;
+	CURL *						CURLHandle;
+	CEasyBuffer					RecvBuffer;
+	HTTP_REQUEST_INFO()
+	{
+		RequestID = 0;
+		RequestType = HTTP_REQUEST_TYPE_NONE;
+		Param1 = 0;
+		Param2 = 0;
+		CURLHandle = NULL;
+	}
+	~HTTP_REQUEST_INFO()
+	{
+		if (CURLHandle)
+		{
+			curl_easy_cleanup(CURLHandle);
+		}
+	}
+	void SetID(UINT ID)
+	{
+		RequestID = ID;
+	}
+};
 
 
 struct USER_INFO

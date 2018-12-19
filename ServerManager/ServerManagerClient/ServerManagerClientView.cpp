@@ -69,7 +69,7 @@ void CServerManagerClientView::DoDataExchange(CDataExchange* pDX)
 	CFormView::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TYPE_TREE, m_tvServers);
 	DDX_Control(pDX, IDC_SERVICE_LIST, m_lvServiceInfos);
-	DDX_Control(pDX, IDC_EDIT_LOG, m_edLog);
+	DDX_Control(pDX, IDC_EDIT_LOG, m_redLog);
 	DDX_Control(pDX, IDC_TASK_LIST, m_lvTask);
 }
 
@@ -147,6 +147,26 @@ void CServerManagerClientView::OnInitialUpdate()
 	m_DlgServerStatus.Create(m_DlgServerStatus.IDD, AfxGetMainWnd());
 	m_DlgServerConsole.Create(m_DlgServerConsole.IDD, AfxGetMainWnd());
 
+
+	m_redLog.SetBackgroundColor(false, RGB(255, 255, 255));
+	
+	ZeroMemory(&m_NormalCharFormat, sizeof(m_NormalCharFormat));
+	m_NormalCharFormat.dwMask = CFM_COLOR | CFM_SIZE | CFM_FACE;
+	m_NormalCharFormat.dwEffects = 0;
+	m_NormalCharFormat.crTextColor = RGB(0, 0, 0);
+	m_NormalCharFormat.yHeight = 200;
+	strcpy_s(m_NormalCharFormat.szFaceName, 32, _T("宋体"));
+
+	ZeroMemory(&m_ErrorCharFormat, sizeof(m_NormalCharFormat));
+	m_ErrorCharFormat.dwMask = CFM_COLOR | CFM_SIZE | CFM_FACE;
+	m_ErrorCharFormat.dwEffects = 0;
+	m_ErrorCharFormat.crTextColor = RGB(255, 0, 0);
+	m_ErrorCharFormat.yHeight = 200;
+	strcpy_s(m_ErrorCharFormat.szFaceName, 32, _T("宋体"));
+
+	m_redLog.SetDefaultCharFormat(m_NormalCharFormat);
+	
+
 }
 
 
@@ -200,7 +220,7 @@ void CServerManagerClientView::RefreshConnection()
 	m_tvServers.Expand(m_hAllServer, TVE_EXPAND);
 }
 
-void CServerManagerClientView::PrintLogVL(LPCTSTR szFormat,va_list vl)
+void CServerManagerClientView::PrintLogVL(LOG_TYPE LogType, LPCTSTR szFormat, va_list vl)
 {
 	TCHAR LogBuffer[1000];
 
@@ -215,59 +235,85 @@ void CServerManagerClientView::PrintLogVL(LPCTSTR szFormat,va_list vl)
 
 
 	_vstprintf_s(LogBuffer+17,1000-17,szFormat, vl );
+	_tcscat_s(LogBuffer, 1000, _T("\r\n"));
+
+	
+	
+	int LineCount = m_redLog.GetLineCount();
+
+	m_redLog.SetSel(-1, -1);
+
+	switch (LogType)
+	{
+	case LOG_TYPE_NORMAL:
+		m_redLog.SetSelectionCharFormat(m_NormalCharFormat);
+		break;
+	case LOG_TYPE_ERROR:
+		m_redLog.SetSelectionCharFormat(m_ErrorCharFormat);
+		break;
+	}
+
+	m_redLog.ReplaceSel(LogBuffer);
+
 	
 
-	int s1,s2;
-	int sm1,sm2;
-	int SelLine;
-	int EndLine;
-
-	m_edLog.SetRedraw(false);
-
-	m_edLog.GetSel(sm1,sm2);
-	m_edLog.SetSel(0,-1);
-	m_edLog.GetSel(s1,s2);
-	SelLine=m_edLog.LineFromChar(sm1);
-	EndLine=m_edLog.GetLineCount()-1;
-	if(s2>MAX_LOG_MSG_LEN)
+	if (GetFocus() != &m_redLog)
 	{
-		m_edLog.SetSel(0,-1);
-		m_edLog.Clear();
-		s2=0;
+		int ScrollCount = m_redLog.GetLineCount() - LineCount;
+		m_redLog.LineScroll(ScrollCount);
 	}
-	m_edLog.SetSel(s2,s2);	
-	m_edLog.ReplaceSel(LogBuffer);
+
+	//int s1,s2;
+	//int sm1,sm2;
+	//int SelLine;
+	//int EndLine;
+
+	//m_edLog.SetRedraw(false);
+
+	//m_edLog.GetSel(sm1,sm2);
+	//m_edLog.SetSel(0,-1);
+	//m_edLog.GetSel(s1,s2);
+	//SelLine=m_edLog.LineFromChar(sm1);
+	//EndLine=m_edLog.GetLineCount()-1;
+	//if(s2>MAX_LOG_MSG_LEN)
+	//{
+	//	m_edLog.SetSel(0,-1);
+	//	m_edLog.Clear();
+	//	s2=0;
+	//}
+	//m_edLog.SetSel(s2,s2);	
+	//m_edLog.ReplaceSel(LogBuffer);
 
 
-	m_edLog.SetSel(0,-1);
-	m_edLog.GetSel(s1,s2);
-	m_edLog.SetSel(s2,s2);	
+	//m_edLog.SetSel(0,-1);
+	//m_edLog.GetSel(s1,s2);
+	//m_edLog.SetSel(s2,s2);	
 
-	m_edLog.ReplaceSel(_T("\r\n"));
-
-
-
-	m_edLog.SetRedraw(true);	
+	//m_edLog.ReplaceSel(_T("\r\n"));
 
 
-	if(SelLine==EndLine)
-		m_edLog.LineScroll(m_edLog.GetLineCount());
-	else
-		m_edLog.SetSel(sm1,sm2);
+
+	//m_edLog.SetRedraw(true);	
+
+
+	//if(SelLine==EndLine)
+	//	m_edLog.LineScroll(m_edLog.GetLineCount());
+	//else
+	//	m_edLog.SetSel(sm1,sm2);
 }
 
-void CServerManagerClientView::PrintLog(LPCTSTR szFormat,...)
+void CServerManagerClientView::PrintLog(LOG_TYPE LogType, LPCTSTR szFormat, ...)
 {
 	va_list vl;
 
 	va_start(vl,szFormat);
-	PrintLogVL(szFormat,vl);
+	PrintLogVL(LogType, szFormat, vl);
 	va_end(vl);
 }
 
 void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, const CServiceInfo& ServiceInfo)
 {
-	if ((!m_ShowHideService) && ServiceInfo.GetServiceID() == 0)
+	if ((!m_ShowHideService) && ServiceInfo.GetName() == CServerManagerClientApp::GetInstance()->GetSystemServiceName())
 		return;
 	if (m_SelectedConnectionID != 0 && m_SelectedConnectionID != pConnection->GetID())
 		return;
@@ -292,7 +338,17 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 	{
 		CEasyString Temp;
 		m_lvServiceInfos.SetItemText(Item, 0, pConnection->GetServerAddress());
-		Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), (LPCTSTR)ServiceInfo.GetName());
+		if (ServiceInfo.GetCharSet() == CP_UTF8)
+		{
+			char Buffer[1024];
+			UINT Len = UTF8ToAnsi(ServiceInfo.GetName(), ServiceInfo.GetName().GetLength(), Buffer, 1000);
+			Buffer[Len] = 0;
+			Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), Buffer);
+		}
+		else
+		{
+			Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), (LPCTSTR)ServiceInfo.GetName());
+		}		
 		m_lvServiceInfos.SetItemText(Item,1,Temp);
 		switch (ServiceInfo.GetStatus())
 		{
@@ -518,6 +574,15 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
+	case CTaskQueue::TASK_TYPE_COMPARE:
+		{
+			Temp.Format(_T("比较(%u)"), ConID);
+			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
+			m_lvTask.SetItemText(Item, 1, _T("0%"));
+			m_lvTask.SetItemText(Item, 2, TaskInfo.SourceFilePath);
+			m_lvTask.SetItemText(Item, 3, TaskInfo.TargetFilePath);
+			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
+		}
 	default:
 		{
 			Temp.Format(_T("未知(%u)"), ConID);

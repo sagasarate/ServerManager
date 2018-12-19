@@ -81,6 +81,7 @@ BOOL CServerManagerClientApp::InitInstance()
 		return FALSE;
 	}
 	AfxEnableControlContainer();
+	AfxInitRichEdit2();
 	// 标准初始化
 	// 如果未使用这些功能并希望减小
 	// 最终可执行文件的大小，则应移除下列
@@ -131,6 +132,12 @@ BOOL CServerManagerClientApp::InitInstance()
 
 	m_DlgServerUpdate.Create(m_DlgServerUpdate.IDD, pMainFrame);
 
+	CDlgLogin Dlg;
+
+	Dlg.DoModal();
+
+	m_AccountName = Dlg.m_AccountName;
+	m_Password = Dlg.m_Password;
 
 	LoadConfig();
 
@@ -266,6 +273,11 @@ void CServerManagerClientApp::LoadConfig()
 		{
 			if (Setting.has_attribute(_T("ServerUpdateListFile")))
 				m_ServerUpdateListFile = Setting.attribute(_T("ServerUpdateListFile")).getvalue();
+
+			if (Setting.has_attribute(_T("SystemServiceName")))
+				m_SystemServiceName = Setting.attribute(_T("SystemServiceName")).getvalue();
+
+			
 			xml_node ServerList=Setting;
 			if(ServerList.moveto_child(_T("ServerList")))
 			{				
@@ -277,6 +289,12 @@ void CServerManagerClientApp::LoadConfig()
 					UINT ServerPort=Server.attribute(_T("Port"));
 					CEasyString UserName = Server.attribute(_T("UserName")).getvalue();
 					CEasyString Password = Server.attribute(_T("Password")).getvalue();
+
+					if (UserName.IsEmpty())
+					{
+						UserName = m_AccountName;
+						Password = m_Password;
+					}
 					
 					CServerConnection * pConnection = AddServerConnection(ServerAddress, ServerPort, UserName, Password);
 				}
@@ -305,6 +323,7 @@ void CServerManagerClientApp::SaveConfig()
 	xml_node Setting = Doc.append_child(node_element, _T("Setting"));
 
 	Setting.append_attribute(_T("ServerUpdateListFile"), m_ServerUpdateListFile);
+	Setting.append_attribute(_T("SystemServiceName"), m_SystemServiceName);
 
 	xml_node ServerList = Setting.append_child(node_element, _T("ServerList"));
 

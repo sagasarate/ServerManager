@@ -17,6 +17,13 @@ class CMainConfig :
 	public CStaticObject<CMainConfig>
 {
 protected:
+	struct NOTIFY_SEND_CONFIG
+	{
+		CEasyString		GetTokenURL;
+		CEasyString		SendNotifyURL;
+		CEasyString		SendTarget;
+	};
+protected:
 	CIPAddress					m_ListenAddress;
 	UINT						m_MaxClient;
 	UINT						m_RecvBufferSize;
@@ -25,6 +32,7 @@ protected:
 	UINT						m_KeepAliveCount;	
 	UINT						m_ProcessInfoFetchTime;
 	CEasyArray<USER_INFO>		m_UserList;
+	NOTIFY_SEND_CONFIG			m_NotifyConfig;
 	
 public:
 	CMainConfig(void);
@@ -67,4 +75,8 @@ public:
 		return m_UserList;
 	}
 	bool VerfyUser(LPCTSTR UserName, LPCTSTR Password);
+	const NOTIFY_SEND_CONFIG GetNotifyConfig()
+	{
+		return m_NotifyConfig;
+	}
 };

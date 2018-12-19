@@ -95,6 +95,9 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_GET_SERVER_STATUS_FORMAT,true),MsgHandleInfo);
+	MsgHandleInfo.pObject=this;
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileCompareAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_COMPARE,true),MsgHandleInfo);
 	
 }
 
@@ -1286,4 +1289,49 @@ int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(CSmartStruct&
 		
 
 	return GetServerStatusFormatAck( Result , ServiceID , StatusFormatPacket );
+}
+int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(CSmartStruct& Packet)
+{
+	short		Result;
+	UINT		ServiceID;
+	LPCTSTR		FilePath;
+	
+	
+	Result=0;
+	ServiceID=0;
+	FilePath=NULL;
+	
+
+	
+	void * Pos=Packet.GetFirstMemberPosition();
+	while(Pos)
+	{
+		WORD MemberID;
+		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
+		switch(MemberID)
+		{
+		case SST_FILE_COMPARE_ACK_RESULT:
+			{
+				Result=Value;
+		
+			}
+			break;
+		case SST_FILE_COMPARE_ACK_SERVICE_ID:
+			{
+				ServiceID=Value;
+		
+			}
+			break;
+		case SST_FILE_COMPARE_ACK_FILE_PATH:
+			{
+				FilePath=Value;
+		
+			}
+			break;
+		
+		}
+	}
+		
+
+	return FileCompareAck( Result , ServiceID , FilePath );
 }

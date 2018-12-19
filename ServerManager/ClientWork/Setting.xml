@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="gb2312"?>
-<Setting ServerUpdateListFile="D:\MyPrj\ServerManager\ClientWork\ServerUpdateList.csv">
+<Setting ServerUpdateListFile="E:\Work\1000game\src\WM2GameServer\Work\ServerUpdateList.csv" SystemServiceName="ServerManager">
 	<ServerList>
 		<Server Address="192.168.0.18" Port="8300" UserName="test" Password="123"/>
 		<Server Address="101.201.77.93" Port="8300" UserName="test" Password="123"/>
-		<Server Address="60.205.56.41" Port="8300" UserName="Test" Password="123"/>
+		<Server Address="60.205.56.41" Port="8300" UserName="test" Password="123"/>
+		<Server Address="60.205.156.227" Port="8300" UserName="test" Password="123"/>
+		<Server Address="127.0.0.1" Port="8300" UserName="test" Password="123"/>
 	</ServerList>
 </Setting>

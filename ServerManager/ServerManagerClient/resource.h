@@ -20,6 +20,7 @@
 #define IDD_DIALOG_CONSOLE              140
 #define IDD_DIALOG_SERVER_STATUS        141
 #define IDD_DIALOG_SERVER_UPDATE        142
+#define IDD_DIALOG_LOGIN                143
 #define IDC_TYPE_TREE                   1000
 #define IDC_SERVICE_LIST                1001
 #define IDC_EDIT_LOG                    1002
@@ -38,6 +39,7 @@
 #define IDC_EDIT_TEXT                   1010
 #define IDC_RETURN_UP                   1010
 #define IDC_EDIT_PASSWORD               1010
+#define IDC_EDIT2                       1010
 #define IDC_TRANSFER_PROGRESS           1011
 #define IDC_STATIC_TRANSFER_RATE        1012
 #define IDC_CHECK_SELECT_ALL            1013
@@ -56,7 +58,6 @@
 #define IDC_BUTTON_HIDE_LOG             1024
 #define IDC_EDIT_CONTROL_PIPE_NAME      1024
 #define IDC_BUTTON_SERVER_STATUS        1025
-#define IDC_EDIT_CHAR_SET3              1025
 #define IDC_EDIT_SHUTDOWN_CMD           1025
 #define IDC_EDIT_CMD                    1028
 #define IDC_CHECK_UPDATE_CONFIG         1029
@@ -69,6 +70,7 @@
 #define IDC_BUTTON_UPDATE_CONFIG        1036
 #define IDC_BUTTON_ADD_EXEC_FILE        1036
 #define IDC_BUTTON_DEL_EXEC_FILE        1037
+#define IDC_EDIT_ACCOUNT                1038
 #define IDC_LIST                        10211
 #define ID_32771                        32771
 #define ID_SERVER_MANAGE                32772
@@ -124,9 +126,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32820
-#define _APS_NEXT_CONTROL_VALUE         1037
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

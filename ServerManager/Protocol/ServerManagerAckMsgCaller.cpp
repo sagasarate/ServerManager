@@ -1374,6 +1374,55 @@ int CServerManagerAckMsgCaller::GetServerStatusFormatAck(short Result ,UINT Serv
 	
 }
 
+int CServerManagerAckMsgCaller::FileCompareAck(short Result ,UINT ServiceID ,LPCTSTR FilePath )
+{
+	if(m_pNet==NULL)
+	{
+		return COMMON_RESULT_FAILED;
+	}
+
+	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
+		+CSmartStruct::GetFixMemberSize(sizeof(short))
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+(FilePath!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(FilePath)):0);
+
+	WORD MsgFlag=0;
+		
+	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
+	if(pMsg==NULL)
+	{
+		return COMMON_RESULT_MSG_ALLOC_ERROR;
+	}
+
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_COMPARE,true));
+	pMsg->SetDataLength(MsgDataSize);
+	pMsg->SetMsgFlag(MsgFlag);
+
+	UINT FailCount=0;
+	
+	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
+	
+	if(PackMsgFileCompareAck(Packet, Result , ServiceID , FilePath ))
+	{			
+		if(m_pNet->SendMessage(pMsg))
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_SUCCEED;
+		}
+		else
+		{
+			m_pNet->ReleaseMessage(pMsg);
+			return COMMON_RESULT_MSG_SEND_ERROR;
+		}
+	}
+	else
+	{
+		m_pNet->ReleaseMessage(pMsg);
+		return COMMON_RESULT_MSG_PACK_ERROR;
+	}
+	
+}
+
 
 bool CServerManagerAckMsgCaller::PackMsgLoginAck(CSmartStruct& Packet,short Result )
 {
@@ -1923,6 +1972,30 @@ bool CServerManagerAckMsgCaller::PackMsgGetServerStatusFormatAck(CSmartStruct& P
 	
 	{
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_GET_SERVER_STATUS_FORMAT_ACK_STATUS_FORMAT_PACKET,StatusFormatPacket),FailCount);
+	}
+	
+	
+
+	return FailCount==0;
+}
+
+bool CServerManagerAckMsgCaller::PackMsgFileCompareAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,LPCTSTR FilePath )
+{
+	UINT FailCount=0;
+
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_ACK_RESULT,Result),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_ACK_SERVICE_ID,ServiceID),FailCount);
+	}
+	
+	{
+		if( FilePath != NULL)
+		{
+			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_ACK_FILE_PATH,FilePath),FailCount);
+		}
 	}
 	
 	

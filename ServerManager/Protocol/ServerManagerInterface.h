@@ -38,6 +38,7 @@ public:
 		METHOD_GET_SERVER_STATUS=27,
 		METHOD_GET_ALL_SERVER_STATUS=28,
 		METHOD_GET_SERVER_STATUS_FORMAT=29,
+		METHOD_FILE_COMPARE=31,
 	
 	};
 	
@@ -376,6 +377,20 @@ public:
 		
 	
 	
+	/*************************************************
+	函数名:	FileCompare
+	用途:	
+	参数:
+		ServiceID				
+		FilePath				
+		FileSize				
+		FileMD5				
+	返回值:无特别意义
+	*************************************************/
+	virtual int FileCompare(UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 ) {return COMMON_RESULT_FAILED;}
+		
+	
+	
 protected:	
 	
 	enum SERVER_MANAGER_LOGIN_MEMBER_IDS
@@ -538,6 +553,14 @@ protected:
 	enum SERVER_MANAGER_GET_SERVER_STATUS_FORMAT_MEMBER_IDS
 	{
 		SST_GET_SERVER_STATUS_FORMAT_SERVICE_ID=3,
+	
+	};
+	enum SERVER_MANAGER_FILE_COMPARE_MEMBER_IDS
+	{
+		SST_FILE_COMPARE_SERVICE_ID=1,
+		SST_FILE_COMPARE_FILE_PATH=2,
+		SST_FILE_COMPARE_FILE_SIZE=3,
+		SST_FILE_COMPARE_FILE_MD5=4,
 	
 	};
 };

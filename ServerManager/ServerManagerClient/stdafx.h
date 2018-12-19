@@ -79,6 +79,12 @@ enum SERVER_CONNECTION_STATUS
 	SCS_CONNECTING,
 };
 
+enum LOG_TYPE
+{
+	LOG_TYPE_NORMAL,
+	LOG_TYPE_ERROR,
+};
+
 //struct TRANSFER_FILE_INFO
 //{
 //	CEasyString	SourceFilePath;
@@ -110,6 +116,7 @@ struct SELECT_ITEM_INFO
 #include "DlgServerStatus.h"
 #include "DlgServerConsole.h"
 #include "DlgServerUpdate.h"
+#include "DlgLogin.h"
 
 #include "ServerManagerClientView.h"
 #include "ServerManagerClientDoc.h"

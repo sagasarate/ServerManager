@@ -62,7 +62,7 @@ void CServerConnection::OnConnection(bool IsSucceed)
 {
 	if(IsSucceed)
 	{
-		PrintLog(_T("%s:%u已连接"),
+		PrintLog(0, _T("%s:%u已连接"),
 			GetRemoteAddress().GetIPString(),
 			GetRemoteAddress().GetPort());
 		m_AssembleBuffer.SetUsedSize(0);
@@ -78,7 +78,7 @@ void CServerConnection::OnConnection(bool IsSucceed)
 		CServerManagerMsgCaller MsgCaller(this);
 
 		MsgCaller.Login(m_UserName, m_Password);
-		PrintLog(_T("以用户[%s]登录"), m_UserName);
+		PrintLog(0, _T("以用户[%s]登录"), m_UserName);
 
 		//SAFE_RELEASE(m_pDataLogFile);
 		//m_pDataLogFile = CFileSystemManager::GetInstance()->CreateFileAccessor(FILE_CHANNEL_NORMAL1);
@@ -89,7 +89,7 @@ void CServerConnection::OnConnection(bool IsSucceed)
 	}
 	else
 	{
-		PrintLog(_T("%s:%u连接失败"),
+		PrintLog(-1, _T("%s:%u连接失败"),
 			GetRemoteAddress().GetIPString(),
 			GetRemoteAddress().GetPort());
 	}
@@ -97,7 +97,7 @@ void CServerConnection::OnConnection(bool IsSucceed)
 
 void CServerConnection::OnDisconnection()
 {
-	PrintLog(_T("%s:%u已断开"),
+	PrintLog(-1, _T("%s:%u已断开"),
 		GetRemoteAddress().GetIPString(),
 		GetRemoteAddress().GetPort());
 
@@ -121,7 +121,7 @@ void CServerConnection::OnRecvData(const BYTE * pData, UINT DataSize)
 
 	if (!m_AssembleBuffer.PushBack(pData, DataSize))
 	{
-		PrintLog(_T("装配缓冲已满!"));
+		PrintLog(-1, _T("装配缓冲已满!"));
 		Disconnect();
 		return;
 	}
@@ -155,7 +155,7 @@ int CServerConnection::Update(int ProcessPacketLimit)
 
 			CIPAddress Address((LPCTSTR)m_ServerAddress,m_ServerPort);
 			Connect(Address,CONNECT_TIME);
-			PrintLog(_T("尝试连接%s:%u"), (LPCTSTR)m_ServerAddress, m_ServerPort);
+			PrintLog(0, _T("尝试连接%s:%u"), (LPCTSTR)m_ServerAddress, m_ServerPort);
 		}
 	}
 
@@ -181,7 +181,7 @@ int CServerConnection::Update(int ProcessPacketLimit)
 			
 			if (m_KeepAliveCount > MAX_KEEP_ALIVE_COUNT)
 			{
-				PrintLog(_T("连接超时!"));
+				PrintLog(-1, _T("连接超时!"));
 				Disconnect();
 			}
 		}
@@ -190,14 +190,14 @@ int CServerConnection::Update(int ProcessPacketLimit)
 	return ProcessCount;
 }
 
-void CServerConnection::PrintLog(LPCTSTR szFormat,...)
+void CServerConnection::PrintLog(short Result, LPCTSTR szFormat, ...)
 {
 	if(m_pView)
 	{
 		va_list vl;
 
 		va_start(vl,szFormat);
-		m_pView->PrintLogVL(szFormat,vl);
+		m_pView->PrintLogVL((Result == MSG_RESULT_SUCCEED ? LOG_TYPE_NORMAL : LOG_TYPE_ERROR), szFormat, vl);
 		va_end(vl);
 	}
 }
@@ -212,7 +212,7 @@ void CServerConnection::OnMsg(CMessage * pMsg)
 	}
 	else
 	{
-		PrintLog(_T("无法找到消息[0x%X]的处理函数"), pMsg->GetMsgID());
+		PrintLog(-1, _T("无法找到消息[0x%X]的处理函数"), pMsg->GetMsgID());
 	}
 }
 void CServerConnection::OnSystemMsg(CMessage * pMsg)
@@ -270,7 +270,7 @@ void CServerConnection::QueryStartupService(UINT ServiceID)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求启动服务器[%s]上的服务[%u]"),
+	PrintLog(0, _T("请求启动服务器[%s]上的服务[%u]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID);
 	MsgCaller.ServiceStartup(ServiceID);
@@ -279,7 +279,7 @@ void CServerConnection::QueryShutDownService(UINT ServiceID, BYTE ShutDownType)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求关闭服务器[%s]上的服务[%u]"),
+	PrintLog(0, _T("请求关闭服务器[%s]上的服务[%u]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID);
 	MsgCaller.ServiceShutdown(ServiceID, ShutDownType);
@@ -288,7 +288,7 @@ void CServerConnection::QueryBrowseWorkDir(UINT ServiceID, LPCTSTR Dir)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求浏览服务器[%s]上的服务[%u]的目录[%s]"),
+	PrintLog(0, _T("请求浏览服务器[%s]上的服务[%u]的目录[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,Dir);
 	MsgCaller.BrowseServiceDir(ServiceID, Dir, 0, DIR_BROWSE_PAGE_LEN);
@@ -298,7 +298,7 @@ void CServerConnection::QueryStartDownload(UINT ServiceID,LPCTSTR SourceFilePath
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]下载文件[%s]到[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]下载文件[%s]到[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		SourceFilePath,TargetFilePath);
@@ -324,7 +324,7 @@ void CServerConnection::QueryStartUpload(UINT ServiceID,LPCTSTR SourceFilePath,L
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]上传文件[%s]到[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]上传文件[%s]到[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		SourceFilePath,TargetFilePath);
@@ -352,7 +352,7 @@ void CServerConnection::QueryCreateDir(UINT ServiceID,LPCTSTR Dir)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]创建目录[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]创建目录[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		Dir);
@@ -364,7 +364,7 @@ void CServerConnection::QueryDeleteFile(UINT ServiceID,LPCTSTR FilePath)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]删除文件[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]删除文件[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		FilePath);
@@ -375,7 +375,7 @@ void CServerConnection::QueryChangeFileMode(UINT ServiceID, LPCTSTR FilePath, UI
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]文件[%s]更改属性为[0x%X]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]文件[%s]更改属性为[0x%X]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		FilePath, Mode);
@@ -386,7 +386,7 @@ void CServerConnection::QueryCreateProcess(UINT ServiceID,LPCTSTR FilePath,LPCTS
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]运行程序[%s %s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]运行程序[%s %s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		FilePath, Param);
@@ -405,7 +405,7 @@ void CServerConnection::QueryRunScript(UINT ServiceID,LPCTSTR FilePath)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]运行脚本[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]运行脚本[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		FilePath);
@@ -416,7 +416,7 @@ void CServerConnection::QueryAddService(const CServiceInfo& ServiceInfo)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求添加服务[%s]"),
+	PrintLog(0, _T("请求添加服务[%s]"),
 		(LPCTSTR)ServiceInfo.GetName());
 	m_PacketBuffer.Clear();
 	ServiceInfo.MakePacket(m_PacketBuffer, DOMF_SERVICE_INFO_FOR_EDIT);
@@ -426,7 +426,7 @@ void CServerConnection::QueryEditService(const CServiceInfo& ServiceInfo)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求编辑服务[%s]"),
+	PrintLog(0, _T("请求编辑服务[%s]"),
 		(LPCTSTR)ServiceInfo.GetName());
 	m_PacketBuffer.Clear();
 	ServiceInfo.MakePacket(m_PacketBuffer, DOMF_SERVICE_INFO_FOR_EDIT);
@@ -436,7 +436,7 @@ void CServerConnection::QueryDelService(UINT ServiceID)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求删除服务[%u]"),
+	PrintLog(0, _T("请求删除服务[%u]"),
 		ServiceID);
 
 	MsgCaller.DeleteService(ServiceID);
@@ -446,7 +446,7 @@ void CServerConnection::QueryProcessList(short Page, short PageLen)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("以%d的页长请求第%d页的进程列表"),
+	PrintLog(0, _T("以%d的页长请求第%d页的进程列表"),
 		PageLen, Page);
 
 	MsgCaller.GetProcessList(Page, PageLen);
@@ -456,7 +456,7 @@ void CServerConnection::QuerySendCommand(UINT ServiceID, LPCTSTR szCommand)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	PrintLog(_T("请求服务器[%s]上的服务[%u]执行命令[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]执行命令[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		szCommand);
@@ -487,10 +487,16 @@ void CServerConnection::QueryServiceInfo(UINT ServiceID)
 
 	MsgCaller.GetServiceInfo(ServiceID);
 }
+void CServerConnection::QueryFileCompare(UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize, LPCTSTR FileMD5)
+{
+	CServerManagerMsgCaller MsgCaller(this);
+
+	MsgCaller.FileCompare(ServiceID, FilePath, FileSize, FileMD5);
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int CServerConnection::LoginAck(short Result)
 {
-	PrintLog(_T("登录返回:%s"), GetResultStr(Result));
+	PrintLog(Result,_T("登录返回:%s"), GetResultStr(Result));
 	if (Result == MSG_RESULT_SUCCEED)
 	{
 		m_IsLogined = true;
@@ -583,7 +589,7 @@ int CServerConnection::GetServiceInfoAck(short Result, const CSmartStruct& Servi
 }
 int CServerConnection::ServiceStartupAck(short Result, UINT ServiceID)
 {
-	PrintLog(_T("启动服务器[%s]上的服务[%u],结果[%s]"),
+	PrintLog(Result, _T("启动服务器[%s]上的服务[%u],结果[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		GetResultStr(Result));
@@ -592,7 +598,7 @@ int CServerConnection::ServiceStartupAck(short Result, UINT ServiceID)
 }
 int CServerConnection::ServiceShutdownAck(short Result, UINT ServiceID)
 {
-	PrintLog(_T("关闭服务器[%s]上的服务[%u],结果[%s]"),
+	PrintLog(Result, _T("关闭服务器[%s]上的服务[%u],结果[%s]"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
 		GetResultStr(Result));
@@ -603,11 +609,11 @@ int CServerConnection::RunProgramAck(short Result)
 {
 	if (Result == MSG_RESULT_SUCCEED)
 	{
-		PrintLog(_T("执行程序成功"));
+		PrintLog(Result, _T("执行程序成功"));
 	}
 	else
 	{
-		PrintLog(_T("执行程序失败"));
+		PrintLog(Result, _T("执行程序失败"));
 	}
 	return COMMON_RESULT_SUCCEED;
 }
@@ -680,47 +686,47 @@ int CServerConnection::FileUploadEndAck(short Result)
 }
 int CServerConnection::CreateDirAck(short Result, UINT ServiceID, const CEasyString& Dir)
 {
-	PrintLog(_T("新建目录结果%s[%s]"), GetResultStr(Result), (LPCTSTR)Dir);
+	PrintLog(Result, _T("新建目录结果%s[%s]"), GetResultStr(Result), (LPCTSTR)Dir);
 	m_TaskQueue.OnCreateDirResult(Result, ServiceID, Dir);
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::DeleteFileAck(short Result, UINT ServiceID, const CEasyString& FilePath)
 {
-	PrintLog(_T("删除文件结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
+	PrintLog(Result, _T("删除文件结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
 	m_TaskQueue.OnDeleteFileResult(Result, ServiceID, FilePath);
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::ChangeFileModeAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT Mode)
 {
-	PrintLog(_T("修改文件属性结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
+	PrintLog(Result, _T("修改文件属性结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
 	m_TaskQueue.OnChangeFileModeResult(Result, ServiceID, FilePath, Mode);
 	return COMMON_RESULT_SUCCEED;
 }
 
 int CServerConnection::AddServiceAck(short Result)
 {
-	PrintLog(_T("添加服务结果%s"), GetResultStr(Result));
+	PrintLog(Result, _T("添加服务结果%s"), GetResultStr(Result));
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::EditServiceAck(short Result)
 {
-	PrintLog(_T("编辑服务结果%s"), GetResultStr(Result));
+	PrintLog(Result, _T("编辑服务结果%s"), GetResultStr(Result));
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::DeleteServiceAck(short Result, UINT ServiceID)
 {
-	PrintLog(_T("删除服务结果%s"), GetResultStr(Result));
+	PrintLog(Result, _T("删除服务结果%s"), GetResultStr(Result));
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::SendCommandAck(short Result, UINT ServiceID)
 {
-	PrintLog(_T("向[%u]发送命令结果%s"), ServiceID, GetResultStr(Result));
+	PrintLog(Result, _T("向[%u]发送命令结果%s"), ServiceID, GetResultStr(Result));
 	m_TaskQueue.OnSendCommandResult(Result, ServiceID);
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::EnableLogRecvAck(short Result, UINT ServiceID, bool Enable)
 {
-	PrintLog(_T("向[%u]请求%s日志结果%s"), ServiceID, Enable ? _T("连接") : _T("取消连接"), GetResultStr(Result));
+	PrintLog(Result, _T("向[%u]请求%s日志结果%s"), ServiceID, Enable ? _T("连接") : _T("取消连接"), GetResultStr(Result));
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::ConsoleLogNotify(UINT ServiceID, LPCTSTR LogMsg)
@@ -736,7 +742,7 @@ int CServerConnection::GetServerStatusAck(short Result, UINT ServiceID, const CS
 	}
 	else
 	{
-		PrintLog(_T("向[%u]请求服务器状态失败%s"), ServiceID, GetResultStr(Result));
+		PrintLog(Result, _T("向[%u]请求服务器状态失败%s"), ServiceID, GetResultStr(Result));
 	}
 	return COMMON_RESULT_SUCCEED;
 }
@@ -748,7 +754,14 @@ int CServerConnection::GetServerStatusFormatAck(short Result, UINT ServiceID, co
 	}
 	else
 	{
-		PrintLog(_T("向[%u]请求服务器状态格式失败%s"), ServiceID, GetResultStr(Result));
+		PrintLog(Result, _T("向[%u]请求服务器状态格式失败%s"), ServiceID, GetResultStr(Result));
 	}
+	return COMMON_RESULT_SUCCEED;
+}
+
+int CServerConnection::FileCompareAck(short Result, UINT ServiceID, LPCTSTR FilePath)
+{
+	PrintLog(0, _T("比较文件结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
+	m_TaskQueue.OnFileCompareResult(Result, ServiceID, FilePath);
 	return COMMON_RESULT_SUCCEED;
 }

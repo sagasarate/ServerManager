@@ -98,6 +98,13 @@ bool CDlgServiceEditor::Init(CServerConnection * pConnection, CServiceInfo * pSe
 	if (pServiceInfo)
 	{
 		m_ServiceInfo = *pServiceInfo;
+		if (m_ServiceInfo.GetCharSet() == CP_UTF8)
+		{
+			char Buffer[1024];
+			UINT Len = UTF8ToAnsi(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
+			Buffer[Len] = 0;
+			m_ServiceInfo.SetName(Buffer);
+		}
 		m_IsAddNew = false;
 		CWnd * pedServiceID = GetDlgItem(IDC_EDIT_SERVICE_ID);
 		if (pedServiceID)
@@ -191,12 +198,30 @@ void CDlgServiceEditor::OnBnClickedOk()
 				return;
 			}
 		}
+
+		if (m_ServiceInfo.GetCharSet() == CP_UTF8)
+		{
+			char Buffer[1024];
+			UINT Len = AnsiToUTF8(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
+			Buffer[Len] = 0;
+			m_ServiceInfo.SetName(Buffer);
+		}
 		m_pConnection->QueryAddService(m_ServiceInfo);
 	}
 	else
 	{
+		if (m_ServiceInfo.GetCharSet() == CP_UTF8)
+		{
+			char Buffer[1024];
+			UINT Len = AnsiToUTF8(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
+			Buffer[Len] = 0;
+			m_ServiceInfo.SetName(Buffer);
+		}
 		m_pConnection->QueryEditService(m_ServiceInfo);
 	}
+
+	
+
 	CDialog::OnOK();
 }
 

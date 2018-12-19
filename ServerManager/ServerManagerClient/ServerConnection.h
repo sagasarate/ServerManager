@@ -67,7 +67,7 @@ public:
 	const CServiceInfo * GetServiceInfo(UINT ServiceID);
 	CTaskQueue& GetTaskQueue();
 
-	void PrintLog(LPCTSTR szFormat,...);
+	void PrintLog(short Result, LPCTSTR szFormat, ...);
 	
 
 	void OnMsg(CMessage * pMsg);
@@ -111,6 +111,7 @@ public:
 	void QueryEnableLogRecv(UINT ServiceID, bool Enable);
 
 	void QueryServiceInfo(UINT ServiceID);
+	void QueryFileCompare(UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize, LPCTSTR FileMD5);
 protected:
 	virtual int LoginAck(short Result) override;
 	virtual int GetServiceListAck(short Result, const CSmartStruct& ServiceListData) override;
@@ -140,6 +141,7 @@ protected:
 	virtual int ConsoleLogNotify(UINT ServiceID, LPCTSTR LogMsg) override;
 	virtual int GetServerStatusAck(short Result, UINT ServiceID, const CSmartStruct& StatusListPacket) override;
 	virtual int GetServerStatusFormatAck(short Result, UINT ServiceID, const CSmartStruct& StatusFormatPacket) override;
+	virtual int FileCompareAck(short Result, UINT ServiceID, LPCTSTR FilePath) override;
 
 };
 
