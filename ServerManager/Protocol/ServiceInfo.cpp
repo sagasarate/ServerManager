@@ -30,6 +30,7 @@ void CServiceInfo::Clear()
 	m_ControlPipeName.Clear();
 	m_ShutdownCmd.Clear();
 	m_CharSet=0;
+	m_LogStatusToFile=false;
 	m_OtherExecFileList.Clear();
 	m_OtherExecFileList.Create(16,8);
 	
@@ -169,6 +170,11 @@ bool CServiceInfo::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAG
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_CHAR_SET,m_CharSet),FailCount);
 	}
 	
+	if(Flag&MF_LOG_STATUS_TO_FILE)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_LOG_STATUS_TO_FILE,m_LogStatusToFile),FailCount);
+	}
+	
 	if(Flag&MF_OTHER_EXEC_FILE_LIST)
 	{
 		UINT BufferSize;
@@ -298,6 +304,13 @@ void CServiceInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODI
 				UpdateFlag|=MF_CHAR_SET;
 			}
 			break;
+		case SST_SRVI_LOG_STATUS_TO_FILE:
+			if(Flag&MF_LOG_STATUS_TO_FILE)
+			{
+				m_LogStatusToFile=Value;
+				UpdateFlag|=MF_LOG_STATUS_TO_FILE;
+			}
+			break;
 		case SST_SRVI_OTHER_EXEC_FILE_LIST:
 			if(Flag&MF_OTHER_EXEC_FILE_LIST)
 			{
@@ -408,6 +421,11 @@ void CServiceInfo::CloneFrom(const CServiceInfo& DataObject,const DATA_OBJECT_MO
 		m_CharSet=DataObject.m_CharSet;
 		UpdateFlag|=MF_CHAR_SET;
 	}
+	if(Flag&MF_LOG_STATUS_TO_FILE)
+	{
+		m_LogStatusToFile=DataObject.m_LogStatusToFile;
+		UpdateFlag|=MF_LOG_STATUS_TO_FILE;
+	}
 	if(Flag&MF_OTHER_EXEC_FILE_LIST)
 	{
 		m_OtherExecFileList=DataObject.m_OtherExecFileList;
@@ -437,6 +455,7 @@ UINT CServiceInfo::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlag
 	Size+=CSmartStruct::GetStringMemberSize((UINT)m_ControlPipeName.GetLength());
 	Size+=CSmartStruct::GetStringMemberSize((UINT)m_ShutdownCmd.GetLength());
 	Size+=CSmartStruct::GetFixMemberSize(sizeof(int));
+	Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
 	for(size_t i=0;i<m_OtherExecFileList.GetCount();i++)
 	{
 		Size+=CSmartStruct::GetStringMemberSize((UINT)m_OtherExecFileList[i].GetLength());

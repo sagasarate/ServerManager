@@ -66,6 +66,10 @@ void CDlgServiceEditor::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_KEEP_RUNNING, KeepRunning);
 	m_ServiceInfo.SetLastOperation(KeepRunning ? SERVICE_OPERATION_STARTUP : SERVICE_OPERATION_SHUTDOWN);
 
+	BOOL LogServiceStatus = m_ServiceInfo.GetLogStatusToFile() ? TRUE : FALSE;
+	DDX_Check(pDX, IDC_CHECK_LOG_SERVER_STATUS, LogServiceStatus);
+	m_ServiceInfo.SetLogStatusToFile(LogServiceStatus != FALSE);
+
 	int CharSet = m_ServiceInfo.GetCharSet();
 	DDX_Text(pDX, IDC_EDIT_CHAR_SET, CharSet);
 	m_ServiceInfo.SetCharSet(CharSet);

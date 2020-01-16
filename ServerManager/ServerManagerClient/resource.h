@@ -59,6 +59,8 @@
 #define IDC_EDIT_CONTROL_PIPE_NAME      1024
 #define IDC_BUTTON_SERVER_STATUS        1025
 #define IDC_EDIT_SHUTDOWN_CMD           1025
+#define IDC_CHECK_KEEP_RUNNING2         1026
+#define IDC_CHECK_LOG_SERVER_STATUS     1026
 #define IDC_EDIT_CMD                    1028
 #define IDC_CHECK_UPDATE_CONFIG         1029
 #define IDC_CHECK_UPDATE_EXEC           1030
@@ -126,7 +128,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        144
+#define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32820
 #define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101

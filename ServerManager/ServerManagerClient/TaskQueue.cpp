@@ -221,7 +221,7 @@ void CTaskQueue::DeleteAllTask()
 	void * Pos = m_TaskQueue.GetFirstObjectPos();
 	while (Pos)
 	{
-		TASK_INFO * pTaskInfo = m_TaskQueue.GetObject(Pos);
+		TASK_INFO * pTaskInfo = m_TaskQueue.GetNextObject(Pos);
 		DeleteTask(pTaskInfo->ID);
 	}
 }
@@ -455,7 +455,7 @@ BOOL CTaskQueue::OnRun()
 			do {
 				ReadLen = m_CurTransferFile.Read(m_InputBuffer.GetBuffer(), FILE_TRANSFER_BLOCK_SIZE);
 				m_HashMD5.AddData((BYTE *)m_InputBuffer.GetBuffer(), ReadLen);
-			} while (ReadLen < FILE_TRANSFER_BLOCK_SIZE);
+			} while (ReadLen == FILE_TRANSFER_BLOCK_SIZE);
 			m_HashMD5.MD5Final();
 			CEasyString MD5Str = m_HashMD5.GetHashCodeString();
 			m_OutputBuffer.SetUsedSize(0);
@@ -977,6 +977,9 @@ void CTaskQueue::OnFileCompareResult(short Result, UINT ServiceID, LPCTSTR FileP
 			if (m_pView)
 				m_pView->GetWorkDirBrowser()->OnFileCompareFinish(Result, pTaskInfo->SourceFilePath, pTaskInfo->TargetFilePath);
 		}
+		if (m_pView)
+			m_pView->GetWorkDirBrowser()->OnFileCompareFinish(Result, pTaskInfo->SourceFilePath, pTaskInfo->TargetFilePath);
+		DeleteTask(pTaskInfo->ID);
 	}
 }
 void CTaskQueue::DeleteTask(UINT ID)

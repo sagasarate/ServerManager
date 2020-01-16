@@ -23,6 +23,7 @@ void CProcessInfo::Clear()
 	m_CPUUsed=0;
 	m_MemoryUsed=0;
 	m_VirtualMemoryUsed=0;
+	m_DiskFree=0;
 	
 //<GenerateArea1End>
 
@@ -123,6 +124,11 @@ bool CProcessInfo::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAG
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_PROCI_VIRTUAL_MEMORY_USED,m_VirtualMemoryUsed),FailCount);
 	}
 	
+	if(Flag&MF_DISK_FREE)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_PROCI_DISK_FREE,m_DiskFree),FailCount);
+	}
+	
 	
 //<GenerateArea6End>
 	return FailCount==0;
@@ -193,6 +199,13 @@ void CProcessInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODI
 				UpdateFlag|=MF_VIRTUAL_MEMORY_USED;
 			}
 			break;
+		case SST_PROCI_DISK_FREE:
+			if(Flag&MF_DISK_FREE)
+			{
+				m_DiskFree=Value;
+				UpdateFlag|=MF_DISK_FREE;
+			}
+			break;
 		
 		}
 	}
@@ -245,6 +258,11 @@ void CProcessInfo::CloneFrom(const CProcessInfo& DataObject,const DATA_OBJECT_MO
 		m_VirtualMemoryUsed=DataObject.m_VirtualMemoryUsed;
 		UpdateFlag|=MF_VIRTUAL_MEMORY_USED;
 	}
+	if(Flag&MF_DISK_FREE)
+	{
+		m_DiskFree=DataObject.m_DiskFree;
+		UpdateFlag|=MF_DISK_FREE;
+	}
 	
 	
 //<GenerateArea8End>
@@ -261,6 +279,7 @@ UINT CProcessInfo::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlag
 	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
 	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
 	Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
+	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
 	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
 	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
 	

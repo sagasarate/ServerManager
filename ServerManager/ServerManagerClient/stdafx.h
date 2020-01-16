@@ -95,6 +95,7 @@ struct SELECT_ITEM_INFO
 {
 	bool			IsSelected;
 	CEasyString		Item;
+	CEasyString		Param1;
 };
 
 

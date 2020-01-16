@@ -20,6 +20,7 @@ protected:
 	CProcessSnapshot							m_ProcessSnapshot;
 	CProcessInfoList							m_ProcessInfoList;	
 	CEasyTimer									m_ProcessInfoFetchTimer;
+	CEasyTimer									m_ServiceStatusLogTimer;
 
 	CEasyArray<CServiceInfoEx>					m_ServiceInfoList;
 	//UINT64										m_RecentTime;
@@ -105,6 +106,9 @@ protected:
 	int FinishCURL();
 
 	void OnRequestResult(int RequestType, long ResponseCode, UINT Param1, UINT Param2, LPCTSTR Param3, LPCTSTR Content);
+
+	UINT64 GetDiskFreeSize(LPCTSTR szPath);
+
 };
 
 inline CServerManagerClient * CServerManagerService::GetConnection(UINT ConnectionID)

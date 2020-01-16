@@ -83,6 +83,8 @@
 #pragma comment(lib,"Psapi.lib")
 #pragma comment(lib,"Iphlpapi.lib")
 //#pragma comment(lib,"Toolhelp.lib")
+#else
+#include <sys/vfs.h>d
 #endif
 
 #define MAX_SERVER_TERMINATE_WAIT_TIME	300000
@@ -98,7 +100,7 @@
 #define MAX_OPERATION_WAIT_TIME			30
 #define CONTROL_PIPE_BUFFER_SIZE		8192
 #define CONTROL_PIPE_RECREATE_TIME		(5*1000)
-
+#define SERVICE_LOG_ID_SEED				7550000
 
 
 
@@ -122,7 +124,7 @@
 //	BYTE		Status;
 //	float		CPUUsed;
 //	UINT		MemoryUsed;
-//	UINT		VirtualMemoryUsed;	
+//	UINT		VirtualMemoryUsed;
 //	CEasyTime	ImageFileTime;
 //	SERVICE_INFO()
 //	{
@@ -213,9 +215,11 @@ class CServiceInfoEx :public CServiceInfo
 {
 public:
 	CServiceControlPipe	*	pControlPipe;
+	UINT					LogID;
 	CServiceInfoEx()
 	{
 		pControlPipe = NULL;
+		LogID = 0;
 	}
 };
 

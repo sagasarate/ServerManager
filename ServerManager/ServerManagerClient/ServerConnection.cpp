@@ -97,9 +97,7 @@ void CServerConnection::OnConnection(bool IsSucceed)
 
 void CServerConnection::OnDisconnection()
 {
-	PrintLog(-1, _T("%s:%u已断开"),
-		GetRemoteAddress().GetIPString(),
-		GetRemoteAddress().GetPort());
+	PrintLog(-1, _T("%s已断开"), (LPCTSTR)m_ServerAddress);
 
 	m_TaskQueue.DeleteAllTask();
 	m_TaskQueue.SafeTerminate(5000);
@@ -761,7 +759,7 @@ int CServerConnection::GetServerStatusFormatAck(short Result, UINT ServiceID, co
 
 int CServerConnection::FileCompareAck(short Result, UINT ServiceID, LPCTSTR FilePath)
 {
-	PrintLog(0, _T("比较文件结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
+	PrintLog(Result, _T("比较文件结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
 	m_TaskQueue.OnFileCompareResult(Result, ServiceID, FilePath);
 	return COMMON_RESULT_SUCCEED;
 }

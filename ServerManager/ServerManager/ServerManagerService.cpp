@@ -112,6 +112,11 @@ void CServerManagerService::Destory()
 	for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 	{
 		SAFE_DELETE(m_ServiceInfoList[i].pControlPipe);
+		if (m_ServiceInfoList[i].LogID)
+		{
+			CLogManager::GetInstance()->DelChannel(m_ServiceInfoList[i].LogID);
+			m_ServiceInfoList[i].LogID = 0;
+		}
 	}
 	CNetService::Destory();
 	FUNCTION_END;
@@ -202,6 +207,24 @@ int CServerManagerService::Update(int ProcessPacketLimit)
 
 		if (SeriveInfo.pControlPipe)
 			Process += SeriveInfo.pControlPipe->Update(ProcessPacketLimit);
+
+	}
+
+	if (m_ServiceStatusLogTimer.IsTimeOut(CMainConfig::GetInstance()->GetProcessInfoFetchTime()))
+	{
+		m_ServiceStatusLogTimer.SaveTime();
+		for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
+		{
+			CServiceInfoEx& SeriveInfo = m_ServiceInfoList[i];
+			if(SeriveInfo.LogID)
+			{
+				CLogManager::GetInstance()->PrintLog(SeriveInfo.LogID, ILogPrinter::LOG_LEVEL_NORMAL, "", "%u,%u,%llu,%f,%llu,%llu",
+					SeriveInfo.GetStatus(), SeriveInfo.GetProcessID(), SeriveInfo.GetCPUUsedTime(), SeriveInfo.GetCPUUsed(),
+					SeriveInfo.GetMemoryUsed(),
+					SeriveInfo.GetVirtualMemoryUsed());
+			}
+			
+		}
 	}
 
 	if (m_HaveRequestRunning)
@@ -458,6 +481,24 @@ void CServerManagerService::FetchProcessInfo()
 				ServiceInfo.pControlPipe = new CServiceControlPipe(ServiceInfo.GetServiceID());
 			}
 		}
+		if (ServiceInfo.GetLogStatusToFile())
+		{
+			if (ServiceInfo.LogID==0)
+			{
+				ServiceInfo.LogID = SERVICE_LOG_ID_SEED + ServiceInfo.GetServiceID();
+				CEasyString LogFileName;
+				LogFileName.Format("Log%cServiceStatus.%u", DIR_SLASH, ServiceInfo.GetServiceID());
+				CCSVFileLogPrinter * pStatusLog = new CCSVFileLogPrinter(ILogPrinter::LOG_LEVEL_NORMAL, CFileTools::MakeModuleFullPath(NULL, LogFileName),
+					"ServiceStatus,ProcessID,CPUUsedTime,CPUUsed,MemoryUsed,VirtualMemoryUsed");
+				CLogManager::GetInstance()->AddChannel(ServiceInfo.LogID, pStatusLog);
+				SAFE_RELEASE(pStatusLog);
+			}
+		}
+		else if(ServiceInfo.LogID)
+		{
+			CLogManager::GetInstance()->DelChannel(ServiceInfo.LogID);
+			ServiceInfo.LogID = 0;
+		}
 		if (ServiceInfo.pControlPipe)
 		{
 			ServiceInfo.pControlPipe->QueryGetServerWorkStatus();
@@ -533,6 +574,8 @@ void CServerManagerService::FetchProcessInfo()
 			}
 			ServiceInfo.SetImageFileTime(LastExecFileTime);
 		}
+
+		ServiceInfo.SetDiskFree(GetDiskFreeSize(CFileTools::GetPathDirectory(ServiceInfo.GetImageFilePath())));
 	}
 
 }
@@ -1266,6 +1309,8 @@ void CServerManagerService::OnRequestResult(int RequestType, long ResponseCode, 
 		Log(_T("未知的请求类型%d"), RequestType);
 	}
 }
+
+
 size_t CServerManagerService::ReadCallback(void *ptr, size_t size, size_t nmemb, void *userp)
 {
 	HTTP_REQUEST_INFO * pRequestInfo = (HTTP_REQUEST_INFO *)userp;
@@ -1389,4 +1434,31 @@ int CServerManagerService::FinishCURL()
 		}
 	}
 	return ProcessCount;
+}
+
+UINT64 CServerManagerService::GetDiskFreeSize(LPCTSTR szPath)
+{
+#ifdef WIN32
+	ULARGE_INTEGER FreeSize;
+	if (GetDiskFreeSpaceEx(szPath, &FreeSize, NULL, NULL))
+	{
+		return FreeSize.QuadPart;
+	}
+	else
+	{
+		Log("GetDiskFreeSpaceEx error %d", GetLastError());
+	}
+	return 0;
+#else
+	struct statfs Info;
+	if (statfs(szPath, &Info) == 0)
+	{
+		return (UINT64)Info.f_bsize*Info.f_bfree;
+	}
+	else
+	{
+		Log("statfs error %d", errno);
+	}
+	return 0;
+#endif
 }

@@ -181,6 +181,8 @@ void CDlgServerUpdate::OnBnClickedButtonLoadUpdateList()
 void CDlgServerUpdate::OnBnClickedButtonUpdateExec()
 {
 	// TODO:  在此添加控件通知处理程序代码
+	CDlgListSelector Dlg;
+	UPDATE_INFO * pRecentUpdateInfo = NULL;
 	for (int i = 0; i < m_lvList.GetItemCount(); i++)
 	{
 		if(m_lvList.GetCheck(i))
@@ -200,16 +202,33 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateExec()
 						{
 							CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
 
+							if(pUpdateInfo!=pRecentUpdateInfo)
+							{
+								Dlg.m_ItemList.Clear();
+								for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
+								{
+									UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
+									if (FileInfo.UpdateType == UPDTAE_TYPE_EXEC)
+									{
+										SELECT_ITEM_INFO * pInfo = Dlg.m_ItemList.AddEmpty();
+										pInfo->IsSelected = true;
+										pInfo->Item = FileInfo.SrcPath;
+										pInfo->Param1 = FileInfo.DestPath;
+									}
+								}
+								pRecentUpdateInfo = pUpdateInfo;
+								if (Dlg.DoModal() != IDOK)
+								{
+									break;
+								}
+							}
 							if (pServiceInfo->GetStatus() != SERVICE_STATUS_STOP)
 								TaskQueue.AddShutdownServiceTask(ServiceInfo.ServiceID, true);
 
-							for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
+							for (SELECT_ITEM_INFO& ItemInfo : Dlg.m_ItemList)
 							{
-								UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
-								if (FileInfo.UpdateType == UPDTAE_TYPE_EXEC)
-								{
-									TaskQueue.AddUploadTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, false);
-								}
+								if (ItemInfo.IsSelected)
+									TaskQueue.AddUploadTask(ServiceInfo.ServiceID, ItemInfo.Item, ItemInfo.Param1, false);
 							}
 							TaskQueue.AddStartupServiceTask(ServiceInfo.ServiceID, false);
 						}
@@ -246,6 +265,14 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateConfig()
 							if (FileInfo.UpdateType == UPDTAE_TYPE_CONFIG)
 							{
 								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, false);
+							}
+						}
+						for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
+						{
+							UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
+							if (FileInfo.UpdateType == UPDTAE_TYPE_CONFIG)
+							{
+								TaskQueue.AddFileCompareTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, CTaskQueue::TASK_USAGE_CHECK_AFTER_UPDATE);
 							}
 						}
 						TaskQueue.AddReloadConfigDataTask(ServiceInfo.ServiceID);

@@ -131,8 +131,9 @@ void CServerManagerClientView::OnInitialUpdate()
 	m_lvServiceInfos.InsertColumn(6,_T("虚拟内存占用"),LVCFMT_RIGHT,100);
 	m_lvServiceInfos.InsertColumn(7,_T("外网流量(发送/接收)"),LVCFMT_RIGHT,130);
 	m_lvServiceInfos.InsertColumn(8,_T("内网流量(发送/接收)"),LVCFMT_RIGHT,130);
-	m_lvServiceInfos.InsertColumn(9,_T("可执行文件日期"),LVCFMT_CENTER,130);
-	m_lvServiceInfos.InsertColumn(10,_T("可执行文件路径"),LVCFMT_LEFT,300);
+	m_lvServiceInfos.InsertColumn(9, _T("磁盘空间"), LVCFMT_RIGHT, 90);
+	m_lvServiceInfos.InsertColumn(10,_T("可执行文件日期"),LVCFMT_CENTER,130);
+	m_lvServiceInfos.InsertColumn(11,_T("可执行文件路径"),LVCFMT_LEFT,300);
 	
 
 	m_lvTask.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
@@ -397,6 +398,8 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 		m_lvServiceInfos.SetItemText(Item,5,Temp);
 		Temp = FormatNumberWords(ServiceInfo.GetVirtualMemoryUsed());
 		m_lvServiceInfos.SetItemText(Item,6,Temp);		
+		Temp = FormatNumberWords(ServiceInfo.GetDiskFree());
+		m_lvServiceInfos.SetItemText(Item, 9, Temp);
 		if (ServiceInfo.GetImageFileTime() == -1)
 		{
 			Temp=_T("无");
@@ -406,8 +409,8 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 			CEasyTime Time(ServiceInfo.GetImageFileTime());
 			Time.Format(Temp,_T("%Y-%m-%d %H:%M:%S"));
 		}		
-		m_lvServiceInfos.SetItemText(Item,9,Temp);
-		m_lvServiceInfos.SetItemText(Item, 10, ServiceInfo.GetImageFilePath());
+		m_lvServiceInfos.SetItemText(Item,10,Temp);
+		m_lvServiceInfos.SetItemText(Item, 11, ServiceInfo.GetImageFilePath());
 
 	}
 }
@@ -583,6 +586,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemText(Item, 3, TaskInfo.TargetFilePath);
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
+		break;
 	default:
 		{
 			Temp.Format(_T("未知(%u)"), ConID);

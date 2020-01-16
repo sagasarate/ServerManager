@@ -16,6 +16,7 @@ protected:
 	float			m_CPUUsed;
 	UINT64			m_MemoryUsed;
 	UINT64			m_VirtualMemoryUsed;
+	UINT64			m_DiskFree;
 	
 //<GenerateArea2End>
 	
@@ -31,6 +32,7 @@ public:
 		SST_PROCI_PUUSED=106,
 		SST_PROCI_MEMORY_USED=107,
 		SST_PROCI_VIRTUAL_MEMORY_USED=108,
+		SST_PROCI_DISK_FREE=110,
 	
 	};
 	
@@ -43,7 +45,8 @@ public:
 		MF_PUUSED=(((UINT64)1)<<4),
 		MF_MEMORY_USED=(((UINT64)1)<<5),
 		MF_VIRTUAL_MEMORY_USED=(((UINT64)1)<<6),
-		MF_ALL=0x7F,
+		MF_DISK_FREE=(((UINT64)1)<<7),
+		MF_ALL=0xFF,
 	
 	};
 //<GenerateArea3End>
@@ -67,6 +70,7 @@ public:
 	void SetCPUUsed(float Value);
 	void SetMemoryUsed(UINT64 Value);
 	void SetVirtualMemoryUsed(UINT64 Value);
+	void SetDiskFree(UINT64 Value);
 	
 		   
 	UINT GetProcessID() const;
@@ -77,6 +81,7 @@ public:
 	float GetCPUUsed() const;
 	UINT64 GetMemoryUsed() const;
 	UINT64 GetVirtualMemoryUsed() const;
+	UINT64 GetDiskFree() const;
 	
 
 	
@@ -156,6 +161,14 @@ inline void CProcessInfo::SetVirtualMemoryUsed(UINT64 Value)
 		m_ModifyFlag|=MF_VIRTUAL_MEMORY_USED;
 	}
 }
+inline void CProcessInfo::SetDiskFree(UINT64 Value)
+{
+	if(m_DiskFree!=Value)
+	{
+		m_DiskFree=Value;
+		m_ModifyFlag|=MF_DISK_FREE;
+	}
+}
 
 		   
 inline UINT CProcessInfo::GetProcessID() const
@@ -189,6 +202,10 @@ inline UINT64 CProcessInfo::GetMemoryUsed() const
 inline UINT64 CProcessInfo::GetVirtualMemoryUsed() const
 {
 	return m_VirtualMemoryUsed;
+}
+inline UINT64 CProcessInfo::GetDiskFree() const
+{
+	return m_DiskFree;
 }
 
 

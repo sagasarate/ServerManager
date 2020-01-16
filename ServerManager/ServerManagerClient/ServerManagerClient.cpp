@@ -293,6 +293,10 @@ void CServerManagerClientApp::LoadConfig()
 					if (UserName.IsEmpty())
 					{
 						UserName = m_AccountName;
+					}
+
+					if (Password.IsEmpty())
+					{
 						Password = m_Password;
 					}
 					

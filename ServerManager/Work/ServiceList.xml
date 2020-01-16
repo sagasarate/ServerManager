@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf8"?>
 <ServiceList>
-	<Service ID="2" Type="2" Name="ServerManager" ImageFilePath="D:\MyPrj\ServerManager\Work\ServerManagerD.exe" WorkDir="D:\MyPrj\ServerManager\Work" StartupParam="" KeepRunning="false" RestartupTime="60" />
-	<Service ID="3" Type="0" Name="WM2Server" ImageFilePath="E:\Work\1000game\src\WM2GameServer\Work\DistributedObjectServerD.exe" WorkDir="E:\Work\1000game\src\WM2GameServer\Work" StartupParam="-f" KeepRunning="false" RestartupTime="120" ControlPipeName="DOSS" ShutdownCmd="ShutdownCore(0)" CharSet="65001"/>
+	<Service ID="2" Type="2" Name="ServerManager" ImageFilePath="D:\MyPrj\ServerManager\Work\ServerManagerD.exe" 
+           WorkDir="D:\MyPrj\ServerManager\Work" StartupParam="" KeepRunning="false" RestartupTime="60" />
+	<Service ID="3" Type="0" Name="WM2Server" ImageFilePath="E:\Work\1000game\src\WM2GameServer\Work\DistributedObjectServerD.exe" 
+           WorkDir="E:\Work\1000game\src\WM2GameServer\Work" StartupParam="-f" KeepRunning="false" RestartupTime="120" ControlPipeName="DOSS" ShutdownCmd="ShutdownCore(0)" CharSet="65001" LogStatusToFile="true"/>
 </ServiceList>

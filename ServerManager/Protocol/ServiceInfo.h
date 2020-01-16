@@ -23,6 +23,7 @@ protected:
 	CEasyString		m_ControlPipeName;
 	CEasyString		m_ShutdownCmd;
 	int				m_CharSet;
+	bool			m_LogStatusToFile;
 	CEasyArray<CEasyString>		m_OtherExecFileList;
 	
 //<GenerateArea2End>
@@ -45,6 +46,7 @@ public:
 		SST_SRVI_CONTROL_PIPE_NAME=317,
 		SST_SRVI_SHUTDOWN_CMD=318,
 		SST_SRVI_CHAR_SET=320,
+		SST_SRVI_LOG_STATUS_TO_FILE=322,
 		SST_SRVI_OTHER_EXEC_FILE_LIST=321,
 	
 	};
@@ -64,8 +66,9 @@ public:
 		MF_CONTROL_PIPE_NAME=(((UINT64)1)<<10),
 		MF_SHUTDOWN_CMD=(((UINT64)1)<<11),
 		MF_CHAR_SET=(((UINT64)1)<<12),
-		MF_OTHER_EXEC_FILE_LIST=(((UINT64)1)<<13),
-		MF_ALL=0x3FFF,
+		MF_LOG_STATUS_TO_FILE=(((UINT64)1)<<13),
+		MF_OTHER_EXEC_FILE_LIST=(((UINT64)1)<<14),
+		MF_ALL=0x7FFF,
 	
 	};
 //<GenerateArea3End>
@@ -95,6 +98,7 @@ public:
 	void SetControlPipeName(const CEasyString& Value);
 	void SetShutdownCmd(const CEasyString& Value);
 	void SetCharSet(int Value);
+	void SetLogStatusToFile(bool Value);
 	void SetOtherExecFileList(const CEasyArray<CEasyString>& Value);
 	
 		   
@@ -116,6 +120,7 @@ public:
 	 CEasyString& GetShutdownCmd() ;
 	const CEasyString& GetShutdownCmd() const;
 	int GetCharSet() const;
+	bool GetLogStatusToFile() const;
 	 CEasyArray<CEasyString>& GetOtherExecFileList() ;
 	const CEasyArray<CEasyString>& GetOtherExecFileList() const;
 	
@@ -233,6 +238,14 @@ inline void CServiceInfo::SetCharSet(int Value)
 		m_ModifyFlag|=MF_CHAR_SET;
 	}
 }
+inline void CServiceInfo::SetLogStatusToFile(bool Value)
+{
+	if(m_LogStatusToFile!=Value)
+	{
+		m_LogStatusToFile=Value;
+		m_ModifyFlag|=MF_LOG_STATUS_TO_FILE;
+	}
+}
 inline void CServiceInfo::SetOtherExecFileList(const CEasyArray<CEasyString>& Value)
 {
 	m_OtherExecFileList=Value;
@@ -311,6 +324,10 @@ inline const CEasyString& CServiceInfo::GetShutdownCmd() const
 inline int CServiceInfo::GetCharSet() const
 {
 	return m_CharSet;
+}
+inline bool CServiceInfo::GetLogStatusToFile() const
+{
+	return m_LogStatusToFile;
 }
 inline  CEasyArray<CEasyString>& CServiceInfo::GetOtherExecFileList() 
 {

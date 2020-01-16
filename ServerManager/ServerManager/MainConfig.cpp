@@ -198,6 +198,11 @@ bool CMainConfig::LoadServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& 
 							pServiceInfo->SetCharSet(Service.attribute("CharSet"));
 						}
 
+						if (Service.has_attribute("LogStatusToFile"))
+						{
+							pServiceInfo->SetLogStatusToFile(Service.attribute("LogStatusToFile"));
+						}
+
 						xml_node OtherExecFileList = Service;
 						if (OtherExecFileList.moveto_child("OtherExecFileList"))
 						{
@@ -257,6 +262,7 @@ bool CMainConfig::SaveServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& 
 		Service.append_attribute(_T("ControlPipeName"), (LPCTSTR)ServiceList[i].GetControlPipeName());
 		Service.append_attribute(_T("ShutdownCmd"), (LPCTSTR)ServiceList[i].GetShutdownCmd());
 		Service.append_attribute(_T("CharSet"), ServiceList[i].GetCharSet());
+		Service.append_attribute(_T("LogStatusToFile"), ServiceList[i].GetLogStatusToFile());
 
 		xml_node OtherExecFileList = Service.append_child(node_element, _T("OtherExecFileList"));
 
