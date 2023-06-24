@@ -16,6 +16,7 @@ void CProcessInfoList::Clear()
 
 	m_ModifyFlag=0;
 	   
+	m_List.SetTag(_T("StructData"));
 	m_List.Clear();
 	m_List.Create(16,8);
 	
@@ -51,7 +52,7 @@ bool CProcessInfoList::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) c
 	IsModified=IsModified||(m_ModifyFlag&MemberFlags[DATA_OBJECT_FLAG_PROCESS_INFO_LIST])!=0;
 	
 	IsModified=IsModified
-		||false;
+		;
 	
 //<GenerateArea3End>
 	return IsModified;
@@ -179,12 +180,16 @@ void CProcessInfoList::CloneFrom(const CProcessInfoList& DataObject,const DATA_O
 UINT CProcessInfoList::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 {
 //<GenerateArea9Start>
+	UINT64 Flag=MemberFlags[DATA_OBJECT_FLAG_PROCESS_INFO_LIST];
 	UINT Size=0;
-	for(size_t i=0;i<m_List.GetCount();i++)
+	if(Flag&MF_LIST)
 	{
-		Size+=CSmartStruct::GetStructMemberSize(m_List[i].GetSmartStructSize(MemberFlags));
+		for(size_t i=0;i<m_List.GetCount();i++)
+		{
+			Size+=CSmartStruct::GetStructMemberSize(m_List[i].GetSmartStructSize(MemberFlags));
+		}
+		Size+=CSmartStruct::GetStructMemberSize(0);
 	}
-	Size+=CSmartStruct::GetStructMemberSize(0);
 	
 		
 //<GenerateArea9End>	

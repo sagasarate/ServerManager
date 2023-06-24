@@ -1,7 +1,7 @@
 bool ToXML(xml_node& StructNode)
 {
 	<IfHaveBaseClass>
-	if (!base.ToXML(StructNode))
+	if (!<BaseClass>::ToXML(StructNode))
 		return false;
 	</IfHaveBaseClass>
 	<ToXMLOperations>
@@ -11,7 +11,7 @@ bool FromXML(xml_node& StructNode)
 {
 	UINT FailCount=0;
 	<IfHaveBaseClass>
-	if (!base.FromXML(StructNode))
+	if (!<BaseClass>::FromXML(StructNode))
 		return false;
 	</IfHaveBaseClass>
 	<FromXMLOperations>

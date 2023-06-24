@@ -1,4 +1,4 @@
-// DlgServerUpdate.cpp : ÊµÏÖÎÄ¼ş
+ï»¿// DlgServerUpdate.cpp : å®ç°æ–‡ä»¶
 //
 
 #include "stdafx.h"
@@ -6,7 +6,7 @@
 
 
 
-// CDlgServerUpdate ¶Ô»°¿ò
+// CDlgServerUpdate å¯¹è¯æ¡†
 
 IMPLEMENT_DYNAMIC(CDlgServerUpdate, CDialog)
 
@@ -34,83 +34,79 @@ BEGIN_MESSAGE_MAP(CDlgServerUpdate, CDialog)
 END_MESSAGE_MAP()
 
 
-// CDlgServerUpdate ÏûÏ¢´¦Àí³ÌĞò
+// CDlgServerUpdate æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 
 BOOL CDlgServerUpdate::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// TODO:  ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯
+	// TODO:  åœ¨æ­¤æ·»åŠ é¢å¤–çš„åˆå§‹åŒ–
 
 	m_lvList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES);
 
-	m_lvList.InsertColumn(0, _T("·şÎñÆ÷"), LVCFMT_LEFT, 150);
-	m_lvList.InsertColumn(1, _T("·şÎñ"), LVCFMT_LEFT, 150);
+	m_lvList.InsertColumn(0, _T("æœåŠ¡å™¨"), LVCFMT_LEFT, 150);
+	m_lvList.InsertColumn(1, _T("æœåŠ¡"), LVCFMT_LEFT, 150);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// Òì³£:  OCX ÊôĞÔÒ³Ó¦·µ»Ø FALSE
+	// å¼‚å¸¸:  OCX å±æ€§é¡µåº”è¿”å› FALSE
 }
 
-CDlgServerUpdate::UPDATE_INFO * CDlgServerUpdate::GetUpdateInfo(LPCTSTR szServiceName, bool NewOnNotExist)
+LPCTSTR CDlgServerUpdate::HaveUpdate(const CEasyString& ServiceName, UPDTAE_TYPE UpdateType)
 {
-	for (UINT i = 0; i < m_UpdateList.GetCount(); i++)
+	for (UPDATE_FILE_INFO& Info : m_UpdateFileList)
 	{
-		if (_tcsncmp(szServiceName, m_UpdateList[i].ServiceName, m_UpdateList[i].ServiceName.GetLength()) == 0)
+		if ((Info.UpdateType&UpdateType) && (ServiceName.Find(Info.ServiceName) >= 0))
 		{
-			return m_UpdateList.GetObject(i);
+			return Info.ServiceName;
 		}
-	}
-	if (NewOnNotExist)
-	{
-		UPDATE_INFO * pUpdateInfo = m_UpdateList.AddEmpty();
-		pUpdateInfo->ServiceName = szServiceName;
-		return pUpdateInfo;
 	}
 	return NULL;
 }
+
 bool CDlgServerUpdate::LoadUpdateList(LPCTSTR szFileName)
 {
 	CCSVReader CSVReader;
 
+	CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+	CServerManagerClientView* pView = NULL;
+	if (pMainFrame)
+	{
+		pView = (CServerManagerClientView*)pMainFrame->GetActiveView();
+	}
+
 	if (CSVReader.Open(szFileName))
 	{
-		m_UpdateList.Clear();
+		m_UpdateFileList.Clear();
 		m_ServiceList.Clear();
 		bool HaveMissFile = false;
 		for (UINT i = 0; i < CSVReader.GetRowCount(); i++)
 		{
-			LPCTSTR szServiceName = CSVReader.GetDataString(i, _T("ServiceName"), _T(""));
 			int UpdateType = CSVReader.GetDataInt(i, _T("UpdateType"), 0);
-			LPCTSTR szFileName = CSVReader.GetDataString(i, _T("FileName"), _T(""));
-			LPCTSTR szSrcDir = CSVReader.GetDataString(i, _T("SrcDir"), _T(""));
-			LPCTSTR szDestDir = CSVReader.GetDataString(i, _T("DestDir"), _T(""));
-
+			
 			if (UpdateType)
 			{
 				UPDATE_FILE_INFO FileInfo;
 				FileInfo.UpdateType = UpdateType;
-				if (CFileTools::IsAbsolutePath(szSrcDir))
-					FileInfo.SrcPath.Format(_T("%s\\%s"), szSrcDir, szFileName);
-				else
-					FileInfo.SrcPath.Format(_T("%s\\%s\\%s"), (LPCTSTR)CFileTools::GetModulePath(NULL), szSrcDir, szFileName);
+				FileInfo.IncludeChildDir = CSVReader.GetDataBool(i, _T("IncludeChildDir"), false);
+				FileInfo.ServiceName = CSVReader.GetDataString(i, _T("ServiceName"), _T(""));
+				FileInfo.SrcDir = CSVReader.GetDataString(i, _T("SrcDir"), _T(""));
+				FileInfo.DestDir = CSVReader.GetDataString(i, _T("DestDir"), _T(""));
+				LPCTSTR szFileName = CSVReader.GetDataString(i, _T("FileName"), _T(""));
+				LPCTSTR szExceptPatterns = CSVReader.GetDataString(i, _T("ExceptPatterns"), _T(""));
 
-				FileInfo.SrcPath = CFileTools::MakeFullPath(FileInfo.SrcPath);
-				FileInfo.DestPath.Format(_T("%s/%s"), szDestDir, szFileName);
-
-				if (CFileTools::IsFileExist(FileInfo.SrcPath))
+				CStringSplitter Splitter;
+				Splitter.Splitter(szFileName, ';');
+				for (UINT i = 0; i < Splitter.GetCount(); i++)
 				{
-					UPDATE_INFO * pUpdateInfo = GetUpdateInfo(szServiceName, true);
-					if (pUpdateInfo)
-					{
-						pUpdateInfo->UpdateFileList.Add(FileInfo);
-					}
+					FileInfo.Files.Add(Splitter[i]);
 				}
-				else
+				Splitter.Splitter(szExceptPatterns, ';');
+				for (UINT i = 0; i < Splitter.GetCount(); i++)
 				{
-					HaveMissFile = true;
-					AfxMessageBoxEx(MB_OK, 0, _T("ÎÄ¼ş%s²»´æÔÚ"), (LPCTSTR)FileInfo.SrcPath);
-				}				
+					FileInfo.ExceptPatterns.Add(Splitter[i]);
+				}
+				m_UpdateFileList.Add(FileInfo);
 			}
 		}
 		void * Pos = CServerManagerClientApp::GetInstance()->GetFirstServerConnectionPos();
@@ -120,24 +116,12 @@ bool CDlgServerUpdate::LoadUpdateList(LPCTSTR szFileName)
 			const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
 			for (UINT i = 0; i < ServiceList.GetCount(); i++)
 			{
-				CEasyString ServiceName;
-				if (ServiceList[i].GetCharSet() == CP_UTF8)
-				{
-					char Buffer[1024];
-					UINT Len = UTF8ToAnsi(ServiceList[i].GetName(), ServiceList[i].GetName().GetLength(), Buffer, 1000);
-					Buffer[Len] = 0;
-					ServiceName = Buffer;
-				}
-				else
-				{
-					ServiceName = ServiceList[i].GetName();
-				}
-				if (GetUpdateInfo(ServiceName, false))
+				if (HaveUpdate(ServiceList[i].GetName(), UPDTAE_TYPE_ALL))
 				{
 					UPDATE_SERVICE_INFO * pInfo = m_ServiceList.AddEmpty();
 					pInfo->ConnectionID = pConnection->GetID();
 					pInfo->ServiceID = ServiceList[i].GetServiceID();
-					pInfo->ServiceName = ServiceName;
+					pInfo->ServiceName = ServiceList[i].GetName();
 					pInfo->ServerAddress = pConnection->GetServerAddress();
 				}
 			}			
@@ -159,13 +143,94 @@ void CDlgServerUpdate::FillList()
 		m_lvList.SetItemData(Item, i);
 	}
 }
-
-
+bool CDlgServerUpdate::IsMatch(CEasyArray<CEasyString> Patterns, const CEasyString& FileName)
+{
+	for (CEasyString& Pattern : Patterns)
+	{
+		if (FileName.Find(Pattern, 0, true) >= 0)
+			return true;
+	}
+	return false;
+}
+void CDlgServerUpdate::SearchFiles(LPCTSTR SearchDir, LPCTSTR FilePattern, CEasyArray<CEasyString> ExceptPatterns, LPCTSTR DestDir, CEasyArray<SELECT_ITEM_INFO>& FileList, bool Recursion)
+{
+	CEasyString SearchPattern;
+	SearchPattern.Format(_T("%s\\%s"), SearchDir, FilePattern);
+	CFileSearcher FileSearcher;
+	FileSearcher.FindFirst(SearchPattern);
+	while (FileSearcher.FindNext())
+	{
+		if (!FileSearcher.IsDirectory() && !IsMatch(ExceptPatterns, FileSearcher.GetFileName()))
+		{
+			SELECT_ITEM_INFO* pInfo = FileList.AddEmpty();
+			pInfo->IsSelected = true;
+			pInfo->Item = FileSearcher.GetFilePath();
+			pInfo->Param1.Format(_T("%s\\%s"), DestDir, (LPCTSTR)FileSearcher.GetFileName());
+		}
+	}
+	if (Recursion)
+	{
+		SearchPattern.Format(_T("%s\\*"), SearchDir);
+		FileSearcher.FindFirst(SearchPattern);
+		while (FileSearcher.FindNext())
+		{
+			if (FileSearcher.IsDirectory() && (!FileSearcher.IsDots()) && (!IsMatch(ExceptPatterns, FileSearcher.GetFileName())))
+			{
+				CEasyString NewDestDir;
+				NewDestDir.Format(_T("%s\\%s"), DestDir, (LPCTSTR)FileSearcher.GetFileName());
+				SearchFiles(FileSearcher.GetFilePath(), FilePattern, ExceptPatterns, NewDestDir, FileList, Recursion);
+			}
+		}
+	}
+}
+void CDlgServerUpdate::GetFiles(const CEasyArray<UPDATE_FILE_INFO>& UpdateList, CEasyArray<SELECT_ITEM_INFO>& FileList, const CEasyString& ServiceName, UPDTAE_TYPE MatchType)
+{
+	CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+	CServerManagerClientView* pView = NULL;
+	if (pMainFrame)
+	{
+		pView = (CServerManagerClientView*)pMainFrame->GetActiveView();
+	}
+	CEasyString ModuleDir = CFileTools::GetModulePath(NULL);
+	for (const UPDATE_FILE_INFO& UpdateInfo : UpdateList)
+	{
+		if ((UpdateInfo.UpdateType & MatchType) && (ServiceName.Find(UpdateInfo.ServiceName) >= 0))
+		{
+			for (const CEasyString& FileName : UpdateInfo.Files)
+			{
+				if ((FileName.Find('*') >= 0) || (FileName.Find('?') >= 0))
+				{
+					//å¸¦æœ‰åŒ¹é…ç¬¦ï¼Œéœ€è¦æœç´¢
+					CEasyString FilePath;
+					FilePath.Format(_T("%s\\%s"), (LPCTSTR)ModuleDir, (LPCTSTR)UpdateInfo.SrcDir);
+					SearchFiles(FilePath, FileName, UpdateInfo.ExceptPatterns, UpdateInfo.DestDir, FileList, UpdateInfo.IncludeChildDir);
+				}
+				else
+				{
+					CEasyString FilePath;
+					FilePath.Format(_T("%s\\%s\\%s"), (LPCTSTR)ModuleDir, (LPCTSTR)UpdateInfo.SrcDir, (LPCTSTR)FileName);
+					if (CFileTools::IsFileExist(FilePath))
+					{
+						SELECT_ITEM_INFO* pInfo = FileList.AddEmpty();
+						pInfo->IsSelected = true;
+						pInfo->Item = CFileTools::MakeFullPath(FilePath);
+						pInfo->Param1.Format(_T("%s\\%s"), (LPCTSTR)UpdateInfo.DestDir, (LPCTSTR)FileName);
+					}
+					else
+					{
+						if (pView)
+							pView->PrintLog(LOG_TYPE_ERROR, _T("æ–‡ä»¶ä¸å­˜åœ¨:%s"), (LPCTSTR)FilePath);
+					}
+				}
+			}
+		}
+	}
+}
 
 
 void CDlgServerUpdate::OnBnClickedButtonLoadUpdateList()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	CFileDialog Dlg(true, _T("*.csv"), _T("*.csv"));
 
 	if (Dlg.DoModal() == IDOK)
@@ -180,9 +245,9 @@ void CDlgServerUpdate::OnBnClickedButtonLoadUpdateList()
 
 void CDlgServerUpdate::OnBnClickedButtonUpdateExec()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	CDlgListSelector Dlg;
-	UPDATE_INFO * pRecentUpdateInfo = NULL;
+	CEasyString RecentMatchName;
 	for (int i = 0; i < m_lvList.GetItemCount(); i++)
 	{
 		if(m_lvList.GetCheck(i))
@@ -190,48 +255,34 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateExec()
 			UINT Index = m_lvList.GetItemData(i);
 			if (Index < m_ServiceList.GetCount())
 			{
-				UPDATE_SERVICE_INFO& ServiceInfo = m_ServiceList[Index];
-				UPDATE_INFO * pUpdateInfo = GetUpdateInfo(ServiceInfo.ServiceName, false);
+				UPDATE_SERVICE_INFO& ServiceInfo = m_ServiceList[Index];				
 				CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ServiceInfo.ConnectionID);
-				if (pUpdateInfo&&pConnection)
+				if (pConnection)
 				{
 					const CServiceInfo * pServiceInfo = pConnection->GetServiceInfo(ServiceInfo.ServiceID);
 					if (pServiceInfo)
 					{
-						if (pUpdateInfo->UpdateFileList.GetCount())
+						CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
+						LPCTSTR MatchName = HaveUpdate(ServiceInfo.ServiceName, UPDTAE_TYPE_EXEC);
+						if (MatchName && (RecentMatchName != MatchName))
 						{
-							CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
-
-							if(pUpdateInfo!=pRecentUpdateInfo)
+							Dlg.m_ItemList.Clear();
+							GetFiles(m_UpdateFileList, Dlg.m_ItemList, ServiceInfo.ServiceName, UPDTAE_TYPE_EXEC);
+							RecentMatchName = MatchName;
+							if (Dlg.DoModal() != IDOK)
 							{
-								Dlg.m_ItemList.Clear();
-								for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
-								{
-									UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
-									if (FileInfo.UpdateType == UPDTAE_TYPE_EXEC)
-									{
-										SELECT_ITEM_INFO * pInfo = Dlg.m_ItemList.AddEmpty();
-										pInfo->IsSelected = true;
-										pInfo->Item = FileInfo.SrcPath;
-										pInfo->Param1 = FileInfo.DestPath;
-									}
-								}
-								pRecentUpdateInfo = pUpdateInfo;
-								if (Dlg.DoModal() != IDOK)
-								{
-									break;
-								}
+								break;
 							}
-							if (pServiceInfo->GetStatus() != SERVICE_STATUS_STOP)
-								TaskQueue.AddShutdownServiceTask(ServiceInfo.ServiceID, true);
-
-							for (SELECT_ITEM_INFO& ItemInfo : Dlg.m_ItemList)
-							{
-								if (ItemInfo.IsSelected)
-									TaskQueue.AddUploadTask(ServiceInfo.ServiceID, ItemInfo.Item, ItemInfo.Param1, false);
-							}
-							TaskQueue.AddStartupServiceTask(ServiceInfo.ServiceID, false);
 						}
+						if (pServiceInfo->GetStatus() != SERVICE_STATUS_STOP)
+							TaskQueue.AddShutdownServiceTask(ServiceInfo.ServiceID, true);
+
+						for (SELECT_ITEM_INFO& ItemInfo : Dlg.m_ItemList)
+						{
+							if (ItemInfo.IsSelected)
+								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, ItemInfo.Item, ItemInfo.Param1, false);
+						}
+						TaskQueue.AddStartupServiceTask(ServiceInfo.ServiceID, false);
 					}
 				}
 			}
@@ -242,7 +293,9 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateExec()
 
 void CDlgServerUpdate::OnBnClickedButtonUpdateConfig()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
+	CDlgListSelector Dlg;
+	CEasyString RecentMatchName;
 	for (int i = 0; i < m_lvList.GetItemCount(); i++)
 	{
 		if (m_lvList.GetCheck(i))
@@ -251,31 +304,29 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateConfig()
 			if (Index < m_ServiceList.GetCount())
 			{
 				UPDATE_SERVICE_INFO& ServiceInfo = m_ServiceList[Index];
-				UPDATE_INFO * pUpdateInfo = GetUpdateInfo(ServiceInfo.ServiceName, false);
-				CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ServiceInfo.ConnectionID);
-				if (pUpdateInfo&&pConnection)
+				CServerConnection* pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ServiceInfo.ConnectionID);
+				if (pConnection)
 				{
-					if (pUpdateInfo->UpdateFileList.GetCount())
+					const CServiceInfo* pServiceInfo = pConnection->GetServiceInfo(ServiceInfo.ServiceID);
+					if (pServiceInfo)
 					{
 						CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
-
-						for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
+						LPCTSTR MatchName = HaveUpdate(ServiceInfo.ServiceName, UPDTAE_TYPE_CONFIG);
+						if (MatchName && (RecentMatchName != MatchName))
 						{
-							UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
-							if (FileInfo.UpdateType == UPDTAE_TYPE_CONFIG)
+							Dlg.m_ItemList.Clear();
+							GetFiles(m_UpdateFileList, Dlg.m_ItemList, ServiceInfo.ServiceName, UPDTAE_TYPE_CONFIG);
+							RecentMatchName = MatchName;
+							if (Dlg.DoModal() != IDOK)
 							{
-								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, false);
+								break;
 							}
 						}
-						for (UINT j = 0; j < pUpdateInfo->UpdateFileList.GetCount(); j++)
+						for (SELECT_ITEM_INFO& ItemInfo : Dlg.m_ItemList)
 						{
-							UPDATE_FILE_INFO& FileInfo = pUpdateInfo->UpdateFileList[j];
-							if (FileInfo.UpdateType == UPDTAE_TYPE_CONFIG)
-							{
-								TaskQueue.AddFileCompareTask(ServiceInfo.ServiceID, FileInfo.SrcPath, FileInfo.DestPath, CTaskQueue::TASK_USAGE_CHECK_AFTER_UPDATE);
-							}
+							if (ItemInfo.IsSelected)
+								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, ItemInfo.Item, ItemInfo.Param1, false);
 						}
-						TaskQueue.AddReloadConfigDataTask(ServiceInfo.ServiceID);
 					}
 				}
 			}

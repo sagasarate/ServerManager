@@ -16,6 +16,31 @@
 class CMainConfig :
 	public CStaticObject<CMainConfig>
 {
+public:
+	struct POOL_CONFIGS
+	{
+		STORAGE_POOL_SETTING				FileTaskPoolConfig;
+		STORAGE_POOL_SETTING				FileDataBlockPoolConfig;
+		STORAGE_POOL_SETTING				SerialOperationPoolConfig;
+		STORAGE_POOL_SETTING				ParallelOperationPoolConfig;
+		STORAGE_POOL_SETTING				FinishOperationPoolConfig;
+	};
+	struct TASK_MANAGER_CONFIG
+	{
+		UINT	SerialWorkThreadCount;
+		UINT	ParallelWorkThreadCount;
+		UINT	MaxUploadAcceptCount;
+		UINT	MaxDownloadAcceptCount;
+		UINT	TaskTimeOut;
+		TASK_MANAGER_CONFIG()
+		{
+			SerialWorkThreadCount = 1;
+			ParallelWorkThreadCount = 2;
+			MaxUploadAcceptCount = 4;
+			MaxDownloadAcceptCount = 4;
+			TaskTimeOut = 3600;
+		}
+	};
 protected:
 	struct NOTIFY_SEND_CONFIG
 	{
@@ -31,9 +56,11 @@ protected:
 	UINT						m_KeepAliveTime;
 	UINT						m_KeepAliveCount;	
 	UINT						m_ProcessInfoFetchTime;
+	UINT						m_MaxWorkThreadCount;
 	CEasyArray<USER_INFO>		m_UserList;
 	NOTIFY_SEND_CONFIG			m_NotifyConfig;
-	
+	POOL_CONFIGS				m_PoolConfigs;
+	TASK_MANAGER_CONFIG			m_TaskManagerConfig;
 public:
 	CMainConfig(void);
 	~CMainConfig(void);
@@ -42,6 +69,10 @@ public:
 	bool LoadServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& ServiceList);
 	bool SaveServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& ServiceList);
 	
+	const POOL_CONFIGS& GetPoolConfigs()
+	{
+		return m_PoolConfigs;
+	}
 	CIPAddress& GetListenAddress()
 	{
 		return m_ListenAddress;
@@ -70,6 +101,10 @@ public:
 	{
 		return m_ProcessInfoFetchTime;
 	}	
+	UINT GetMaxWorkThreadCount()
+	{
+		return m_MaxWorkThreadCount;
+	}
 	const CEasyArray<USER_INFO>& GetUserList()
 	{
 		return m_UserList;
@@ -79,4 +114,10 @@ public:
 	{
 		return m_NotifyConfig;
 	}
+	const TASK_MANAGER_CONFIG& GetTaskManagerConfig()
+	{
+		return m_TaskManagerConfig;
+	}
+protected:
+	bool ReadPoolConfigs(xml_node& XMLContent, POOL_CONFIGS& Config);
 };

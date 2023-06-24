@@ -504,7 +504,7 @@ int CServerManagerAckMsgCaller::BrowseServiceDirAck(short Result ,UINT ServiceID
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize((UINT)Dir.GetLength())
+		+CSmartStruct::GetStringMemberSize(Dir)
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
@@ -547,7 +547,7 @@ int CServerManagerAckMsgCaller::BrowseServiceDirAck(short Result ,UINT ServiceID
 	
 }
 
-int CServerManagerAckMsgCaller::FileDownloadStartAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize )
+int CServerManagerAckMsgCaller::FileDownloadStartAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,UINT FileLastWriteTime )
 {
 	if(m_pNet==NULL)
 	{
@@ -557,8 +557,9 @@ int CServerManagerAckMsgCaller::FileDownloadStartAck(short Result ,UINT ServiceI
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength())
-		+CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		+CSmartStruct::GetStringMemberSize(FilePath)
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
 
 	WORD MsgFlag=0;
 		
@@ -576,7 +577,7 @@ int CServerManagerAckMsgCaller::FileDownloadStartAck(short Result ,UINT ServiceI
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileDownloadStartAck(Packet, Result , ServiceID , FilePath , FileSize ))
+	if(PackMsgFileDownloadStartAck(Packet, Result , ServiceID , FilePath , FileSize , FileLastWriteTime ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -597,7 +598,7 @@ int CServerManagerAckMsgCaller::FileDownloadStartAck(short Result ,UINT ServiceI
 	
 }
 
-int CServerManagerAckMsgCaller::FileDownloadDataAck(short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData )
+int CServerManagerAckMsgCaller::FileDownloadDataAck(short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ,bool IsLast )
 {
 	if(m_pNet==NULL)
 	{
@@ -608,7 +609,8 @@ int CServerManagerAckMsgCaller::FileDownloadDataAck(short Result ,UINT64 Offset 
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSizeA(FileData.GetUsedSize());
+		+CSmartStruct::GetBinaryMemberSize(FileData.GetUsedSize())
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
 
 	WORD MsgFlag=0;
 		
@@ -626,7 +628,7 @@ int CServerManagerAckMsgCaller::FileDownloadDataAck(short Result ,UINT64 Offset 
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileDownloadDataAck(Packet, Result , Offset , Length , FileData ))
+	if(PackMsgFileDownloadDataAck(Packet, Result , Offset , Length , FileData , IsLast ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -647,7 +649,7 @@ int CServerManagerAckMsgCaller::FileDownloadDataAck(short Result ,UINT64 Offset 
 	
 }
 
-int CServerManagerAckMsgCaller::FileDownloadEndAck(short Result ,UINT FileLastWriteTime )
+int CServerManagerAckMsgCaller::FileDownloadFinishAck(short Result ,const CEasyString& MD5 )
 {
 	if(m_pNet==NULL)
 	{
@@ -656,9 +658,10 @@ int CServerManagerAckMsgCaller::FileDownloadEndAck(short Result ,UINT FileLastWr
 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
-		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+		+CSmartStruct::GetStringMemberSize(MD5);
 
 	WORD MsgFlag=0;
+	MsgFlag|=DOS_MESSAGE_FLAG_CAN_CACHE;
 		
 	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
 	if(pMsg==NULL)
@@ -666,7 +669,7 @@ int CServerManagerAckMsgCaller::FileDownloadEndAck(short Result ,UINT FileLastWr
 		return COMMON_RESULT_MSG_ALLOC_ERROR;
 	}
 
-	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_END,true));
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_FINISH,true));
 	pMsg->SetDataLength(MsgDataSize);
 	pMsg->SetMsgFlag(MsgFlag);
 
@@ -674,7 +677,7 @@ int CServerManagerAckMsgCaller::FileDownloadEndAck(short Result ,UINT FileLastWr
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileDownloadEndAck(Packet, Result , FileLastWriteTime ))
+	if(PackMsgFileDownloadFinishAck(Packet, Result , MD5 ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -705,7 +708,7 @@ int CServerManagerAckMsgCaller::FileUploadStartAck(short Result ,UINT ServiceID 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength())
+		+CSmartStruct::GetStringMemberSize(FilePath)
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT64));
 
 	WORD MsgFlag=0;
@@ -745,7 +748,7 @@ int CServerManagerAckMsgCaller::FileUploadStartAck(short Result ,UINT ServiceID 
 	
 }
 
-int CServerManagerAckMsgCaller::FileUploadDataAck(short Result ,UINT64 Offset ,UINT Length )
+int CServerManagerAckMsgCaller::FileUploadDataAck(short Result ,UINT Length ,bool IsLast )
 {
 	if(m_pNet==NULL)
 	{
@@ -754,8 +757,8 @@ int CServerManagerAckMsgCaller::FileUploadDataAck(short Result ,UINT64 Offset ,U
 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
-		+CSmartStruct::GetFixMemberSize(sizeof(UINT64))
-		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
+		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
+		+CSmartStruct::GetFixMemberSize(sizeof(BYTE));
 
 	WORD MsgFlag=0;
 		
@@ -773,7 +776,7 @@ int CServerManagerAckMsgCaller::FileUploadDataAck(short Result ,UINT64 Offset ,U
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileUploadDataAck(Packet, Result , Offset , Length ))
+	if(PackMsgFileUploadDataAck(Packet, Result , Length , IsLast ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -794,7 +797,7 @@ int CServerManagerAckMsgCaller::FileUploadDataAck(short Result ,UINT64 Offset ,U
 	
 }
 
-int CServerManagerAckMsgCaller::FileUploadEndAck(short Result )
+int CServerManagerAckMsgCaller::FileUploadFinishAck(short Result ,const CEasyString& MD5 )
 {
 	if(m_pNet==NULL)
 	{
@@ -802,9 +805,11 @@ int CServerManagerAckMsgCaller::FileUploadEndAck(short Result )
 	}
 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
-		+CSmartStruct::GetFixMemberSize(sizeof(short));
+		+CSmartStruct::GetFixMemberSize(sizeof(short))
+		+CSmartStruct::GetStringMemberSize(MD5);
 
 	WORD MsgFlag=0;
+	MsgFlag|=DOS_MESSAGE_FLAG_CAN_CACHE;
 		
 	CMessage * pMsg=m_pNet->NewMessage(MsgDataSize);
 	if(pMsg==NULL)
@@ -812,7 +817,7 @@ int CServerManagerAckMsgCaller::FileUploadEndAck(short Result )
 		return COMMON_RESULT_MSG_ALLOC_ERROR;
 	}
 
-	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_END,true));
+	pMsg->SetMsgID(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_FINISH,true));
 	pMsg->SetDataLength(MsgDataSize);
 	pMsg->SetMsgFlag(MsgFlag);
 
@@ -820,7 +825,7 @@ int CServerManagerAckMsgCaller::FileUploadEndAck(short Result )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileUploadEndAck(Packet, Result ))
+	if(PackMsgFileUploadFinishAck(Packet, Result , MD5 ))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -851,7 +856,7 @@ int CServerManagerAckMsgCaller::CreateDirAck(short Result ,UINT ServiceID ,const
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize((UINT)Dir.GetLength());
+		+CSmartStruct::GetStringMemberSize(Dir);
 
 	WORD MsgFlag=0;
 		
@@ -900,7 +905,7 @@ int CServerManagerAckMsgCaller::DeleteFileAck(short Result ,UINT ServiceID ,cons
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength());
+		+CSmartStruct::GetStringMemberSize(FilePath);
 
 	WORD MsgFlag=0;
 		
@@ -949,7 +954,7 @@ int CServerManagerAckMsgCaller::ChangeFileModeAck(short Result ,UINT ServiceID ,
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+CSmartStruct::GetStringMemberSize((UINT)FilePath.GetLength())
+		+CSmartStruct::GetStringMemberSize(FilePath)
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT));
 
 	WORD MsgFlag=0;
@@ -1228,7 +1233,7 @@ int CServerManagerAckMsgCaller::EnableLogRecvAck(short Result ,UINT ServiceID ,b
 	
 }
 
-int CServerManagerAckMsgCaller::ConsoleLogNotify(UINT ServiceID ,LPCTSTR LogMsg )
+int CServerManagerAckMsgCaller::ConsoleLogNotify(UINT ServiceID ,const CEasyString& LogMsg )
 {
 	if(m_pNet==NULL)
 	{
@@ -1237,7 +1242,7 @@ int CServerManagerAckMsgCaller::ConsoleLogNotify(UINT ServiceID ,LPCTSTR LogMsg 
 
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+(LogMsg!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(LogMsg)):0);
+		+CSmartStruct::GetStringMemberSize(LogMsg);
 
 	WORD MsgFlag=0;
 		
@@ -1374,7 +1379,7 @@ int CServerManagerAckMsgCaller::GetServerStatusFormatAck(short Result ,UINT Serv
 	
 }
 
-int CServerManagerAckMsgCaller::FileCompareAck(short Result ,UINT ServiceID ,LPCTSTR FilePath )
+int CServerManagerAckMsgCaller::FileCompareAck(short Result ,UINT ServiceID ,const CEasyString& FilePath )
 {
 	if(m_pNet==NULL)
 	{
@@ -1384,7 +1389,7 @@ int CServerManagerAckMsgCaller::FileCompareAck(short Result ,UINT ServiceID ,LPC
 	UINT MsgDataSize=CSmartStruct::GetEmptyStructSize()
 		+CSmartStruct::GetFixMemberSize(sizeof(short))
 		+CSmartStruct::GetFixMemberSize(sizeof(UINT))
-		+(FilePath!=NULL?CSmartStruct::GetStringMemberSize((UINT)_tcslen(FilePath)):0);
+		+CSmartStruct::GetStringMemberSize(FilePath);
 
 	WORD MsgFlag=0;
 		
@@ -1643,7 +1648,7 @@ bool CServerManagerAckMsgCaller::PackMsgBrowseServiceDirAck(CSmartStruct& Packet
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgFileDownloadStartAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize )
+bool CServerManagerAckMsgCaller::PackMsgFileDownloadStartAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,UINT FileLastWriteTime )
 {
 	UINT FailCount=0;
 
@@ -1663,12 +1668,16 @@ bool CServerManagerAckMsgCaller::PackMsgFileDownloadStartAck(CSmartStruct& Packe
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_START_ACK_FILE_SIZE,FileSize),FailCount);
 	}
 	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_START_ACK_FILE_LAST_WRITE_TIME,FileLastWriteTime),FailCount);
+	}
+	
 	
 
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgFileDownloadDataAck(CSmartStruct& Packet,short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData )
+bool CServerManagerAckMsgCaller::PackMsgFileDownloadDataAck(CSmartStruct& Packet,short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ,bool IsLast )
 {
 	UINT FailCount=0;
 
@@ -1685,7 +1694,11 @@ bool CServerManagerAckMsgCaller::PackMsgFileDownloadDataAck(CSmartStruct& Packet
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA,(LPCSTR)FileData.GetBuffer(),FileData.GetUsedSize()),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA,(BYTE *)FileData.GetBuffer(),FileData.GetUsedSize()),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_ACK_IS_LAST,IsLast),FailCount);
 	}
 	
 	
@@ -1693,16 +1706,16 @@ bool CServerManagerAckMsgCaller::PackMsgFileDownloadDataAck(CSmartStruct& Packet
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgFileDownloadEndAck(CSmartStruct& Packet,short Result ,UINT FileLastWriteTime )
+bool CServerManagerAckMsgCaller::PackMsgFileDownloadFinishAck(CSmartStruct& Packet,short Result ,const CEasyString& MD5 )
 {
 	UINT FailCount=0;
 
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_END_ACK_RESULT,Result),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_FINISH_ACK_RESULT,Result),FailCount);
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_END_ACK_FILE_LAST_WRITE_TIME,FileLastWriteTime),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_FINISH_ACK_MD5,MD5),FailCount);
 	}
 	
 	
@@ -1735,7 +1748,7 @@ bool CServerManagerAckMsgCaller::PackMsgFileUploadStartAck(CSmartStruct& Packet,
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgFileUploadDataAck(CSmartStruct& Packet,short Result ,UINT64 Offset ,UINT Length )
+bool CServerManagerAckMsgCaller::PackMsgFileUploadDataAck(CSmartStruct& Packet,short Result ,UINT Length ,bool IsLast )
 {
 	UINT FailCount=0;
 
@@ -1744,11 +1757,11 @@ bool CServerManagerAckMsgCaller::PackMsgFileUploadDataAck(CSmartStruct& Packet,s
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_ACK_OFFSET,Offset),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_ACK_LENGTH,Length),FailCount);
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_ACK_LENGTH,Length),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_DATA_ACK_IS_LAST,IsLast),FailCount);
 	}
 	
 	
@@ -1756,12 +1769,16 @@ bool CServerManagerAckMsgCaller::PackMsgFileUploadDataAck(CSmartStruct& Packet,s
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgFileUploadEndAck(CSmartStruct& Packet,short Result )
+bool CServerManagerAckMsgCaller::PackMsgFileUploadFinishAck(CSmartStruct& Packet,short Result ,const CEasyString& MD5 )
 {
 	UINT FailCount=0;
 
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_END_ACK_RESULT,Result),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_FINISH_ACK_RESULT,Result),FailCount);
+	}
+	
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_UPLOAD_FINISH_ACK_MD5,MD5),FailCount);
 	}
 	
 	
@@ -1917,7 +1934,7 @@ bool CServerManagerAckMsgCaller::PackMsgEnableLogRecvAck(CSmartStruct& Packet,sh
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgConsoleLogNotify(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR LogMsg )
+bool CServerManagerAckMsgCaller::PackMsgConsoleLogNotify(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& LogMsg )
 {
 	UINT FailCount=0;
 
@@ -1926,10 +1943,7 @@ bool CServerManagerAckMsgCaller::PackMsgConsoleLogNotify(CSmartStruct& Packet,UI
 	}
 	
 	{
-		if( LogMsg != NULL)
-		{
-			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CONSOLE_LOG_NOTIFY_LOG_MSG,LogMsg),FailCount);
-		}
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_CONSOLE_LOG_NOTIFY_LOG_MSG,LogMsg),FailCount);
 	}
 	
 	
@@ -1979,7 +1993,7 @@ bool CServerManagerAckMsgCaller::PackMsgGetServerStatusFormatAck(CSmartStruct& P
 	return FailCount==0;
 }
 
-bool CServerManagerAckMsgCaller::PackMsgFileCompareAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,LPCTSTR FilePath )
+bool CServerManagerAckMsgCaller::PackMsgFileCompareAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath )
 {
 	UINT FailCount=0;
 
@@ -1992,10 +2006,7 @@ bool CServerManagerAckMsgCaller::PackMsgFileCompareAck(CSmartStruct& Packet,shor
 	}
 	
 	{
-		if( FilePath != NULL)
-		{
-			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_ACK_FILE_PATH,FilePath),FailCount);
-		}
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_COMPARE_ACK_FILE_PATH,FilePath),FailCount);
 	}
 	
 	

@@ -23,6 +23,7 @@ protected:
 	CEasyString		m_ControlPipeName;
 	CEasyString		m_ShutdownCmd;
 	int				m_CharSet;
+	bool			m_KeepRunning;
 	bool			m_LogStatusToFile;
 	CEasyArray<CEasyString>		m_OtherExecFileList;
 	
@@ -46,6 +47,7 @@ public:
 		SST_SRVI_CONTROL_PIPE_NAME=317,
 		SST_SRVI_SHUTDOWN_CMD=318,
 		SST_SRVI_CHAR_SET=320,
+		SST_SRVI_KEEP_RUNNING=323,
 		SST_SRVI_LOG_STATUS_TO_FILE=322,
 		SST_SRVI_OTHER_EXEC_FILE_LIST=321,
 	
@@ -66,9 +68,10 @@ public:
 		MF_CONTROL_PIPE_NAME=(((UINT64)1)<<10),
 		MF_SHUTDOWN_CMD=(((UINT64)1)<<11),
 		MF_CHAR_SET=(((UINT64)1)<<12),
-		MF_LOG_STATUS_TO_FILE=(((UINT64)1)<<13),
-		MF_OTHER_EXEC_FILE_LIST=(((UINT64)1)<<14),
-		MF_ALL=0x7FFF,
+		MF_KEEP_RUNNING=(((UINT64)1)<<13),
+		MF_LOG_STATUS_TO_FILE=(((UINT64)1)<<14),
+		MF_OTHER_EXEC_FILE_LIST=(((UINT64)1)<<15),
+		MF_ALL=0xFFFF,
 	
 	};
 //<GenerateArea3End>
@@ -98,6 +101,7 @@ public:
 	void SetControlPipeName(const CEasyString& Value);
 	void SetShutdownCmd(const CEasyString& Value);
 	void SetCharSet(int Value);
+	void SetKeepRunning(bool Value);
 	void SetLogStatusToFile(bool Value);
 	void SetOtherExecFileList(const CEasyArray<CEasyString>& Value);
 	
@@ -120,6 +124,7 @@ public:
 	 CEasyString& GetShutdownCmd() ;
 	const CEasyString& GetShutdownCmd() const;
 	int GetCharSet() const;
+	bool GetKeepRunning() const;
 	bool GetLogStatusToFile() const;
 	 CEasyArray<CEasyString>& GetOtherExecFileList() ;
 	const CEasyArray<CEasyString>& GetOtherExecFileList() const;
@@ -238,6 +243,14 @@ inline void CServiceInfo::SetCharSet(int Value)
 		m_ModifyFlag|=MF_CHAR_SET;
 	}
 }
+inline void CServiceInfo::SetKeepRunning(bool Value)
+{
+	if(m_KeepRunning!=Value)
+	{
+		m_KeepRunning=Value;
+		m_ModifyFlag|=MF_KEEP_RUNNING;
+	}
+}
 inline void CServiceInfo::SetLogStatusToFile(bool Value)
 {
 	if(m_LogStatusToFile!=Value)
@@ -324,6 +337,10 @@ inline const CEasyString& CServiceInfo::GetShutdownCmd() const
 inline int CServiceInfo::GetCharSet() const
 {
 	return m_CharSet;
+}
+inline bool CServiceInfo::GetKeepRunning() const
+{
+	return m_KeepRunning;
 }
 inline bool CServiceInfo::GetLogStatusToFile() const
 {

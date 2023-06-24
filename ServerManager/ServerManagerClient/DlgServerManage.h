@@ -19,6 +19,8 @@ class CDlgServerManage : public CDialog
 {
 protected:
 	CListCtrl					m_lvServerList;
+	CString						m_Name;
+	CString						m_Group;
 	CString						m_IP;
 	UINT						m_Port;
 	CString						m_UserName;
@@ -49,5 +51,6 @@ protected:
 public:
 //	afx_msg void OnHdnItemdblclickList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult);
+	
 	
 };

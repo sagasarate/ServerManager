@@ -158,9 +158,10 @@ public:
 		ServiceID				
 		FilePath				
 		FileSize				
+		FileLastWriteTime				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadStartAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ) {return COMMON_RESULT_FAILED;}
+	virtual int FileDownloadStartAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,UINT FileLastWriteTime ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -172,21 +173,22 @@ public:
 		Offset				
 		Length				
 		FileData				
+		IsLast				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadDataAck(short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ) {return COMMON_RESULT_FAILED;}
+	virtual int FileDownloadDataAck(short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ,bool IsLast ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
 	/*************************************************
-	函数名:	FileDownloadEndAck
+	函数名:	FileDownloadFinishAck
 	用途:	
 	参数:
 		Result				
-		FileLastWriteTime				
+		MD5				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadEndAck(short Result ,UINT FileLastWriteTime ) {return COMMON_RESULT_FAILED;}
+	virtual int FileDownloadFinishAck(short Result ,const CEasyString& MD5 ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -209,22 +211,23 @@ public:
 	用途:	
 	参数:
 		Result				
-		Offset				
 		Length				
+		IsLast				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadDataAck(short Result ,UINT64 Offset ,UINT Length ) {return COMMON_RESULT_FAILED;}
+	virtual int FileUploadDataAck(short Result ,UINT Length ,bool IsLast ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
 	/*************************************************
-	函数名:	FileUploadEndAck
+	函数名:	FileUploadFinishAck
 	用途:	
 	参数:
 		Result				
+		MD5				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadEndAck(short Result ) {return COMMON_RESULT_FAILED;}
+	virtual int FileUploadFinishAck(short Result ,const CEasyString& MD5 ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -335,7 +338,7 @@ public:
 		LogMsg				
 	返回值:无特别意义
 	*************************************************/
-	virtual int ConsoleLogNotify(UINT ServiceID ,LPCTSTR LogMsg ) {return COMMON_RESULT_FAILED;}
+	virtual int ConsoleLogNotify(UINT ServiceID ,const CEasyString& LogMsg ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -374,7 +377,7 @@ public:
 		FilePath				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileCompareAck(short Result ,UINT ServiceID ,LPCTSTR FilePath ) {return COMMON_RESULT_FAILED;}
+	virtual int FileCompareAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -460,6 +463,7 @@ protected:
 		SST_FILE_DOWNLOAD_START_ACK_SERVICE_ID=4,
 		SST_FILE_DOWNLOAD_START_ACK_FILE_PATH=5,
 		SST_FILE_DOWNLOAD_START_ACK_FILE_SIZE=6,
+		SST_FILE_DOWNLOAD_START_ACK_FILE_LAST_WRITE_TIME=7,
 	
 	};
 	enum SERVER_MANAGER_ACK_FILE_DOWNLOAD_DATA_ACK_MEMBER_IDS
@@ -468,12 +472,13 @@ protected:
 		SST_FILE_DOWNLOAD_DATA_ACK_OFFSET=4,
 		SST_FILE_DOWNLOAD_DATA_ACK_LENGTH=5,
 		SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA=7,
+		SST_FILE_DOWNLOAD_DATA_ACK_IS_LAST=8,
 	
 	};
-	enum SERVER_MANAGER_ACK_FILE_DOWNLOAD_END_ACK_MEMBER_IDS
+	enum SERVER_MANAGER_ACK_FILE_DOWNLOAD_FINISH_ACK_MEMBER_IDS
 	{
-		SST_FILE_DOWNLOAD_END_ACK_RESULT=1,
-		SST_FILE_DOWNLOAD_END_ACK_FILE_LAST_WRITE_TIME=2,
+		SST_FILE_DOWNLOAD_FINISH_ACK_RESULT=1,
+		SST_FILE_DOWNLOAD_FINISH_ACK_MD5=2,
 	
 	};
 	enum SERVER_MANAGER_ACK_FILE_UPLOAD_START_ACK_MEMBER_IDS
@@ -487,13 +492,14 @@ protected:
 	enum SERVER_MANAGER_ACK_FILE_UPLOAD_DATA_ACK_MEMBER_IDS
 	{
 		SST_FILE_UPLOAD_DATA_ACK_RESULT=5,
-		SST_FILE_UPLOAD_DATA_ACK_OFFSET=6,
 		SST_FILE_UPLOAD_DATA_ACK_LENGTH=7,
+		SST_FILE_UPLOAD_DATA_ACK_IS_LAST=9,
 	
 	};
-	enum SERVER_MANAGER_ACK_FILE_UPLOAD_END_ACK_MEMBER_IDS
+	enum SERVER_MANAGER_ACK_FILE_UPLOAD_FINISH_ACK_MEMBER_IDS
 	{
-		SST_FILE_UPLOAD_END_ACK_RESULT=1,
+		SST_FILE_UPLOAD_FINISH_ACK_RESULT=1,
+		SST_FILE_UPLOAD_FINISH_ACK_MD5=2,
 	
 	};
 	enum SERVER_MANAGER_ACK_CREATE_DIR_ACK_MEMBER_IDS

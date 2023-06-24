@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中文(中华人民共和国) resources
+// 中文(简体，中国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -44,7 +42,7 @@ BEGIN
         BLOCK "080403a8"
         BEGIN
             VALUE "CompanyName", "TODO: <公司名>"
-            VALUE "FileDescription", "TODO: <文件说明>"
+            VALUE "FileDescription", "ServerManager"
             VALUE "FileVersion", "1.0.2.0"
             VALUE "InternalName", "ServerManager"
             VALUE "LegalCopyright", "TODO: (C) <公司名>。保留所有权利。"
@@ -85,7 +83,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 中文(中华人民共和国) resources
+#endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

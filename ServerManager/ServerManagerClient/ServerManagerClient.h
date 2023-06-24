@@ -48,7 +48,7 @@ public:
 	virtual int ExitInstance();
 	virtual BOOL OnIdle(LONG lCount);
 
-	CServerConnection * AddServerConnection(LPCTSTR Address, UINT Port, LPCTSTR UserName, LPCTSTR Password);
+	CServerConnection * AddServerConnection(LPCTSTR Name, LPCTSTR Group, LPCTSTR Address, UINT Port, LPCTSTR UserName, LPCTSTR Password);
 	CServerConnection * GetServerConnection(LPCTSTR ServerAddress);
 	CServerConnection * GetServerConnection(UINT ConnectionID);
 

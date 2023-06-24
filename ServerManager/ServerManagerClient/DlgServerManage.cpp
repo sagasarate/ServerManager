@@ -28,6 +28,8 @@ CDlgServerManage::CDlgServerManage(CWnd* pParent /*=NULL*/)
 	, m_Port(8300)
 	, m_UserName(_T(""))
 	, m_Password(_T(""))
+	, m_Name(_T(""))
+	, m_Group(_T(""))
 {
 
 }
@@ -44,6 +46,8 @@ void CDlgServerManage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_PORT, m_Port);
 	DDX_Text(pDX, IDC_EDIT_USER_NAME, m_UserName);
 	DDX_Text(pDX, IDC_EDIT_PASSWORD, m_Password);
+	DDX_Text(pDX, IDC_EDIT_NAME, m_Name);
+	DDX_Text(pDX, IDC_EDIT_GROUP, m_Group);
 }
 
 
@@ -66,14 +70,16 @@ void CDlgServerManage::OnBnClickedAddServer()
 	m_IP.Trim();
 	if(!m_IP.IsEmpty())
 	{
-		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->AddServerConnection(m_IP, m_Port, m_UserName, m_Password);
+		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->AddServerConnection(m_Name, m_Group, m_IP, m_Port, m_UserName, m_Password);
 		if (pConnection)
 		{
-			int Item = m_lvServerList.InsertItem(m_lvServerList.GetItemCount(), pConnection->GetServerAddress());
+			int Item = m_lvServerList.InsertItem(m_lvServerList.GetItemCount(), pConnection->GetName());
+			m_lvServerList.SetItemText(Item, 1, pConnection->GetGroup());
+			m_lvServerList.SetItemText(Item, 2, pConnection->GetServerAddress());
 			CString Temp;
 			Temp.Format(_T("%u"), pConnection->GetServerPort());
-			m_lvServerList.SetItemText(Item, 1, Temp);
-			m_lvServerList.SetItemText(Item, 2, _T("未连接"));
+			m_lvServerList.SetItemText(Item, 3, Temp);
+			m_lvServerList.SetItemText(Item, 4, _T("未连接"));
 			m_lvServerList.SetItemData(Item, pConnection->GetID());
 		}
 		else
@@ -121,12 +127,14 @@ void CDlgServerManage::OnBnClickedEditServer()
 			CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConnectionID);
 			if (pConnection)
 			{
-				if (pConnection->Reconnection(m_IP, m_Port, m_UserName, m_Password))
+				if (pConnection->Reconnection(m_Name, m_Group, m_IP, m_Port, m_UserName, m_Password))
 				{
-					m_lvServerList.SetItemText(Item, 0, m_IP);
+					m_lvServerList.SetItemText(Item, 0, m_Name);
+					m_lvServerList.SetItemText(Item, 1, m_Group);
+					m_lvServerList.SetItemText(Item, 2, m_IP);
 					CString Temp;
 					Temp.Format(_T("%u"), m_Port);
-					m_lvServerList.SetItemText(Item, 1, Temp);
+					m_lvServerList.SetItemText(Item, 3, Temp);
 				}
 				else
 				{
@@ -151,9 +159,11 @@ BOOL CDlgServerManage::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_lvServerList.InsertColumn(0,_T("地址"),LVCFMT_LEFT,150);
-	m_lvServerList.InsertColumn(1,_T("Port"),LVCFMT_LEFT,50);
-	m_lvServerList.InsertColumn(2,_T("状态"),LVCFMT_LEFT,50);
+	m_lvServerList.InsertColumn(0, _T("名称"), LVCFMT_LEFT, 150);
+	m_lvServerList.InsertColumn(1, _T("分组"), LVCFMT_LEFT, 100);
+	m_lvServerList.InsertColumn(2,_T("地址"),LVCFMT_LEFT,150);
+	m_lvServerList.InsertColumn(3,_T("Port"),LVCFMT_LEFT,50);
+	m_lvServerList.InsertColumn(4,_T("状态"),LVCFMT_LEFT,50);
 
 	m_lvServerList.SetExtendedStyle(LVS_EX_GRIDLINES|LVS_EX_FULLROWSELECT);
 
@@ -162,16 +172,18 @@ BOOL CDlgServerManage::OnInitDialog()
 	while (Pos)
 	{
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
-		int Item = m_lvServerList.InsertItem(m_lvServerList.GetItemCount(), pConnection->GetServerAddress());
+		int Item = m_lvServerList.InsertItem(m_lvServerList.GetItemCount(), pConnection->GetName());
+		m_lvServerList.SetItemText(Item, 1, pConnection->GetGroup());
+		m_lvServerList.SetItemText(Item, 2, pConnection->GetServerAddress());
 		CString Temp;
 		Temp.Format(_T("%u"), pConnection->GetServerPort());
-		m_lvServerList.SetItemText(Item, 1, Temp);
+		m_lvServerList.SetItemText(Item, 3, Temp);
 		if (pConnection->IsConnected())
-			m_lvServerList.SetItemText(Item, 2, _T("已连接"));
+			m_lvServerList.SetItemText(Item, 4, _T("已连接"));
 		else if (pConnection->IsDisconnected())
-			m_lvServerList.SetItemText(Item, 2, _T("连接断开"));
+			m_lvServerList.SetItemText(Item, 4, _T("连接断开"));
 		else
-			m_lvServerList.SetItemText(Item, 2, _T("连接中"));		
+			m_lvServerList.SetItemText(Item, 4, _T("连接中"));		
 		m_lvServerList.SetItemData(Item, pConnection->GetID());
 	}	
 
@@ -207,6 +219,8 @@ void CDlgServerManage::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ConnectionID);
 		if (pConnection)
 		{
+			m_Name = pConnection->GetName();
+			m_Group = pConnection->GetGroup();
 			m_IP = pConnection->GetServerAddress();
 			m_Port = pConnection->GetServerPort();
 			m_UserName = pConnection->GetUserName();
@@ -215,3 +229,6 @@ void CDlgServerManage::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 	}
 }
+
+
+

@@ -55,12 +55,14 @@
 #define KEEP_ALIVE_TIME				(5000)
 #define MAX_KEEP_ALIVE_COUNT		(10)
 #define DIR_BROWSE_PAGE_LEN			50
-#define MAX_MSG_SIZE				650000
-#define FILE_TRANSFER_BLOCK_SIZE	300000
 #define MAX_SERVER_STATUS_NAME_LEN	128
 
 #define MAX_CONTROL_PANEL_MSG_LEN	5000
 #define SERVICE_STARTUP_TIMEOUT		(5*60*1000)
+
+#define MAX_DOWNLOAD_QUERY			5
+
+#define LOG_CHANNEL_MAIN			76438
 
 #include "../../Libs/Utils/Utils.h"
 #include "../../Libs/NetLib/NetLib.h"
@@ -98,8 +100,118 @@ struct SELECT_ITEM_INFO
 	CEasyString		Param1;
 };
 
+enum TASK_TYPE
+{
+	TASK_TYPE_NONE,
+	TASK_TYPE_DOWNLOAD,
+	TASK_TYPE_UPLOAD,
+	TASK_TYPE_DELETE_FILE,
+	TASK_TYPE_CREATE_DIR,
+	TASK_TYPE_CHANGE_FILE_MODE,
+	TASK_TYPE_STARTUP_SERVICE,
+	TASK_TYPE_SHUTDOWN_SERVICE,
+	TASK_TYPE_RELOAD_CONFIG_DATA,
+	TASK_TYPE_COMPARE,
+};
+enum TASK_STATUS
+{
+	TASK_STATUS_NONE,
+	TASK_STATUS_PROCESSING,
+	TASK_STATUS_TRANSFER_DATA,
+	TASK_STATUS_WAIT_SERVICE_STATUS,
+	TASK_STATUS_END,
+	TASK_STATUS_ERROR
+};
+enum WORK_STATUS
+{
+	WORK_STATUS_NONE,
+	WORK_STATUS_LOAD,
+	WORK_STATUS_SAVE,
+	WORK_STATUS_MD5,
+	WORK_STATUS_COMPRESS,
+	WORK_STATUS_UNCOMPRESS,
+};
+enum TASK_USAGE
+{
+	TASK_USAGE_NONE,
+	TASK_USAGE_CHECK_BEFORE_UPDATE,
+	TASK_USAGE_UPDATE,
+	TASK_USAGE_CHECK_AFTER_UPDATE,
+};
+struct TASK_INFO
+{
+	UINT					ID;
+	TASK_TYPE				Type;
+	volatile TASK_STATUS	Status;
+	UINT					ServiceID;
+	CEasyString				SourceFilePath;
+	CEasyString				TargetFilePath;
+	UINT					FileMode;
+	UINT64					FileSize;
+	time_t					FileLastWriteTime;
+	UINT64					QueryOffset;
+	UINT64					TransferOffset;	
+	UINT64					TransferSize;
+	UINT64					FinishSize;
+	bool					ContinueTransfer;
+	UINT					TransferStartTime;
+	UINT					Usage;
+	CWinFileAccessor		TaskFile;
+	CEasyString				FileMD5;
+	CEasyString				RemoteMD5;
+	UINT					CurBlockIndex;
+	volatile UINT			QueryCount;
+	void Clear()
+	{
+		ID = 0;
+		Type = TASK_TYPE_NONE;
+		Status = TASK_STATUS_NONE;
+		ServiceID = 0;
+		SourceFilePath.Clear();
+		TargetFilePath.Clear();
+		FileMode = 0;
+		FileSize = 0;
+		FileLastWriteTime = 0;
+		QueryOffset = 0;
+		TransferOffset = 0;		
+		TransferSize = 0;
+		FinishSize = 0;
+		ContinueTransfer = false;
+		TransferStartTime = 0;
+		Usage = 0;
+		TaskFile.Close();
+		FileMD5.Clear();
+		RemoteMD5.Clear();
+		CurBlockIndex = 0;
+		QueryCount = 0;
+	}
+	void IncQueryCount()
+	{
+		AtomicInc(&QueryCount);
+	}
+	void DecQueryCount()
+	{
+		AtomicDec(&QueryCount);
+	}
+};
 
+struct FILE_DATA_INFO
+{
+	UINT								DataID;
+	UINT								Index;
+	CEasyBuffer							DataBuffer;
+	UINT								OriginSize;
+	bool								IsLast;
 
+	void SetID(UINT ID)
+	{
+		DataID = ID;
+		OriginSize = 0;
+		IsLast = false;
+	}	
+};
+
+#include "WorkThread.h"
 #include "TaskQueue.h"
 #include "ServerConnection.h"
 
@@ -139,17 +251,43 @@ inline CServerManagerClientView * GetMainView()
 
 inline LPCTSTR GetResultStr(short Result)
 {
-	static TCHAR ResultStr[128];
+	static TCHAR ResultStr[256];
 	if (Result >= 0 && Result < MSG_RESULT_MAX)
 	{
-		return g_szMSG_RESULT[Result];
+		_stprintf_s(ResultStr, 128, "%d(%s)", Result, g_szMSG_RESULT[Result]);
 	}
 	else
 	{
-		_tcprintf_s(ResultStr, 128, "%d", Result);
-		return ResultStr;
+		_stprintf_s(ResultStr, 128, "%d", Result);
 	}
+	return ResultStr;
 }
+
+inline void LogWithTag(const char* szTag, const char* Format, ...)
+{
+	va_list vl;
+
+	va_start(vl, Format);
+	CLogManager::GetInstance()->PrintLogVL(LOG_CHANNEL_MAIN, ILogPrinter::LOG_LEVEL_NORMAL, szTag, Format, vl);
+	va_end(vl);
+}
+
+inline void LogDebugWithTag(const char* szTag, const char* Format, ...)
+{
+	va_list vl;
+
+	va_start(vl, Format);
+	CLogManager::GetInstance()->PrintLogVL(LOG_CHANNEL_MAIN, ILogPrinter::LOG_LEVEL_DEBUG, szTag, Format, vl);
+	va_end(vl);
+}
+
+#ifdef WIN32
+#define Log(_Format, ...)	LogWithTag(__FUNCTION__, _Format, ##__VA_ARGS__)
+#define LogDebug(_Format, ...)	LogDebugWithTag(__FUNCTION__, _Format, ##__VA_ARGS__)
+#else
+#define Log(_Format, ...)	LogWithTag(__PRETTY_FUNCTION__, _Format, ##__VA_ARGS__)
+#define LogDebug(_Format, ...)	LogDebugWithTag(__PRETTY_FUNCTION__, _Format, ##__VA_ARGS__)
+#endif
 
 #ifdef _UNICODE
 #if defined _M_IX86

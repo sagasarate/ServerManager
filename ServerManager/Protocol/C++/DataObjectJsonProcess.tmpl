@@ -1,0 +1,29 @@
+bool <ClassName>::ToJson(rapidjson::Value& StructNode, rapidjson::Document::AllocatorType& Alloc, const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
+{
+	<IfHaveBaseClass>
+	if (!<BaseClass>::ToJson(StructNode, MemberFlags))
+		return false;
+	</IfHaveBaseClass>
+
+	UINT64 Flag=MemberFlags[<CLASS_FLAG_INDEX>];
+
+	<ToJsonOperations>
+	return true;
+}
+bool <ClassName>::FromJson(rapidjson::Value& StructNode, const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
+{
+	UINT FailCount=0;
+	<IfHaveBaseClass>
+	if (!<BaseClass>::FromJson(StructNode, MemberFlags))
+		return false;
+	</IfHaveBaseClass>
+
+	UINT64 Flag=MemberFlags[<CLASS_FLAG_INDEX>];
+	UINT64 UpdateFlag=0;
+
+	<FromJsonOperations>
+
+	m_ModifyFlag|=UpdateFlag;
+
+	return FailCount==0;
+}

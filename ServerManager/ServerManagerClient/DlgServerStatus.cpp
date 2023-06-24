@@ -1,4 +1,4 @@
-// DlgServerStatus.cpp : ÊµÏÖÎÄ¼ş
+ï»¿// DlgServerStatus.cpp : å®ç°æ–‡ä»¶
 //
 
 #include "stdafx.h"
@@ -6,7 +6,7 @@
 
 
 
-// CDlgServerStatus ¶Ô»°¿ò
+// CDlgServerStatus å¯¹è¯æ¡†
 
 IMPLEMENT_DYNAMIC(CDlgServerStatus, CDialog)
 
@@ -35,18 +35,18 @@ BEGIN_MESSAGE_MAP(CDlgServerStatus, CDialog)
 END_MESSAGE_MAP()
 
 
-// CDlgServerStatus ÏûÏ¢´¦Àí³ÌĞò
+// CDlgServerStatus æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 
 BOOL CDlgServerStatus::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// TODO:  ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯
+	// TODO:  åœ¨æ­¤æ·»åŠ é¢å¤–çš„åˆå§‹åŒ–
 	m_lvList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-	m_lvList.InsertColumn(0, _T("Ïî"), LVCFMT_LEFT, 200);
-	m_lvList.InsertColumn(1, _T("Öµ"), LVCFMT_LEFT, 150);
+	m_lvList.InsertColumn(0, _T("é¡¹"), LVCFMT_LEFT, 200);
+	m_lvList.InsertColumn(1, _T("å€¼"), LVCFMT_LEFT, 150);
 
 	CRect ClientRect;
 	GetClientRect(&ClientRect);
@@ -54,7 +54,7 @@ BOOL CDlgServerStatus::OnInitDialog()
 	m_lvList.MoveWindow(&ClientRect);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// Òì³£:  OCX ÊôĞÔÒ³Ó¦·µ»Ø FALSE
+	// å¼‚å¸¸:  OCX å±æ€§é¡µåº”è¿”å› FALSE
 }
 
 
@@ -62,7 +62,7 @@ void CDlgServerStatus::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 
-	// TODO:  ÔÚ´Ë´¦Ìí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤å¤„æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç 
 
 	if (::IsWindow(m_lvList.GetSafeHwnd()))
 	{
@@ -119,18 +119,7 @@ void CDlgServerStatus::SetStatusFormat(UINT ConnectionID, UINT ServiceID, const 
 			SERVER_STATUS_FORMAT_INFO FormatInfo;
 			FormatInfo.StatusID = Info.GetMember(SC_SST_SSFI_STATUS_ID);
 			FormatInfo.FormatType = Info.GetMember(SC_SST_SSFI_FORMAT_TYPE);
-			if (m_CharSet == CP_UTF8)
-			{
-				LPCSTR szName = Info.GetMember(SC_SST_SSFI_NAME);
-				char Buffer[2001];
-				UINT Len = UTF8ToAnsi(szName, strlen(szName), Buffer, 2000);
-				Buffer[Len] = 0;
-				FormatInfo.Name = Buffer;
-			}
-			else
-			{
-				FormatInfo.Name = (LPCSTR)Info.GetMember(SC_SST_SSFI_NAME);
-			}
+			FormatInfo.Name = (LPCSTR)Info.GetMember(SC_SST_SSFI_NAME);
 
 			if (FormatInfo.StatusID)
 			{
@@ -150,7 +139,7 @@ void CDlgServerStatus::FlushStatus(UINT ConnectionID, UINT ServiceID, const CSma
 	{
 		WORD MemberID;
 		CSmartValue Value = ServerStatus.GetNextMember(Pos, MemberID);
-		CEasyString MemberIDStr(_T("Î´ÖªÊôĞÔ"));
+		CEasyString MemberIDStr(_T("æœªçŸ¥å±æ€§"));
 		int FormatType = SSFT_DEFAULT;
 		for (UINT i = 0; i < m_FormatInfoList.GetCount(); i++)
 		{
@@ -237,14 +226,12 @@ void CDlgServerStatus::FlushStatus(UINT ConnectionID, UINT ServiceID, const CSma
 			else
 				ValueStr.Format(_T("%g"), (double)Value);
 			break;
-		case CSmartValue::VT_STRING:
-			ValueStr = (LPCTSTR)Value;
-			break;
-		case CSmartValue::VT_USTRING:
-			ValueStr = (LPCWSTR)Value;
-			break;
+		case CSmartValue::VT_STRING_UTF8:
+		case CSmartValue::VT_STRING_UCS16:
+			Value.GetString(ValueStr);
+			break;		
 		default:
-			ValueStr = _T("Î´Öª¸ñÊ½Êı¾İ");
+			ValueStr = _T("æœªçŸ¥æ ¼å¼æ•°æ®");
 		}
 		int Item = m_lvList.InsertItem(m_lvList.GetItemCount(), MemberIDStr);
 		m_lvList.SetItemText(Item, 1, ValueStr);
@@ -253,7 +240,7 @@ void CDlgServerStatus::FlushStatus(UINT ConnectionID, UINT ServiceID, const CSma
 
 void CDlgServerStatus::OnCancel()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó×¨ÓÃ´úÂëºÍ/»òµ÷ÓÃ»ùÀà	
+	// TODO:  åœ¨æ­¤æ·»åŠ ä¸“ç”¨ä»£ç å’Œ/æˆ–è°ƒç”¨åŸºç±»	
 	CDialog::OnCancel();
 	Close();
 }
@@ -261,7 +248,7 @@ void CDlgServerStatus::OnCancel()
 
 void CDlgServerStatus::OnOK()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó×¨ÓÃ´úÂëºÍ/»òµ÷ÓÃ»ùÀà
+	// TODO:  åœ¨æ­¤æ·»åŠ ä¸“ç”¨ä»£ç å’Œ/æˆ–è°ƒç”¨åŸºç±»
 
 	CDialog::OnOK();
 	Close();
@@ -270,7 +257,7 @@ void CDlgServerStatus::OnOK()
 
 void CDlgServerStatus::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO:  åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 
 	if (m_ConnectionID&&m_ServiceID)
 	{

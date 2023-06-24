@@ -143,6 +143,7 @@ void <ClassName>::CloneFrom(const <ClassName>& DataObject,const DATA_OBJECT_MODI
 UINT <ClassName>::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 {
 //<GenerateArea9Start>
+	UINT64 Flag=MemberFlags[<CLASS_FLAG_INDEX>];
 	UINT Size=0;
 	<PacketSizes>
 		
@@ -161,3 +162,7 @@ UINT <ClassName>::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags
 //<GenerateArea10End>	
 	return *this;
 }
+
+//<GenerateArea11Start>
+<JsonProcess>
+//<GenerateArea11End>

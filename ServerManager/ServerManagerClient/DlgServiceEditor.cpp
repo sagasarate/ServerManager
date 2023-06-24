@@ -1,4 +1,4 @@
-// DlgServiceEditor.cpp : ÊµÏÖÎÄ¼ş
+ï»¿// DlgServiceEditor.cpp : å®ç°æ–‡ä»¶
 //
 
 #include "stdafx.h"
@@ -8,7 +8,7 @@
 
 
 
-// CDlgServiceEditor ¶Ô»°¿ò
+// CDlgServiceEditor å¯¹è¯æ¡†
 
 IMPLEMENT_DYNAMIC(CDlgServiceEditor, CDialog)
 
@@ -62,9 +62,9 @@ void CDlgServiceEditor::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_RESTARTUP_TIME, RestartupTime);
 	m_ServiceInfo.SetRestartupTime(RestartupTime);
 
-	BOOL KeepRunning = m_ServiceInfo.GetLastOperation() == SERVICE_OPERATION_STARTUP ? TRUE : FALSE;
+	BOOL KeepRunning = m_ServiceInfo.GetKeepRunning() ? TRUE : FALSE;
 	DDX_Check(pDX, IDC_CHECK_KEEP_RUNNING, KeepRunning);
-	m_ServiceInfo.SetLastOperation(KeepRunning ? SERVICE_OPERATION_STARTUP : SERVICE_OPERATION_SHUTDOWN);
+	m_ServiceInfo.SetKeepRunning(KeepRunning ? true : false);
 
 	BOOL LogServiceStatus = m_ServiceInfo.GetLogStatusToFile() ? TRUE : FALSE;
 	DDX_Check(pDX, IDC_CHECK_LOG_SERVER_STATUS, LogServiceStatus);
@@ -95,20 +95,13 @@ BEGIN_MESSAGE_MAP(CDlgServiceEditor, CDialog)
 END_MESSAGE_MAP()
 
 
-// CDlgServiceEditor ÏûÏ¢´¦Àí³ÌĞò
+// CDlgServiceEditor æ¶ˆæ¯å¤„ç†ç¨‹åº
 bool CDlgServiceEditor::Init(CServerConnection * pConnection, CServiceInfo * pServiceInfo)
 {
 	m_pConnection = pConnection;
 	if (pServiceInfo)
 	{
-		m_ServiceInfo = *pServiceInfo;
-		if (m_ServiceInfo.GetCharSet() == CP_UTF8)
-		{
-			char Buffer[1024];
-			UINT Len = UTF8ToAnsi(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
-			Buffer[Len] = 0;
-			m_ServiceInfo.SetName(Buffer);
-		}
+		m_ServiceInfo = *pServiceInfo;		
 		m_IsAddNew = false;
 		CWnd * pedServiceID = GetDlgItem(IDC_EDIT_SERVICE_ID);
 		if (pedServiceID)
@@ -146,11 +139,11 @@ BOOL CDlgServiceEditor::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// TODO:  ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯
+	// TODO:  åœ¨æ­¤æ·»åŠ é¢å¤–çš„åˆå§‹åŒ–
 
 	m_lvList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-	m_lvList.InsertColumn(0, _T("ÎÄ¼şÂ·¾¶"), LVCFMT_LEFT, 500);
+	m_lvList.InsertColumn(0, _T("æ–‡ä»¶è·¯å¾„"), LVCFMT_LEFT, 500);
 
 	m_cbServiceType.ResetContent();
 	for (UINT i = 0; i < SERVICE_TYPE_MAX; i++)
@@ -159,7 +152,7 @@ BOOL CDlgServiceEditor::OnInitDialog()
 	}
 	m_cbServiceType.SetCurSel(0);
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// Òì³£:  OCX ÊôĞÔÒ³Ó¦·µ»Ø FALSE
+	// å¼‚å¸¸:  OCX å±æ€§é¡µåº”è¿”å› FALSE
 }
 
 void CDlgServiceEditor::FillList()
@@ -174,23 +167,23 @@ void CDlgServiceEditor::FillList()
 
 void CDlgServiceEditor::OnBnClickedOk()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	UpdateData(true);
 	if (m_ServiceInfo.GetName().IsEmpty())
 	{
-		AfxMessageBox(_T("ÇëÊäÈë·şÎñÃû³Æ"));
+		AfxMessageBox(_T("è¯·è¾“å…¥æœåŠ¡åç§°"));
 		return;
 	}
 	if ((m_ServiceInfo.GetType() == SERVICE_TYPE_NORMAL || m_ServiceInfo.GetType() == SERVICE_TYPE_WIN_SERVICE) && m_ServiceInfo.GetImageFilePath().IsEmpty())
 	{
-		AfxMessageBox(_T("ÇëÊäÈë·şÎñ¿ÉÖ´ĞĞÎÄ¼şÃû³Æ"));
+		AfxMessageBox(_T("è¯·è¾“å…¥æœåŠ¡å¯æ‰§è¡Œæ–‡ä»¶åç§°"));
 		return;
 	}
 	if (m_IsAddNew)
 	{
 		if (m_ServiceInfo.GetServiceID() == 0)
 		{
-			AfxMessageBox(_T("ÇëÊäÈë·şÎñID"));
+			AfxMessageBox(_T("è¯·è¾“å…¥æœåŠ¡ID"));
 			return;
 		}
 		const CEasyArray<CServiceInfo>& ServiceList = m_pConnection->GetServiceList();
@@ -198,29 +191,29 @@ void CDlgServiceEditor::OnBnClickedOk()
 		{
 			if (m_ServiceInfo.GetServiceID() == ServiceList[i].GetServiceID())
 			{
-				AfxMessageBox(_T("·şÎñIDÒÑ±»Ê¹ÓÃ£¬Çë¸ü»»"));
+				AfxMessageBox(_T("æœåŠ¡IDå·²è¢«ä½¿ç”¨ï¼Œè¯·æ›´æ¢"));
 				return;
 			}
 		}
 
-		if (m_ServiceInfo.GetCharSet() == CP_UTF8)
-		{
-			char Buffer[1024];
-			UINT Len = AnsiToUTF8(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
-			Buffer[Len] = 0;
-			m_ServiceInfo.SetName(Buffer);
-		}
+		//if (m_ServiceInfo.GetCharSet() == CP_UTF8)
+		//{
+		//	char Buffer[1024];
+		//	UINT Len = AnsiToUTF8(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
+		//	Buffer[Len] = 0;
+		//	m_ServiceInfo.SetName(Buffer);
+		//}
 		m_pConnection->QueryAddService(m_ServiceInfo);
 	}
 	else
 	{
-		if (m_ServiceInfo.GetCharSet() == CP_UTF8)
-		{
-			char Buffer[1024];
-			UINT Len = AnsiToUTF8(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
-			Buffer[Len] = 0;
-			m_ServiceInfo.SetName(Buffer);
-		}
+		//if (m_ServiceInfo.GetCharSet() == CP_UTF8)
+		//{
+		//	char Buffer[1024];
+		//	UINT Len = AnsiToUTF8(m_ServiceInfo.GetName(), m_ServiceInfo.GetName().GetLength(), Buffer, 1000);
+		//	Buffer[Len] = 0;
+		//	m_ServiceInfo.SetName(Buffer);
+		//}
 		m_pConnection->QueryEditService(m_ServiceInfo);
 	}
 
@@ -232,7 +225,7 @@ void CDlgServiceEditor::OnBnClickedOk()
 
 void CDlgServiceEditor::OnBnClickedButtonAddExecFile()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	UpdateData(true);
 	m_ServiceInfo.GetOtherExecFileList().Add((LPCTSTR)m_ExecFile);
 	FillList();
@@ -241,7 +234,7 @@ void CDlgServiceEditor::OnBnClickedButtonAddExecFile()
 
 void CDlgServiceEditor::OnBnClickedButtonDelExecFile()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	POSITION Pos = m_lvList.GetFirstSelectedItemPosition();
 	if (Pos)
 	{
@@ -249,7 +242,7 @@ void CDlgServiceEditor::OnBnClickedButtonDelExecFile()
 		UINT Index = m_lvList.GetItemData(Item);
 		if (Index < m_ServiceInfo.GetOtherExecFileList().GetCount())
 		{
-			if (AfxMessageBoxEx(MB_YESNO, 0, _T("ÊÇ·ñÒªÉ¾³ı[%s]?"), m_ServiceInfo.GetOtherExecFileList()[Index]) == IDYES)
+			if (AfxMessageBoxEx(MB_YESNO, 0, _T("æ˜¯å¦è¦åˆ é™¤[%s]?"), m_ServiceInfo.GetOtherExecFileList()[Index]) == IDYES)
 			{
 				m_ServiceInfo.GetOtherExecFileList().Delete(Index);
 				FillList();

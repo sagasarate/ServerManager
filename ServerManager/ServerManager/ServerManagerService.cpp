@@ -20,6 +20,7 @@ CServerManagerService::CServerManagerService(void)
 	//m_RecentTimeSpan = 0;
 	m_CURLMHandle = NULL;
 	m_HaveRequestRunning = 0;
+	m_WeChatTokenExpireTime = 0;
 	FUNCTION_END;
 }
 
@@ -82,6 +83,8 @@ BOOL CServerManagerService::Init(CNetServer * pServer)
 
 	m_RequestPool.Create(32, 32, 32);
 
+	m_TaskManager.Init(this);
+
 	return TRUE;
 	FUNCTION_END;
 	return FALSE;
@@ -90,6 +93,7 @@ BOOL CServerManagerService::Init(CNetServer * pServer)
 void CServerManagerService::Destory()
 {
 	FUNCTION_BEGIN;
+	m_TaskManager.Destory();
 	void * Pos = m_RequestPool.GetFirstObjectPos();
 	while (Pos)
 	{
@@ -167,6 +171,8 @@ int CServerManagerService::Update(int ProcessPacketLimit)
 	FUNCTION_BEGIN;
 	int Process=CNetService::Update(ProcessPacketLimit);
 
+	Process += m_TaskManager.Update(ProcessPacketLimit);
+
 	CEasyArray<CServerManagerClient *> DeleteList;
 	void * Pos=m_ClientPool.GetFirstObjectPos();
 	while(Pos)
@@ -198,7 +204,8 @@ int CServerManagerService::Update(int ProcessPacketLimit)
 	{
 		CServiceInfoEx& SeriveInfo = m_ServiceInfoList[i];
 		if (SeriveInfo.GetType() == SERVICE_TYPE_NORMAL &&
-			SeriveInfo.GetStatus() == SERVICE_STATUS_STOP && SeriveInfo.GetLastOperation() == SERVICE_OPERATION_STARTUP &&
+			SeriveInfo.GetStatus() == SERVICE_STATUS_STOP && SeriveInfo.GetKeepRunning() &&
+			SeriveInfo.GetLastOperation() != SERVICE_OPERATION_SHUTDOWN &&
 			CurTime - SeriveInfo.GetLastStatusChangeTime() >= SeriveInfo.GetRestartupTime())
 		{
 			Log("检测到服务[%u](%s)已停止，重新启动", SeriveInfo.GetServiceID(), (LPCTSTR)SeriveInfo.GetName());
@@ -490,6 +497,7 @@ void CServerManagerService::FetchProcessInfo()
 				LogFileName.Format("Log%cServiceStatus.%u", DIR_SLASH, ServiceInfo.GetServiceID());
 				CCSVFileLogPrinter * pStatusLog = new CCSVFileLogPrinter(ILogPrinter::LOG_LEVEL_NORMAL, CFileTools::MakeModuleFullPath(NULL, LogFileName),
 					"ServiceStatus,ProcessID,CPUUsedTime,CPUUsed,MemoryUsed,VirtualMemoryUsed");
+				pStatusLog->SetBackup(CSystemConfig::GetInstance()->GetLogBackupDir(), CSystemConfig::GetInstance()->GetLogBackupDelay());
 				CLogManager::GetInstance()->AddChannel(ServiceInfo.LogID, pStatusLog);
 				SAFE_RELEASE(pStatusLog);
 			}
@@ -530,7 +538,10 @@ void CServerManagerService::FetchProcessInfo()
 				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 				if (ServiceInfo.GetLastOperation() == SERVICE_OPERATION_STARTUP)
+				{
 					SendNotify(&ServiceInfo, "Service Shutdown Unexpected");
+					Log("服务%u意外终止", ServiceInfo.GetServiceID());
+				}
 			}
 			break;
 		case SERVICE_STATUS_SHUTDOWNNING:
@@ -934,7 +945,7 @@ void CServerManagerService::SendNotify(CServiceInfoEx * pServiceInfo, LPCTSTR sz
 	{
 		CEasyString MsgContent;
 		MsgContent.Format("{"
-			"\"touser\" : \"%s\","
+			"\"totag\" : \"%s\","
 			"\"msgtype\" : \"text\","
 			"\"agentid\" : 1000007,"
 			"\"text\" : {\"content\" : \"(%s)(%s)%s\"},"
@@ -944,7 +955,20 @@ void CServerManagerService::SendNotify(CServiceInfoEx * pServiceInfo, LPCTSTR sz
 			(LPCTSTR)pServiceInfo->GetName(),
 			szMsg
 			);
-		AddRequest(CMainConfig::GetInstance()->GetNotifyConfig().GetTokenURL, HTTP_REQUEST_TYPE_GET_TOKEN, 0, 0, MsgContent, NULL);
+		UINT CurTime = time(NULL);
+		if (m_WeChatToken.IsEmpty() || m_WeChatTokenExpireTime <= CurTime)
+		{
+			//需要重新获取token
+			AddRequest(CMainConfig::GetInstance()->GetNotifyConfig().GetTokenURL, HTTP_REQUEST_TYPE_GET_TOKEN, 0, 0, MsgContent, NULL);
+		}
+		else
+		{
+			CEasyString URL;
+			URL.Format("%s?access_token=%s",
+				(LPCTSTR)CMainConfig::GetInstance()->GetNotifyConfig().SendNotifyURL,
+				(LPCTSTR)m_WeChatToken);
+			AddRequest(URL, HTTP_REQUEST_TYPE_SEND_NOTIFY, 0, 0, MsgContent, MsgContent);
+		}		
 	}
 	else
 	{
@@ -1260,12 +1284,17 @@ void CServerManagerService::OnRequestResult(int RequestType, long ResponseCode, 
 								rapidjson::Value& TokenValue = Root["access_token"];
 								if (TokenValue.IsString())
 								{
-									CEasyString Token = TokenValue.GetString();
+									m_WeChatToken = TokenValue.GetString();
+									rapidjson::Value& ExpireValue = Root["expires_in"];
+									if (ExpireValue.IsInt())
+									{
+										m_WeChatTokenExpireTime = time(NULL) + ExpireValue.GetInt();
+									}
 
 									CEasyString URL;
 									URL.Format("%s?access_token=%s", 
 										(LPCTSTR)CMainConfig::GetInstance()->GetNotifyConfig().SendNotifyURL,
-										(LPCTSTR)Token);
+										(LPCTSTR)m_WeChatToken);
 
 									AddRequest(URL, HTTP_REQUEST_TYPE_SEND_NOTIFY, 0, 0, NULL, Param3);
 								}
@@ -1304,6 +1333,42 @@ void CServerManagerService::OnRequestResult(int RequestType, long ResponseCode, 
 		}
 		break;
 	case HTTP_REQUEST_TYPE_SEND_NOTIFY:
+		{
+			rapidjson::Document Root;
+			Root.Parse(Content);
+			if (!Root.HasParseError())
+			{
+				if (Root.HasMember("errcode"))
+				{
+					rapidjson::Value& ErrorCode = Root["errcode"];
+					if (ErrorCode.IsInt())
+					{
+						int ErrCode = ErrorCode.GetInt();
+						if (ErrCode == 42001)
+						{
+							LogDebug("access_token已过期，重新获取");
+							AddRequest(CMainConfig::GetInstance()->GetNotifyConfig().GetTokenURL, HTTP_REQUEST_TYPE_GET_TOKEN, 0, 0, Param3, NULL);
+						}
+						else if (ErrCode != 0)
+						{
+							Log("SendNotify错误%d", ErrCode);
+						}
+					}
+					else
+					{
+						Log("返回数据格式错误,errcode字段不是数字");
+					}
+				}
+				else
+				{
+					Log("返回数据格式错误,没有errcode字段");
+				}
+			}
+			else
+			{
+				Log("数据解析失败");
+			}
+		}
 		break;
 	default:
 		Log(_T("未知的请求类型%d"), RequestType);

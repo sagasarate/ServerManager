@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Work", "Work", "{2B32DF5D-9E64-4A5A-BD2F-11DF057242D0}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,8 +16,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerFrameWork", "..\Libs\ServerFrameWork\ServerFrameWork.vcxproj", "{91800885-0BE8-4AA8-937F-6FE5C28790EA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerManager", "ServerManager\ServerManager.vcxproj", "{AA8490BB-8AAA-4C41-AD4E-2CBB3A71BC24}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServiceController", "ServiceController\ServiceController.vcxproj", "{CE7CEA77-940C-4294-8F39-5A05721EA349}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Protocol", "Protocol\Protocol.vcxproj", "{1C9A78D6-1718-46C1-9DDF-C13143558521}"
 EndProject
@@ -101,22 +99,6 @@ Global
 		{AA8490BB-8AAA-4C41-AD4E-2CBB3A71BC24}.ReleaseUnicode|Win32.Build.0 = Release|Win32
 		{AA8490BB-8AAA-4C41-AD4E-2CBB3A71BC24}.ReleaseUnicode|x64.ActiveCfg = Release|x64
 		{AA8490BB-8AAA-4C41-AD4E-2CBB3A71BC24}.ReleaseUnicode|x64.Build.0 = Release|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Debug|Win32.Build.0 = Debug|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Debug|x64.ActiveCfg = Debug|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Debug|x64.Build.0 = Debug|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.DebugUnicode|Win32.ActiveCfg = Debug|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.DebugUnicode|Win32.Build.0 = Debug|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.DebugUnicode|x64.ActiveCfg = Debug|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.DebugUnicode|x64.Build.0 = Debug|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Release|Win32.ActiveCfg = Release|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Release|Win32.Build.0 = Release|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Release|x64.ActiveCfg = Release|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.Release|x64.Build.0 = Release|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.ReleaseUnicode|Win32.ActiveCfg = Release|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.ReleaseUnicode|Win32.Build.0 = Release|Win32
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.ReleaseUnicode|x64.ActiveCfg = Release|x64
-		{CE7CEA77-940C-4294-8F39-5A05721EA349}.ReleaseUnicode|x64.Build.0 = Release|x64
 		{1C9A78D6-1718-46C1-9DDF-C13143558521}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1C9A78D6-1718-46C1-9DDF-C13143558521}.Debug|Win32.Build.0 = Debug|Win32
 		{1C9A78D6-1718-46C1-9DDF-C13143558521}.Debug|x64.ActiveCfg = Debug|x64
@@ -136,5 +118,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D623AB56-E5FC-4D36-9727-F0589D07C0A1}
 	EndGlobalSection
 EndGlobal

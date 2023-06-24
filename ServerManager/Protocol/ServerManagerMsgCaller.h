@@ -20,7 +20,7 @@ public:
 		Password				
 	返回值:无特别意义
 	*************************************************/
-	virtual int Login(LPCTSTR UserName ,LPCTSTR Password );
+	virtual int Login(const CEasyString& UserName ,const CEasyString& Password );
 		
 	
 	
@@ -151,9 +151,10 @@ public:
 	参数:
 		ServiceID				
 		FilePath				
+		StartOffset				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadStart(UINT ServiceID ,const CEasyString& FilePath );
+	virtual int FileDownloadStart(UINT ServiceID ,const CEasyString& FilePath ,UINT64 StartOffset );
 		
 	
 	
@@ -161,22 +162,21 @@ public:
 	函数名:	FileDownloadData
 	用途:	
 	参数:
-		Offset				
-		Length				
+		
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadData(UINT64 Offset ,UINT Length );
+	virtual int FileDownloadData();
 		
 	
 	
 	/*************************************************
-	函数名:	FileDownloadEnd
+	函数名:	FileDownloadFinish
 	用途:	
 	参数:
 		
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadEnd();
+	virtual int FileDownloadFinish();
 		
 	
 	
@@ -186,9 +186,10 @@ public:
 	参数:
 		ServiceID				
 		FilePath				
+		FileLastWriteTime				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadStart(UINT ServiceID ,const CEasyString& FilePath );
+	virtual int FileUploadStart(UINT ServiceID ,const CEasyString& FilePath ,UINT FileLastWriteTime );
 		
 	
 	
@@ -196,23 +197,23 @@ public:
 	函数名:	FileUploadData
 	用途:	
 	参数:
-		Offset				
 		Length				
 		FileData				
+		IsLast				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadData(UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData );
+	virtual int FileUploadData(UINT Length ,const CEasyBuffer& FileData ,bool IsLast );
 		
 	
 	
 	/*************************************************
-	函数名:	FileUploadEnd
+	函数名:	FileUploadFinish
 	用途:	
 	参数:
-		FileLastWriteTime				
+		
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadEnd(UINT FileLastWriteTime );
+	virtual int FileUploadFinish();
 		
 	
 	
@@ -295,7 +296,7 @@ public:
 		Command				
 	返回值:无特别意义
 	*************************************************/
-	virtual int SendCommand(UINT ServiceID ,LPCTSTR Command );
+	virtual int SendCommand(UINT ServiceID ,const CEasyString& Command );
 		
 	
 	
@@ -355,10 +356,10 @@ public:
 		FileMD5				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileCompare(UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 );
+	virtual int FileCompare(UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,const CEasyString& FileMD5 );
 		
 	
-	static bool PackMsgLogin(CSmartStruct& Packet,LPCTSTR UserName ,LPCTSTR Password );
+	static bool PackMsgLogin(CSmartStruct& Packet,const CEasyString& UserName ,const CEasyString& Password );
 	static bool PackMsgGetServiceList(CSmartStruct& Packet);
 	static bool PackMsgGetProcessList(CSmartStruct& Packet,short Page ,short PageLen );
 	static bool PackMsgGetNetAdapterList(CSmartStruct& Packet);
@@ -369,23 +370,23 @@ public:
 	static bool PackMsgProcessShutdown(CSmartStruct& Packet,UINT ProcessID ,BYTE ShutdownType );
 	static bool PackMsgExecuteScript(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Script ,bool FromFile );
 	static bool PackMsgBrowseServiceDir(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Dir ,short Page ,short PageLen );
-	static bool PackMsgFileDownloadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath );
-	static bool PackMsgFileDownloadData(CSmartStruct& Packet,UINT64 Offset ,UINT Length );
-	static bool PackMsgFileDownloadEnd(CSmartStruct& Packet);
-	static bool PackMsgFileUploadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath );
-	static bool PackMsgFileUploadData(CSmartStruct& Packet,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData );
-	static bool PackMsgFileUploadEnd(CSmartStruct& Packet,UINT FileLastWriteTime );
+	static bool PackMsgFileDownloadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,UINT64 StartOffset );
+	static bool PackMsgFileDownloadData(CSmartStruct& Packet);
+	static bool PackMsgFileDownloadFinish(CSmartStruct& Packet);
+	static bool PackMsgFileUploadStart(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,UINT FileLastWriteTime );
+	static bool PackMsgFileUploadData(CSmartStruct& Packet,UINT Length ,const CEasyBuffer& FileData ,bool IsLast );
+	static bool PackMsgFileUploadFinish(CSmartStruct& Packet);
 	static bool PackMsgCreateDir(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Dir );
 	static bool PackMsgDeleteFile(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,bool IsRecursive );
 	static bool PackMsgChangeFileMode(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,UINT Mode );
 	static bool PackMsgAddService(CSmartStruct& Packet,const CSmartStruct& ServiceInfo );
 	static bool PackMsgEditService(CSmartStruct& Packet,const CSmartStruct& ServiceInfo );
 	static bool PackMsgDeleteService(CSmartStruct& Packet,UINT ServiceID );
-	static bool PackMsgSendCommand(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR Command );
+	static bool PackMsgSendCommand(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& Command );
 	static bool PackMsgEnableLogRecv(CSmartStruct& Packet,UINT ServiceID ,bool Enable );
 	static bool PackMsgGetServerStatus(CSmartStruct& Packet,UINT ServiceID ,const CSmartStruct& StatusListPacket );
 	static bool PackMsgGetAllServerStatus(CSmartStruct& Packet,UINT ServiceID );
 	static bool PackMsgGetServerStatusFormat(CSmartStruct& Packet,UINT ServiceID );
-	static bool PackMsgFileCompare(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 );
+	static bool PackMsgFileCompare(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,const CEasyString& FileMD5 );
 	
 };

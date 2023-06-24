@@ -74,7 +74,7 @@
 
 
 #define CURL_STATICLIB
-#include "../../Libs/curl/include/curl/curl.h"
+#include <curl/curl.h>
 
 #ifdef WIN32
 //#include "Tlhelp32.h"
@@ -84,7 +84,7 @@
 #pragma comment(lib,"Iphlpapi.lib")
 //#pragma comment(lib,"Toolhelp.lib")
 #else
-#include <sys/vfs.h>d
+#include <sys/vfs.h>
 #endif
 
 #define MAX_SERVER_TERMINATE_WAIT_TIME	300000
@@ -102,6 +102,8 @@
 #define CONTROL_PIPE_RECREATE_TIME		(5*1000)
 #define SERVICE_LOG_ID_SEED				7550000
 
+#define	MAX_FILE_READ_BLOCK				32
+#define TASK_STAT_TIME					10000
 
 
 //#include "Protocol.h"
@@ -170,6 +172,78 @@ enum HTTP_REQUEST_TYPE
 	HTTP_REQUEST_TYPE_SEND_NOTIFY,
 };
 
+enum TASK_TYPE
+{
+	TASK_TYPE_NONE,
+	TASK_TYPE_READ,
+	TASK_TYPE_MAKE_MD5,
+	TASK_TYPE_WRITE,
+};
+enum TASK_STATUS
+{
+	TASK_STATUS_NONE,
+	TASK_STATUS_PROCESSING,
+	TASK_STATUS_FINISH,
+	TASK_STATUS_END,
+	TASK_STATUS_CANCEL,
+	TASK_STATUS_ERROR
+};
+enum WORK_STATUS
+{
+	WORK_STATUS_NONE,
+	WORK_STATUS_LOAD,
+	WORK_STATUS_SAVE,
+	WORK_STATUS_MD5,
+	WORK_STATUS_COMPRESS,
+	WORK_STATUS_UNCOMPRESS,
+};
+
+
+struct FILE_DATA_BLOCK
+{
+	UINT								DataID;
+	volatile UINT						SerialNumber;
+	UINT64								Offset;
+	CEasyBuffer							DataBuffer;
+	UINT								OriginSize;
+	bool								IsLast;
+	bool								NeedAck;
+
+	void SetID(UINT ID)
+	{
+		DataID = ID;
+		SerialNumber = 0;
+		OriginSize = 0;
+		IsLast = false;
+		NeedAck = false;
+	}	
+};
+
+typedef FILE_DATA_BLOCK* LPFILE_DATA_BLOCK;
+
+struct FILE_DATA_BLOCK_POINTER
+{
+	LPFILE_DATA_BLOCK pDataBlock;
+	FILE_DATA_BLOCK_POINTER()
+	{
+		pDataBlock = NULL;
+	}
+	FILE_DATA_BLOCK_POINTER(LPFILE_DATA_BLOCK pData)
+	{
+		pDataBlock = pData;
+	}
+	operator LPFILE_DATA_BLOCK()
+	{
+		return pDataBlock;
+	}
+	bool operator<(const FILE_DATA_BLOCK_POINTER& Block)
+	{
+		return pDataBlock->SerialNumber < Block.pDataBlock->SerialNumber;
+	}
+};
+
+
+
 struct HTTP_REQUEST_INFO
 {
 	UINT						RequestID;
@@ -223,9 +297,26 @@ public:
 	}
 };
 
+inline bool ReadPoolConfig(xml_node& XMLContent, STORAGE_POOL_SETTING& Config)
+{
+
+	if (XMLContent.has_attribute(_T("StartSize")))
+		Config.StartSize = XMLContent.attribute(_T("StartSize"));
+	if (XMLContent.has_attribute(_T("GrowSize")))
+		Config.GrowSize = XMLContent.attribute(_T("GrowSize"));
+	if (XMLContent.has_attribute(_T("GrowLimit")))
+		Config.GrowLimit = XMLContent.attribute(_T("GrowLimit"));
+
+	return true;
+}
+
 #include "MainConfig.h"
 
-
+#include "BaseTask.h"
+#include "FileTask.h"
+#include "SerialWorkThread.h"
+#include "ParallelWorkThread.h"
+#include "TaskManager.h"
 
 #include "ScriptExecutor.h"
 #include "ServerManagerClient.h"

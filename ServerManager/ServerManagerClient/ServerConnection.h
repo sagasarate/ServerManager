@@ -22,6 +22,8 @@ protected:
 	CServerManagerClientView *				m_pView;
 	CEasyBuffer								m_AssembleBuffer;
 	CEasyBuffer								m_SendBuffer;
+	CEasyString								m_Name;
+	CEasyString								m_Group;
 	CEasyString								m_ServerAddress;
 	UINT									m_ServerPort;
 	CEasyString								m_UserName;
@@ -42,14 +44,16 @@ protected:
 
 	CSmartStruct							m_PacketBuffer;
 
+	HTREEITEM								m_hTreeItem;
+
 	//IFileAccessor *							m_pDataLogFile;
 	
 public:
 	CServerConnection();
 	~CServerConnection(void);
 
-	bool Init(CServerManagerClientView * pView, CNetServer * pServer, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password);
-	bool Reconnection(LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password);
+	bool Init(CServerManagerClientView * pView, CNetServer * pServer, LPCTSTR szName, LPCTSTR szGroup, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password);
+	bool Reconnection(LPCTSTR szName, LPCTSTR szGroup, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password);
 
 	virtual void OnConnection(bool IsSucceed);
 	virtual void OnDisconnection();
@@ -62,6 +66,11 @@ public:
 	UINT GetServerPort();
 	LPCTSTR GetUserName();
 	LPCTSTR GetPassword();
+
+	LPCTSTR GetName();
+	LPCTSTR GetGroup();
+	void SetTreeItem(HTREEITEM hTreeItem);
+	HTREEITEM GetTreeItem();
 
 	const CEasyArray<CServiceInfo>& GetServiceList();
 	const CServiceInfo * GetServiceInfo(UINT ServiceID);
@@ -84,12 +93,12 @@ public:
 	void QueryBrowseWorkDir(UINT ServiceID, LPCTSTR Dir);
 
 	void QueryStartDownload(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath);
-	void QueryDownloadData(UINT64 Offset, UINT Length);
-	void QueryEndDownload();
+	void QueryDownloadData();
+	void QueryDownloadFinish();
 
-	void QueryStartUpload(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath);
-	void QueryUploadData(UINT64 Offset, UINT Length, const CEasyBuffer& FileData);
-	void QueryEndUpload(UINT FileLastWriteTime);
+	void QueryStartUpload(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, UINT FileLastWriteTime);
+	void QueryUploadData(UINT Length, const CEasyBuffer& FileData, bool IsLast);
+	void QueryUploadFinish();
 
 	void QueryCreateDir(UINT ServiceID, LPCTSTR Dir);
 	void QueryDeleteFile(UINT ServiceID, LPCTSTR FilePath);
@@ -124,12 +133,12 @@ protected:
 	virtual int ProcessShutdownAck(short Result, UINT ProcessID) override;
 	virtual int ExecuteScriptAck(short Result, UINT ServiceID, int ErrorCode, int LastLine) override;
 	virtual int BrowseServiceDirAck(short Result, UINT ServiceID, const CEasyString& Dir, short Page, short PageLen, short TotalPage, const CSmartStruct& FileListData) override;
-	virtual int FileDownloadStartAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize) override;
-	virtual int FileDownloadDataAck(short Result, UINT64 Offset, UINT Length, const CEasyBuffer& FileData) override;
-	virtual int FileDownloadEndAck(short Result, UINT FileLastWriteTime) override;
+	virtual int FileDownloadStartAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize, UINT FileLastWriteTime) override;
+	virtual int FileDownloadDataAck(short Result, UINT64 Offset, UINT Length, const CEasyBuffer& FileData, bool IsLast) override;
+	virtual int FileDownloadFinishAck(short Result, const CEasyString& MD5) override;
 	virtual int FileUploadStartAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize) override;
-	virtual int FileUploadDataAck(short Result, UINT64 Offset, UINT Length) override;
-	virtual int FileUploadEndAck(short Result) override;
+	virtual int FileUploadDataAck(short Result, UINT Length, bool IsLast) override;
+	virtual int FileUploadFinishAck(short Result, const CEasyString& MD5) override;
 	virtual int CreateDirAck(short Result, UINT ServiceID, const CEasyString& Dir) override;
 	virtual int DeleteFileAck(short Result, UINT ServiceID, const CEasyString& FilePath) override;
 	virtual int ChangeFileModeAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT Mode) override;
@@ -138,10 +147,10 @@ protected:
 	virtual int DeleteServiceAck(short Result, UINT ServiceID) override;
 	virtual int SendCommandAck(short Result, UINT ServiceID) override;
 	virtual int EnableLogRecvAck(short Result, UINT ServiceID, bool Enable) override;
-	virtual int ConsoleLogNotify(UINT ServiceID, LPCTSTR LogMsg) override;
+	virtual int ConsoleLogNotify(UINT ServiceID, const CEasyString& LogMsg) override;
 	virtual int GetServerStatusAck(short Result, UINT ServiceID, const CSmartStruct& StatusListPacket) override;
 	virtual int GetServerStatusFormatAck(short Result, UINT ServiceID, const CSmartStruct& StatusFormatPacket) override;
-	virtual int FileCompareAck(short Result, UINT ServiceID, LPCTSTR FilePath) override;
+	virtual int FileCompareAck(short Result, UINT ServiceID, const CEasyString& FilePath) override;
 
 };
 
@@ -160,6 +169,22 @@ inline LPCTSTR CServerConnection::GetUserName()
 inline LPCTSTR CServerConnection::GetPassword()
 {
 	return m_Password;
+}
+inline LPCTSTR CServerConnection::GetName()
+{
+	return m_Name;
+}
+inline LPCTSTR CServerConnection::GetGroup()
+{
+	return m_Group;
+}
+inline void CServerConnection::SetTreeItem(HTREEITEM hTreeItem)
+{
+	m_hTreeItem = hTreeItem;
+}
+inline HTREEITEM CServerConnection::GetTreeItem()
+{
+	return m_hTreeItem;
 }
 inline const CEasyArray<CServiceInfo>& CServerConnection::GetServiceList()
 {

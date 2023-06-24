@@ -19,6 +19,7 @@ CServerConnection::CServerConnection()
 	m_KeepAliveCount = 0;
 	m_IsLogined = false;
 	//m_pDataLogFile = NULL;
+	m_hTreeItem = NULL;
 
 	CServerManagerAckMsgHandler::InitMsgMap(m_MsgFnMap);
 }
@@ -28,12 +29,14 @@ CServerConnection::~CServerConnection(void)
 	//SAFE_RELEASE(m_pDataLogFile);
 }
 
-bool CServerConnection::Init(CServerManagerClientView * pView, CNetServer * pServer, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password)
+bool CServerConnection::Init(CServerManagerClientView * pView, CNetServer * pServer, LPCTSTR szName, LPCTSTR szGroup, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password)
 {
 	m_pView = pView;
 	SetServer(pServer);
-	m_AssembleBuffer.Create(MAX_MSG_SIZE + NET_DATA_BLOCK_SIZE);
+	m_AssembleBuffer.Create(MAX_MSG_SIZE*MAX_DOWNLOAD_QUERY + NET_DATA_BLOCK_SIZE);
 	m_SendBuffer.Create(MAX_MSG_SIZE + NET_DATA_BLOCK_SIZE);
+	m_Name = szName;
+	m_Group = szGroup;
 	m_ServerAddress = szServerAddress;
 	m_ServerPort = ServerPort;
 	m_UserName = UserName;
@@ -48,8 +51,10 @@ bool CServerConnection::Init(CServerManagerClientView * pView, CNetServer * pSer
 	return true;
 }
 
-bool CServerConnection::Reconnection(LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password)
+bool CServerConnection::Reconnection(LPCTSTR szName, LPCTSTR szGroup, LPCTSTR szServerAddress, UINT ServerPort, LPCTSTR UserName, LPCTSTR Password)
 {
+	m_Name = szName;
+	m_Group = szGroup;
 	m_ServerAddress = szServerAddress;
 	m_ServerPort = ServerPort;
 	m_UserName = UserName;
@@ -78,7 +83,7 @@ void CServerConnection::OnConnection(bool IsSucceed)
 		CServerManagerMsgCaller MsgCaller(this);
 
 		MsgCaller.Login(m_UserName, m_Password);
-		PrintLog(0, _T("以用户[%s]登录"), m_UserName);
+		PrintLog(0, _T("以用户[%s]登录"), (LPCTSTR)m_UserName);
 
 		//SAFE_RELEASE(m_pDataLogFile);
 		//m_pDataLogFile = CFileSystemManager::GetInstance()->CreateFileAccessor(FILE_CHANNEL_NORMAL1);
@@ -100,7 +105,6 @@ void CServerConnection::OnDisconnection()
 	PrintLog(-1, _T("%s已断开"), (LPCTSTR)m_ServerAddress);
 
 	m_TaskQueue.DeleteAllTask();
-	m_TaskQueue.SafeTerminate(5000);
 	//SAFE_RELEASE(m_pDataLogFile);
 
 	if(m_pView)
@@ -301,49 +305,50 @@ void CServerConnection::QueryStartDownload(UINT ServiceID,LPCTSTR SourceFilePath
 		ServiceID,
 		SourceFilePath,TargetFilePath);
 
-	MsgCaller.FileDownloadStart(ServiceID, SourceFilePath);
+	MsgCaller.FileDownloadStart(ServiceID, SourceFilePath, 0);
 }
 
-void CServerConnection::QueryDownloadData(UINT64 Offset, UINT Length)
+void CServerConnection::QueryDownloadData()
+{
+	CServerManagerMsgCaller MsgCaller(this);
+	//LogDebug("请求下载数据");
+	MsgCaller.FileDownloadData();
+}
+
+void CServerConnection::QueryDownloadFinish()
+{
+	CServerManagerMsgCaller MsgCaller(this);
+	LogDebug("请求完成下载");
+	MsgCaller.FileDownloadFinish();
+}
+
+void CServerConnection::QueryStartUpload(UINT ServiceID,LPCTSTR SourceFilePath,LPCTSTR TargetFilePath, UINT FileLastWriteTime)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	MsgCaller.FileDownloadData(Offset, Length);
-}
-
-void CServerConnection::QueryEndDownload()
-{
-	CServerManagerMsgCaller MsgCaller(this);
-
-	MsgCaller.FileDownloadEnd();
-}
-
-void CServerConnection::QueryStartUpload(UINT ServiceID,LPCTSTR SourceFilePath,LPCTSTR TargetFilePath)
-{
-	CServerManagerMsgCaller MsgCaller(this);
-
-	PrintLog(0, _T("请求服务器[%s]上的服务[%u]上传文件[%s]到[%s]"),
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]上传文件[%s]到[%s],文件时间%u"),
 		(LPCTSTR)m_ServerAddress,
 		ServiceID,
-		SourceFilePath,TargetFilePath);
+		SourceFilePath,TargetFilePath, FileLastWriteTime);
 
-	MsgCaller.FileUploadStart(ServiceID, TargetFilePath);
+	MsgCaller.FileUploadStart(ServiceID, TargetFilePath, FileLastWriteTime);
 }
 
-void CServerConnection::QueryUploadData(UINT64 Offset, UINT Length, const CEasyBuffer& FileData)
+void CServerConnection::QueryUploadData(UINT Length, const CEasyBuffer& FileData, bool IsLast)
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
-	//PrintLog(_T("Upload(%u),%u"),
-	//	FileData.GetUsedSize(), Length);
-
-	MsgCaller.FileUploadData(Offset, Length, FileData);
+	//PrintLog(0, _T("Upload%u(%u)@%llu"),
+	//	FileData.GetUsedSize(), Length, Offset);
+	//LogDebug("请求上传数据");
+	MsgCaller.FileUploadData(Length, FileData, IsLast);
 }
-void CServerConnection::QueryEndUpload(UINT FileLastWriteTime)
+
+void CServerConnection::QueryUploadFinish()
 {
 	CServerManagerMsgCaller MsgCaller(this);
-
-	MsgCaller.FileUploadEnd(FileLastWriteTime);
+	LogDebug("请求完成上传");
+	MsgCaller.FileUploadFinish();
 }
 
 void CServerConnection::QueryCreateDir(UINT ServiceID,LPCTSTR Dir)
@@ -489,6 +494,10 @@ void CServerConnection::QueryFileCompare(UINT ServiceID, LPCTSTR FilePath, UINT6
 {
 	CServerManagerMsgCaller MsgCaller(this);
 
+	PrintLog(0, _T("请求服务器[%s]上的服务[%u]对比文件[%s]"),
+		(LPCTSTR)m_ServerAddress,
+		ServiceID,
+		FilePath);
 	MsgCaller.FileCompare(ServiceID, FilePath, FileSize, FileMD5);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -652,19 +661,19 @@ int CServerConnection::BrowseServiceDirAck(short Result, UINT ServiceID, const C
 
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerConnection::FileDownloadStartAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize)
+int CServerConnection::FileDownloadStartAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize, UINT FileLastWriteTime)
 {
-	m_TaskQueue.OnStartDownloadResult(Result, ServiceID, FilePath, FileSize);
+	m_TaskQueue.OnStartDownloadResult(Result, ServiceID, FilePath, FileSize, FileLastWriteTime);
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerConnection::FileDownloadDataAck(short Result, UINT64 Offset, UINT Length, const CEasyBuffer& FileData)
+int CServerConnection::FileDownloadDataAck(short Result, UINT64 Offset, UINT Length, const CEasyBuffer& FileData, bool IsLast)
 {
-	m_TaskQueue.OnDownloadData(Result, Offset, Length, FileData);
+	m_TaskQueue.OnDownloadData(Result, Offset, Length, FileData, IsLast);
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerConnection::FileDownloadEndAck(short Result, UINT FileLastWriteTime)
+int CServerConnection::FileDownloadFinishAck(short Result, const CEasyString& MD5)
 {
-	m_TaskQueue.OnEndDownloadResult(Result, FileLastWriteTime);
+	m_TaskQueue.OnDownloadFinish(Result, MD5);
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::FileUploadStartAck(short Result, UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize)
@@ -672,14 +681,14 @@ int CServerConnection::FileUploadStartAck(short Result, UINT ServiceID, const CE
 	m_TaskQueue.OnUploadStartResult(Result, ServiceID, FilePath, FileSize);
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerConnection::FileUploadDataAck(short Result, UINT64 Offset, UINT Length)
+int CServerConnection::FileUploadDataAck(short Result, UINT Length, bool IsLast)
 {
-	m_TaskQueue.OnUploadData(Result, Offset, Length);
+	m_TaskQueue.OnUploadData(Result, Length, IsLast);
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerConnection::FileUploadEndAck(short Result)
+int CServerConnection::FileUploadFinishAck(short Result, const CEasyString& MD5)
 {
-	m_TaskQueue.OnEndUploadResult(Result);
+	m_TaskQueue.OnUploadFinish(Result, MD5);
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerConnection::CreateDirAck(short Result, UINT ServiceID, const CEasyString& Dir)
@@ -727,7 +736,7 @@ int CServerConnection::EnableLogRecvAck(short Result, UINT ServiceID, bool Enabl
 	PrintLog(Result, _T("向[%u]请求%s日志结果%s"), ServiceID, Enable ? _T("连接") : _T("取消连接"), GetResultStr(Result));
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerConnection::ConsoleLogNotify(UINT ServiceID, LPCTSTR LogMsg)
+int CServerConnection::ConsoleLogNotify(UINT ServiceID, const CEasyString& LogMsg)
 {
 	m_pView->GetServerConsole()->OnLogMsg(GetID(), ServiceID, LogMsg);
 	return COMMON_RESULT_SUCCEED;
@@ -757,7 +766,7 @@ int CServerConnection::GetServerStatusFormatAck(short Result, UINT ServiceID, co
 	return COMMON_RESULT_SUCCEED;
 }
 
-int CServerConnection::FileCompareAck(short Result, UINT ServiceID, LPCTSTR FilePath)
+int CServerConnection::FileCompareAck(short Result, UINT ServiceID, const CEasyString& FilePath)
 {
 	PrintLog(Result, _T("比较文件结果%s[%s]"), GetResultStr(Result), (LPCTSTR)FilePath);
 	m_TaskQueue.OnFileCompareResult(Result, ServiceID, FilePath);

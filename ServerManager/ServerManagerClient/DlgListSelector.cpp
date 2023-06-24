@@ -1,4 +1,4 @@
-// DlgListSelector.cpp : ÊµÏÖÎÄ¼ş
+ï»¿// DlgListSelector.cpp : å®ç°æ–‡ä»¶
 //
 
 #include "stdafx.h"
@@ -7,7 +7,7 @@
 
 
 
-// CDlgListSelector ¶Ô»°¿ò
+// CDlgListSelector å¯¹è¯æ¡†
 
 IMPLEMENT_DYNAMIC(CDlgListSelector, CDialog)
 
@@ -35,20 +35,20 @@ BEGIN_MESSAGE_MAP(CDlgListSelector, CDialog)
 END_MESSAGE_MAP()
 
 
-// CDlgListSelector ÏûÏ¢´¦Àí³ÌĞò
+// CDlgListSelector æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 
 BOOL CDlgListSelector::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// TODO:  ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯
+	// TODO:  åœ¨æ­¤æ·»åŠ é¢å¤–çš„åˆå§‹åŒ–
 
 	SetWindowText(m_Title);
 
 	m_lvList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES);
 
-	m_lvList.InsertColumn(0, _T("ÎÄ¼şÃû"), LVCFMT_LEFT, 300);
+	m_lvList.InsertColumn(0, _T("æ–‡ä»¶å"), LVCFMT_LEFT, 300);
 
 	UINT SelectedCount = 0;
 	for (UINT i = 0; i < m_ItemList.GetCount(); i++)
@@ -65,7 +65,7 @@ BOOL CDlgListSelector::OnInitDialog()
 			m_lvList.SetCheck(Item, FALSE);
 		}
 	}
-	
+	ListCtrlColAutoFit(m_lvList);
 	//if (SelectedCount == 0)
 	//{
 	//	m_cbSelectAll.SetCheck(BST_UNCHECKED);
@@ -79,7 +79,7 @@ BOOL CDlgListSelector::OnInitDialog()
 	//	m_cbSelectAll.SetCheck(BST_INDETERMINATE);
 	//}
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// Òì³£:  OCX ÊôĞÔÒ³Ó¦·µ»Ø FALSE
+	// å¼‚å¸¸:  OCX å±æ€§é¡µåº”è¿”å› FALSE
 }
 
 void CDlgListSelector::UpdateCheckStatus()
@@ -110,7 +110,7 @@ void CDlgListSelector::UpdateCheckStatus()
 void CDlgListSelector::OnLvnItemchangedListFiles(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	*pResult = 0;
 	UINT OldCheckStatus = pNMLV->uOldState >> 12;
 	UINT NewCheckStatus = pNMLV->uNewState >> 12;
@@ -125,7 +125,7 @@ void CDlgListSelector::OnLvnItemchangedListFiles(NMHDR *pNMHDR, LRESULT *pResult
 
 void CDlgListSelector::OnBnClickedCheckSelectAll()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	if (m_PrevSelectAllState == BST_CHECKED || m_PrevSelectAllState == BST_INDETERMINATE)
 	{
 		for (int i = 0; i < m_lvList.GetItemCount(); i++)

@@ -47,6 +47,8 @@ protected: // 仅从序列化创建
 
 	bool					m_ShowHideService;
 	UINT					m_SelectedConnectionID;
+	bool					m_SelectAllGroup;
+	CString					m_SelectedGroup;
 
 
 	CServerManagerClientView();
@@ -69,7 +71,7 @@ public:
 	void SetIntranetAdapterInfo(UINT ConnectionID, float SendFlux, float RecvFlux);
 	void ConnectNotify(CServerConnection * pConnection);
 	void DisconnectNotify(CServerConnection * pConnection);
-	void OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& TaskInfo);
+	void OnAddTask(UINT ConID, TASK_INFO& TaskInfo);
 	void OnDeleteTask(UINT ConID, UINT TaskID);
 	void OnTaskUpdate(UINT ConID, UINT TaskID, float Progress);
 	void OnDeleteAllTask(UINT ConID);

@@ -58,6 +58,7 @@ CServerManagerClientView::CServerManagerClientView()
 	m_ShowHideService=false;
 	m_hAllServer = NULL;
 	m_SelectedConnectionID = 0;
+	m_SelectAllGroup = true;
 }
 
 CServerManagerClientView::~CServerManagerClientView()
@@ -212,10 +213,34 @@ void CServerManagerClientView::RefreshConnection()
 	while (Pos)
 	{
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
+
+		CString Group = pConnection->GetGroup();
+		if (Group.IsEmpty())
+			Group = _T("其他");
+		HTREEITEM hGroup = NULL;
+		HTREEITEM hChild = m_tvServers.GetNextItem(m_hAllServer, TVGN_CHILD);
+		while (hChild)
+		{
+			if (m_tvServers.GetItemText(hChild) == Group)
+			{
+				hGroup = hChild;
+				break;
+			}
+			hChild = m_tvServers.GetNextItem(hChild, TVGN_NEXT);
+		}
+
+		if (hChild == NULL)
+		{
+			hGroup = m_tvServers.InsertItem(Group, m_hAllServer);
+		}
+
 		CEasyString Temp;
-		Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
-		HTREEITEM hItem = m_tvServers.InsertItem(Temp, m_hAllServer);
+		Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->GetName());
+		HTREEITEM hItem = m_tvServers.InsertItem(Temp, hGroup);
 		m_tvServers.SetItemData(hItem, pConnection->GetID());
+		pConnection->SetTreeItem(hItem);
+
+		m_tvServers.Expand(hGroup, TVE_EXPAND);
 	}
 
 	m_tvServers.Expand(m_hAllServer, TVE_EXPAND);
@@ -238,7 +263,7 @@ void CServerManagerClientView::PrintLogVL(LOG_TYPE LogType, LPCTSTR szFormat, va
 	_vstprintf_s(LogBuffer+17,1000-17,szFormat, vl );
 	_tcscat_s(LogBuffer, 1000, _T("\r\n"));
 
-	
+	CLogManager::GetInstance()->PrintLogVL(LOG_CHANNEL_MAIN, ILogPrinter::LOG_LEVEL_NORMAL, "", szFormat, vl);
 	
 	int LineCount = m_redLog.GetLineCount();
 
@@ -316,8 +341,16 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 {
 	if ((!m_ShowHideService) && ServiceInfo.GetName() == CServerManagerClientApp::GetInstance()->GetSystemServiceName())
 		return;
-	if (m_SelectedConnectionID != 0 && m_SelectedConnectionID != pConnection->GetID())
-		return;
+	if (m_SelectedConnectionID)
+	{
+		if (m_SelectedConnectionID != pConnection->GetID())
+			return;
+	}
+	else
+	{
+		if ((!m_SelectAllGroup) && (m_SelectedGroup != pConnection->GetGroup()))
+			return;
+	}
 	int Item=-1;
 	for(int i=0;i<m_lvServiceInfos.GetItemCount();i++)
 	{
@@ -339,17 +372,7 @@ void CServerManagerClientView::SetServiceInfo(CServerConnection * pConnection, c
 	{
 		CEasyString Temp;
 		m_lvServiceInfos.SetItemText(Item, 0, pConnection->GetServerAddress());
-		if (ServiceInfo.GetCharSet() == CP_UTF8)
-		{
-			char Buffer[1024];
-			UINT Len = UTF8ToAnsi(ServiceInfo.GetName(), ServiceInfo.GetName().GetLength(), Buffer, 1000);
-			Buffer[Len] = 0;
-			Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), Buffer);
-		}
-		else
-		{
-			Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), (LPCTSTR)ServiceInfo.GetName());
-		}		
+		Temp.Format(_T("[%u]%s"), ServiceInfo.GetServiceID(), (LPCTSTR)ServiceInfo.GetName());
 		m_lvServiceInfos.SetItemText(Item,1,Temp);
 		switch (ServiceInfo.GetStatus())
 		{
@@ -451,57 +474,28 @@ void CServerManagerClientView::SetIntranetAdapterInfo(UINT ConnectionID, float S
 
 void CServerManagerClientView::ConnectNotify(CServerConnection * pConnection)
 {
-	HTREEITEM hItem = m_tvServers.GetChildItem(m_hAllServer);
-	while (hItem)
-	{
-		UINT ConnectionID = (UINT)m_tvServers.GetItemData(hItem);
-		if (ConnectionID == pConnection->GetID())
-		{
-			CEasyString Temp;
-			Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
-			m_tvServers.SetItemText(hItem, Temp);
-			break;
-		}
-		hItem = m_tvServers.GetNextSiblingItem(hItem);
-	}
+	CEasyString Temp;
+	Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
+	m_tvServers.SetItemText(pConnection->GetTreeItem(), Temp);
 }
 
 void CServerManagerClientView::DisconnectNotify(CServerConnection * pConnection)
 {
-	HTREEITEM hItem = m_tvServers.GetChildItem(m_hAllServer);
-	while (hItem)
-	{
-		UINT ConnectionID = (UINT)m_tvServers.GetItemData(hItem);
-		if (ConnectionID == pConnection->GetID())
-		{
-			CEasyString Temp;
-			Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
-			m_tvServers.SetItemText(hItem, Temp);
-			break;
-		}
-		hItem = m_tvServers.GetNextSiblingItem(hItem);
-	}
-	for(int i=0;i<m_lvServiceInfos.GetItemCount();i++)
-	{		
-		UINT Param = m_lvServiceInfos.GetItemData(i);
-		UINT ConID = Param >> 16;
-		if (pConnection->GetID() == ConID)
-		{
-			m_lvServiceInfos.SetItemText(i,2,_T("已断开"));
-		}
-	}
+	CEasyString Temp;
+	Temp.Format(_T("%s(%u)(%s)"), (LPCTSTR)pConnection->GetServerAddress(), pConnection->GetID(), pConnection->IsConnected() ? _T("已连接") : _T("未连接"));
+	m_tvServers.SetItemText(pConnection->GetTreeItem(), Temp);
 }
 
 
 
 
 
-void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& TaskInfo)
+void CServerManagerClientView::OnAddTask(UINT ConID, TASK_INFO& TaskInfo)
 {
 	CString Temp;
 	switch (TaskInfo.Type)
 	{
-	case CTaskQueue::TASK_TYPE_DOWNLOAD:
+	case TASK_TYPE_DOWNLOAD:
 		{
 			Temp.Format(_T("下载(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -511,7 +505,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_UPLOAD:
+	case TASK_TYPE_UPLOAD:
 		{
 			Temp.Format(_T("上传(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -521,7 +515,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_DELETE_FILE:
+	case TASK_TYPE_DELETE_FILE:
 		{
 			Temp.Format(_T("删除(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -530,7 +524,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_CREATE_DIR:
+	case TASK_TYPE_CREATE_DIR:
 		{
 			Temp.Format(_T("建目录(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -539,7 +533,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_CHANGE_FILE_MODE:
+	case TASK_TYPE_CHANGE_FILE_MODE:
 		{
 			Temp.Format(_T("改属性(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -550,7 +544,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_STARTUP_SERVICE:
+	case TASK_TYPE_STARTUP_SERVICE:
 		{
 			Temp.Format(_T("启动服务(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -559,7 +553,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_SHUTDOWN_SERVICE:
+	case TASK_TYPE_SHUTDOWN_SERVICE:
 		{
 			Temp.Format(_T("关闭服务(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -568,7 +562,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_RELOAD_CONFIG_DATA:
+	case TASK_TYPE_RELOAD_CONFIG_DATA:
 		{
 			Temp.Format(_T("重新加载配置数据(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -577,7 +571,7 @@ void CServerManagerClientView::OnAddTask(UINT ConID, CTaskQueue::TASK_INFO& Task
 			m_lvTask.SetItemData(Item, MAKELONG(ConID, TaskInfo.ID));
 		}
 		break;
-	case CTaskQueue::TASK_TYPE_COMPARE:
+	case TASK_TYPE_COMPARE:
 		{
 			Temp.Format(_T("比较(%u)"), ConID);
 			int Item = m_lvTask.InsertItem(m_lvTask.GetItemCount(), Temp);
@@ -809,14 +803,38 @@ void CServerManagerClientView::OnTvnSelchangedTypeTree(NMHDR *pNMHDR, LRESULT *p
 	}
 	else
 	{
-		void * Pos = CServerManagerClientApp::GetInstance()->GetFirstServerConnectionPos();
-		while (Pos)
+		if (pNMTreeView->itemNew.hItem == m_hAllServer)
 		{
-			CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
-			const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
-			for (UINT i = 0; i < ServiceList.GetCount(); i++)
+			m_SelectAllGroup = true;
+			void * Pos = CServerManagerClientApp::GetInstance()->GetFirstServerConnectionPos();
+			while (Pos)
 			{
-				SetServiceInfo(pConnection, ServiceList[i]);
+				CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
+				const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
+				for (UINT i = 0; i < ServiceList.GetCount(); i++)
+				{
+					SetServiceInfo(pConnection, ServiceList[i]);
+				}
+			}
+		}
+		else
+		{
+			m_SelectAllGroup = false;
+			m_SelectedGroup = m_tvServers.GetItemText(pNMTreeView->itemNew.hItem);
+			if (m_SelectedGroup == _T("其他"))
+				m_SelectedGroup.Empty();
+			void * Pos = CServerManagerClientApp::GetInstance()->GetFirstServerConnectionPos();
+			while (Pos)
+			{
+				CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetNextServerConnection(Pos);
+				if (m_SelectedGroup == pConnection->GetGroup())
+				{
+					const CEasyArray<CServiceInfo>& ServiceList = pConnection->GetServiceList();
+					for (UINT i = 0; i < ServiceList.GetCount(); i++)
+					{
+						SetServiceInfo(pConnection, ServiceList[i]);
+					}
+				}
 			}
 		}
 	}

@@ -1,8 +1,8 @@
-#pragma once
+ï»¿#pragma once
 #include "afxwin.h"
 
 
-// CDlgServerConsole ¶Ô»°¿ò
+// CDlgServerConsole å¯¹è¯æ¡†
 
 class CDlgServerConsole : public CDialog
 {
@@ -15,14 +15,14 @@ protected:
 	UINT									m_ServiceID;
 	int										m_CharSet;
 public:
-	CDlgServerConsole(CWnd* pParent = NULL);   // ±ê×¼¹¹Ôìº¯Êı
+	CDlgServerConsole(CWnd* pParent = NULL);   // æ ‡å‡†æ„é€ å‡½æ•°
 	virtual ~CDlgServerConsole();
 
-// ¶Ô»°¿òÊı¾İ
+// å¯¹è¯æ¡†æ•°æ®
 	enum { IDD = IDD_DIALOG_CONSOLE };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV æ”¯æŒ
 
 	DECLARE_MESSAGE_MAP()
 public:

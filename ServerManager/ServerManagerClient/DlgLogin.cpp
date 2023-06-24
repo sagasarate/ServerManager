@@ -1,11 +1,11 @@
-// DlgLogin.cpp : й╣ожнд╪Ч
+О╩©// DlgLogin.cpp : Е╝·Г▌╟Ф√┤Д╩╤
 //
 
 #include "stdafx.h"
 
 
 
-// CDlgLogin ╤т╩╟©Р
+// CDlgLogin Е╞╧Х╞²Ф║├
 
 IMPLEMENT_DYNAMIC(CDlgLogin, CDialog)
 
@@ -33,4 +33,4 @@ BEGIN_MESSAGE_MAP(CDlgLogin, CDialog)
 END_MESSAGE_MAP()
 
 
-// CDlgLogin оШо╒╢╕юМЁлпР
+// CDlgLogin Ф╤┬Ф│╞Е╓└Г░├Г╗▀Е╨▐

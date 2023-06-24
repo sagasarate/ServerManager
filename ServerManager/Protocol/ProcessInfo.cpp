@@ -57,7 +57,7 @@ bool CProcessInfo::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 	IsModified=IsModified||(m_ModifyFlag&MemberFlags[DATA_OBJECT_FLAG_PROCESS_INFO])!=0;
 	
 	IsModified=IsModified
-		||false;
+		;
 	
 //<GenerateArea3End>
 	return IsModified;
@@ -273,15 +273,48 @@ void CProcessInfo::CloneFrom(const CProcessInfo& DataObject,const DATA_OBJECT_MO
 UINT CProcessInfo::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 {
 //<GenerateArea9Start>
+	UINT64 Flag=MemberFlags[DATA_OBJECT_FLAG_PROCESS_INFO];
 	UINT Size=0;
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
-	Size+=CSmartStruct::GetStringMemberSize((UINT)m_ImageFilePath.GetLength());
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	if(Flag&MF_PROCESS_ID)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
+	}
+	
+	if(Flag&MF_IMAGE_FILE_PATH)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_ImageFilePath);
+	}
+	
+	if(Flag&MF_IMAGE_FILE_TIME)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_PUUSED_TIME)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_PUUSED)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
+	}
+	
+	if(Flag&MF_MEMORY_USED)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_VIRTUAL_MEMORY_USED)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_DISK_FREE)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
 	
 		
 //<GenerateArea9End>	

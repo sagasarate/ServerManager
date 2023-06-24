@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
 
 
-// CDlgServiceEditor ¶Ô»°¿ò
+// CDlgServiceEditor å¯¹è¯æ¡†
 
 class CDlgServiceEditor : public CDialog
 {
@@ -14,14 +14,14 @@ protected:
 	CComboBox				m_cbServiceType;
 	bool					m_IsAddNew;
 public:
-	CDlgServiceEditor(CWnd* pParent = NULL);   // ±ê×¼¹¹Ôìº¯Êı
+	CDlgServiceEditor(CWnd* pParent = NULL);   // æ ‡å‡†æ„é€ å‡½æ•°
 	virtual ~CDlgServiceEditor();
 
-// ¶Ô»°¿òÊı¾İ
+// å¯¹è¯æ¡†æ•°æ®
 	enum { IDD = IDD_DIALOG_SERVICE_EDITOR };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV æ”¯æŒ
 
 	DECLARE_MESSAGE_MAP()
 public:

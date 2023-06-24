@@ -28,6 +28,9 @@
     <Filter Include="控制管道">
       <UniqueIdentifier>{fd129b01-5c60-46e0-b7be-cb03744f9ff6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="任务队列">
+      <UniqueIdentifier>{033667fc-adea-4285-800b-7c15003e398c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -53,6 +56,21 @@
     </ClCompile>
     <ClCompile Include="ServiceControlPipe.cpp">
       <Filter>控制管道</Filter>
+    </ClCompile>
+    <ClCompile Include="FileTask.cpp">
+      <Filter>任务队列</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseTask.cpp">
+      <Filter>任务队列</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskManager.cpp">
+      <Filter>任务队列</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialWorkThread.cpp">
+      <Filter>任务队列</Filter>
+    </ClCompile>
+    <ClCompile Include="ParallelWorkThread.cpp">
+      <Filter>任务队列</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +100,21 @@
     </ClInclude>
     <ClInclude Include="ServiceControlPipe.h">
       <Filter>控制管道</Filter>
+    </ClInclude>
+    <ClInclude Include="FileTask.h">
+      <Filter>任务队列</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseTask.h">
+      <Filter>任务队列</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskManager.h">
+      <Filter>任务队列</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialWorkThread.h">
+      <Filter>任务队列</Filter>
+    </ClInclude>
+    <ClInclude Include="ParallelWorkThread.h">
+      <Filter>任务队列</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -63,7 +63,7 @@ BOOL CServerManagerClientApp::InitInstance()
 
 	CExceptionParser::GetInstance()->Init(EXCEPTION_SET_DEFAULT_HANDLER);
 
-	CSmartValue::AUTO_CONVERT_WSTR_TO_UTF8 = true;
+	CSmartValue::INTERNAL_STRING_CODE_PAGE = CEasyString::STRING_CODE_PAGE_UTF8;
 
 	INITCOMMONCONTROLSEX InitCtrls;
 	InitCtrls.dwSize = sizeof(InitCtrls);
@@ -103,9 +103,20 @@ BOOL CServerManagerClientApp::InitInstance()
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
 
-	
+	CEasyString LogFileName;
+	CEasyString ModulePath = CFileTools::GetModulePath(NULL);
 
-	m_Server.StartUp();
+	LogFileName.Format("%s/Log/ServerManagerClient", (LPCTSTR)ModulePath);
+	CAsyncFileLogPrinter* pLog = MONITORED_NEW(_T("CServerManagerClientApp"), CAsyncFileLogPrinter, ILogPrinter::LOG_LEVEL_NORMAL | ILogPrinter::LOG_LEVEL_DEBUG, LogFileName);
+	CLogManager::GetInstance()->AddChannel(LOG_CHANNEL_MAIN, pLog);
+	SAFE_RELEASE(pLog);
+
+	LogFileName.Format("%s/Log/ServerManagerClient.NetLib", (LPCTSTR)ModulePath);
+	pLog = MONITORED_NEW(_T("CServerManagerClientApp"), CAsyncFileLogPrinter, ILogPrinter::LOG_LEVEL_NORMAL | ILogPrinter::LOG_LEVEL_DEBUG, LogFileName);
+	CLogManager::GetInstance()->AddChannel(LOG_NET_CHANNEL, pLog);
+	SAFE_RELEASE(pLog);
+
+	m_Server.StartUp(4096, 4, 2048, 2048, 64);
 
 	// 分析标准外壳命令、DDE、打开文件操作的命令行
 	CCommandLineInfo cmdInfo;
@@ -285,11 +296,15 @@ void CServerManagerClientApp::LoadConfig()
 				{
 					xml_node Server=ServerList.child(i);
 					
+					CEasyString ServerName = Server.attribute(_T("Name")).getvalue();
+					CEasyString ServerGroup = Server.attribute(_T("Group")).getvalue();
 					CEasyString ServerAddress=Server.attribute(_T("Address")).getvalue();
 					UINT ServerPort=Server.attribute(_T("Port"));
 					CEasyString UserName = Server.attribute(_T("UserName")).getvalue();
 					CEasyString Password = Server.attribute(_T("Password")).getvalue();
 
+					if (ServerGroup == _T("其他"))
+						ServerGroup.Clear();
 					if (UserName.IsEmpty())
 					{
 						UserName = m_AccountName;
@@ -300,7 +315,7 @@ void CServerManagerClientApp::LoadConfig()
 						Password = m_Password;
 					}
 					
-					CServerConnection * pConnection = AddServerConnection(ServerAddress, ServerPort, UserName, Password);
+					CServerConnection * pConnection = AddServerConnection(ServerName, ServerGroup, ServerAddress, ServerPort, UserName, Password);
 				}
 				GetMainView()->RefreshConnection();
 			}			
@@ -336,6 +351,8 @@ void CServerManagerClientApp::SaveConfig()
 	{
 		CServerConnection * pConnection = m_ConnectionPool.GetNextObject(Pos);
 		xml_node Server = ServerList.append_child(node_element, _T("Server"));
+		Server.append_attribute(_T("Name"), pConnection->GetName());
+		Server.append_attribute(_T("Group"), pConnection->GetGroup());
 		Server.append_attribute(_T("Address"), pConnection->GetServerAddress());
 		Server.append_attribute(_T("Port"), pConnection->GetServerPort());
 		Server.append_attribute(_T("UserName"), pConnection->GetUserName());
@@ -347,7 +364,7 @@ void CServerManagerClientApp::SaveConfig()
 		AfxGetMainWnd()->MessageBox(_T("保存配置失败！"));
 	}
 }
-CServerConnection * CServerManagerClientApp::AddServerConnection(LPCTSTR Address, UINT Port, LPCTSTR UserName, LPCTSTR Password)
+CServerConnection * CServerManagerClientApp::AddServerConnection(LPCTSTR Name, LPCTSTR Group, LPCTSTR Address, UINT Port, LPCTSTR UserName, LPCTSTR Password)
 {
 	CMainFrame * pMainFrame = (CMainFrame *)AfxGetMainWnd();
 	CServerManagerClientView * pView = NULL;
@@ -359,7 +376,7 @@ CServerConnection * CServerManagerClientApp::AddServerConnection(LPCTSTR Address
 	CServerConnection * pConnection = m_ConnectionPool.NewObject();
 	if (pConnection)
 	{
-		if (pConnection->Init(pView, &m_Server, Address, Port, UserName, Password))
+		if (pConnection->Init(pView, &m_Server, Name, Group, Address, Port, UserName, Password))
 		{
 			return pConnection;
 		}

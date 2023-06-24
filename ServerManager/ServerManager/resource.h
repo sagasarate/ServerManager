@@ -1,17 +1,6 @@
-﻿/****************************************************************************/
-/*                                                                          */
-/*      文件名:    resource.h                                               */
-/*      创建日期:  2010年02月09日                                           */
-/*      作者:      Sagasarate                                               */
-/*                                                                          */
-/*      本软件版权归Sagasarate(sagasarate@sina.com)所有                     */
-/*      你可以将本软件用于任何商业和非商业软件开发，但                      */
-/*      必须保留此版权声明                                                  */
-/*                                                                          */
-/****************************************************************************/
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by Resource.rc
+﻿//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ 生成的包含文件。
+// 供 Resource.rc 使用
 //
 
 // Next default values for new objects

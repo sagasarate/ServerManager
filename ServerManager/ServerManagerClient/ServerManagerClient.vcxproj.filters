@@ -82,6 +82,9 @@
     <ClCompile Include="DlgLogin.cpp">
       <Filter>对话框</Filter>
     </ClCompile>
+    <ClCompile Include="WorkThread.cpp">
+      <Filter>任务队列</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServerConnection.h">
@@ -140,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="DlgLogin.h">
       <Filter>对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkThread.h">
+      <Filter>任务队列</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -20,15 +20,12 @@ CServerManagerClient::CServerManagerClient(void)
 {
 	FUNCTION_BEGIN;
 	m_pManager=NULL;
-	m_WantDelete=false;	
+	m_WantDelete=false;
 	m_IsLogined = false;
 	m_IsInScriptExecute=false;
-	m_pCurDownloadFile = NULL;
-	m_pCurUploadFile = NULL;
-	//m_pDataLogFile = NULL;
 	m_EnableLogRecv = false;
 	CServerManagerMsgHandler::InitMsgMap(m_MsgFnMap);
-	
+
 	FUNCTION_END;
 }
 
@@ -42,7 +39,7 @@ CServerManagerClient::~CServerManagerClient(void)
 BOOL CServerManagerClient::Init(UINT ID,CServerManagerService * pManager)
 {
 	FUNCTION_BEGIN;
-	m_pManager=pManager;	
+	m_pManager=pManager;
 	SetID(ID);
 	SetServer(m_pManager->GetServer());
 
@@ -65,22 +62,17 @@ BOOL CServerManagerClient::Init(UINT ID,CServerManagerService * pManager)
 	}
 
 	m_PacketBuffer1.Create(CMainConfig::GetInstance()->GetSendBufferSize() - 64);
-	m_CompressBuffer.Create(CMainConfig::GetInstance()->GetSendBufferSize() - 64);
-	m_FileTransferBuffer.Create(CMainConfig::GetInstance()->GetSendBufferSize() - 64);
 
 	if(!m_ScriptExecutor.Init(0,this))
 	{
 		Log("初始化脚本执行器失败");
 		return FALSE;
 	}
-	m_AssembleBuffer.SetUsedSize(0);	
+	m_AssembleBuffer.SetUsedSize(0);
 	m_WantDelete=false;
 	m_IsLogined = false;
 	m_IsInScriptExecute=false;
-	m_EnableLogRecv = false;
-	SAFE_RELEASE(m_pCurDownloadFile);
-	SAFE_RELEASE(m_pCurUploadFile);
-
+	m_EnableLogRecv = false;	
 	m_KeepAliveTimer.SaveTime();
 
 	return TRUE;
@@ -90,12 +82,11 @@ BOOL CServerManagerClient::Init(UINT ID,CServerManagerService * pManager)
 
 void CServerManagerClient::Destory()
 {
-	FUNCTION_BEGIN;	
+	FUNCTION_BEGIN;
 
-	SAFE_RELEASE(m_pCurDownloadFile);
-	SAFE_RELEASE(m_pCurUploadFile);
+	//SAFE_RELEASE(m_pCurDownloadFile);
+	//SAFE_RELEASE(m_pCurUploadFile);
 	//SAFE_RELEASE(m_pDataLogFile);
-
 	CNetConnection::Destory();
 
 	FUNCTION_END;
@@ -133,6 +124,15 @@ void CServerManagerClient::OnDisconnection()
 	Log("客户端%s:%u断开连接",
 		GetRemoteAddress().GetIPString(),
 		GetRemoteAddress().GetPort());
+
+	CFileTask* pTask = m_pManager->GetTaskManager().GetTask(GetID());
+	if (pTask)
+	{
+		pTask->DumpFinishQueue();
+		pTask->DumpParallelQueue();
+	}
+
+	m_pManager->GetTaskManager().CancelTask(GetID());
 	m_WantDelete=true;
 	if (m_EnableLogRecv)
 	{
@@ -145,7 +145,7 @@ void CServerManagerClient::OnDisconnection()
 
 void CServerManagerClient::OnRecvData(const BYTE * pData, UINT DataSize)
 {
-	FUNCTION_BEGIN;	
+	FUNCTION_BEGIN;
 
 	//Log("OnRecvData=%u", DataSize);
 	//if (m_pDataLogFile)
@@ -159,9 +159,16 @@ void CServerManagerClient::OnRecvData(const BYTE * pData, UINT DataSize)
 		Disconnect();
 		return;
 	}
-	while(m_AssembleBuffer.GetUsedSize()>=CMessage::GetMsgHeaderLength())
+	int ProcessCount = 0;
+	while (m_AssembleBuffer.GetUsedSize() >= CMessage::GetMsgHeaderLength())
 	{
 		CMessage * pMsg = (CMessage *)m_AssembleBuffer.GetBuffer();
+		if (pMsg->GetMsgLength() < CMessage::GetMsgHeaderLength())
+		{
+			Log("消息包头异常");
+			Disconnect();
+			return;
+		}
 		if (m_AssembleBuffer.GetUsedSize() >= pMsg->GetMsgLength())
 		{
 			if (pMsg->GetMsgFlag()&MESSAGE_FLAG_SYSTEM_MESSAGE)
@@ -174,21 +181,38 @@ void CServerManagerClient::OnRecvData(const BYTE * pData, UINT DataSize)
 		{
 			break;
 		}
+		ProcessCount++;
+		if (ProcessCount >= 256)
+		{
+			Log("异常,单次已处理256个消息,退出循环");
+			break;
+		}
 	}
 	FUNCTION_END;
 }
 
 int CServerManagerClient::Update(int ProcessPacketLimit)
 {
-	FUNCTION_BEGIN;	
+	FUNCTION_BEGIN;
 	int ProcessCount=CNetConnection::Update(ProcessPacketLimit);
 	ProcessCount += m_ScriptExecutor.Update(ProcessPacketLimit);
+	
 
 	if (IsConnected())
 	{
 		if (m_KeepAliveTimer.IsTimeOut(CMainConfig::GetInstance()->GetKeepAliveTime()))
 		{
 			m_KeepAliveTimer.SaveTime();
+
+			if(m_AssembleBuffer.GetUsedSize())
+			{
+				LogDebug("拼包缓冲使用量%u", m_AssembleBuffer.GetUsedSize());
+				if (m_AssembleBuffer.GetUsedSize() >= CMessage::GetMsgHeaderLength())
+				{
+					CMessage* pMsg = (CMessage*)m_AssembleBuffer.GetBuffer();
+					LogDebug("包头大小%u", pMsg->GetMsgLength());
+				}
+			}
 			m_KeepAliveCount++;
 			if (!m_IsLogined)
 			{
@@ -201,9 +225,83 @@ int CServerManagerClient::Update(int ProcessPacketLimit)
 				Disconnect();
 			}
 		}
-	}
+		
+		CFileTask* pTask = m_pManager->GetTaskManager().GetTask(GetID());
+		if (pTask)
+		{
+			switch (pTask->GetType())
+			{
+			case TASK_TYPE_READ:
+				if (pTask->GetStatus() == TASK_STATUS_ERROR)
+				{
+					Log("文件读取出错");
+					m_pManager->GetTaskManager().CancelTask(GetID());					
+					CServerManagerAckMsgCaller MsgCaller(this);
+					MsgCaller.FileDownloadDataAck(MSG_RESULT_FAILED, 0, 0, CEasyBuffer(), false);
+				}
+				else if(pTask->GetWorkingQueryCount())
+				{
+					FILE_DATA_BLOCK* pData = pTask->GetFinishOperation();
+					if (pData)
+					{
+						CServerManagerAckMsgCaller MsgCaller(this);
+						MsgCaller.FileDownloadDataAck(MSG_RESULT_SUCCEED, pData->Offset, pData->OriginSize, pData->DataBuffer, pData->IsLast);
+						LogDebug("已发送文件块%u,Offset=%llu,Size=%u(%u)", pData->SerialNumber, pData->Offset, pData->OriginSize, pData->DataBuffer.GetUsedSize());
+						m_pManager->GetTaskManager().DeleteFileDataInfo(pData);
+					}
+				}
+				break;
+			case TASK_TYPE_MAKE_MD5:
+				if (pTask->GetStatus() == TASK_STATUS_END)
+				{
+					CServerManagerAckMsgCaller MsgCaller(this);
 
-	
+					MsgCaller.FileCompareAck((pTask->GetFileMD5().CompareNoCase(pTask->GetCompareMD5()) == 0) ? MSG_RESULT_SUCCEED : MSG_RESULT_FAILED,
+						pTask->GetServiceID(), pTask->GetFilePath());
+					Log("MD5比较完毕");
+					m_pManager->GetTaskManager().CancelTask(GetID());
+				}
+				else if (pTask->GetStatus() == TASK_STATUS_ERROR)
+				{
+					CServerManagerAckMsgCaller MsgCaller(this);
+
+					MsgCaller.FileCompareAck(MSG_RESULT_FAILED, pTask->GetServiceID(), pTask->GetFilePath());
+					Log("MD5比较出错");
+					m_pManager->GetTaskManager().CancelTask(GetID());
+				}
+				break;
+			case TASK_TYPE_WRITE:
+				if (pTask->GetStatus() == TASK_STATUS_ERROR)
+				{
+					Log("文件写入出错");
+					m_pManager->GetTaskManager().CancelTask(GetID());
+					CServerManagerAckMsgCaller MsgCaller(this);
+					MsgCaller.FileUploadDataAck(MSG_RESULT_FAILED, 0, false);
+				}
+				else if (pTask->GetWorkingQueryCount())
+				{
+					FILE_DATA_BLOCK* pData = pTask->GetFinishOperation(true);
+					if (pData)
+					{
+						CServerManagerAckMsgCaller MsgCaller(this);
+						MsgCaller.FileUploadDataAck(MSG_RESULT_SUCCEED, pData->OriginSize, pData->IsLast);
+						LogDebug("上传文件块%u处理完成", pData->SerialNumber);
+						m_pManager->GetTaskManager().DeleteFileDataInfo(pData);
+					}					
+				}
+				else if (pTask->IsInWaitFinish() && (pTask->GetWorkingQueryCount() == 0))
+				{
+					pTask->CallFinishCallback();
+					LogDebug("上传任务结束,MD5=%s", (LPCTSTR)pTask->GetFileMD5());
+					pTask->CancelTask();
+				}
+				break;
+			default:
+				Log("未知任务类型%d", pTask->GetType());
+				m_pManager->GetTaskManager().CancelTask(GetID());
+			}
+		}
+	}
 
 	return ProcessCount;
 	FUNCTION_END;
@@ -218,7 +316,7 @@ void CServerManagerClient::OnMsg(CMessage * pMsg)
 		Log("未登录时收到非登录消息");
 		Disconnect();
 		return;
-	}	
+	}
 	MSG_HANDLE_INFO * pHandleInfo = m_MsgFnMap.Find(pMsg->GetMsgID());
 	if (pHandleInfo)
 	{
@@ -286,8 +384,26 @@ bool CServerManagerClient::SendMessage(CMessage * pMsg)
 	return DoSend(pMsg, pMsg->GetMsgLength());
 }
 
+
+void CServerManagerClient::OnTaskFinish(CBaseTask* pTask, LPVOID Param)
+{
+	if (pTask->GetType() == TASK_TYPE_WRITE)
+	{
+		CFileTask* pFileTask = dynamic_cast<CFileTask*>(pTask);
+		if(pFileTask)
+		{
+			LogDebug("上传任务结束,MD5=%s", (LPCTSTR)pFileTask->GetFileMD5());
+			CServerManagerAckMsgCaller MsgCaller(this);
+			MsgCaller.FileUploadFinishAck(MSG_RESULT_SUCCEED, pFileTask->GetFileMD5());
+		}
+		else
+		{
+			Log("任务对象错误");
+		}
+	}
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int CServerManagerClient::Login(LPCTSTR UserName, LPCTSTR Password)
+int CServerManagerClient::Login(const CEasyString& UserName, const CEasyString& Password)
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
 
@@ -409,7 +525,7 @@ int CServerManagerClient::RunProgram(UINT ServiceID, const CEasyString& FilePath
 #ifdef WIN32
 		Path = UTF8ToLocal(Path,Path.GetLength());
 #else
-		Path.Replace('\\', '/');		
+		Path.Replace('\\', '/');
 #endif // !WIN32
 		Path = CFileTools::MakeFullPath(Path);
 
@@ -423,14 +539,14 @@ int CServerManagerClient::RunProgram(UINT ServiceID, const CEasyString& FilePath
 		RunDir = CFileTools::MakeFullPath(RunDir);
 
 		int Result = m_pManager->StartupProcess(FilePath, RunDir, Param);
-		MsgCaller.RunProgramAck(Result);		
+		MsgCaller.RunProgramAck(Result);
 	}
 	else
 	{
 		MsgCaller.RunProgramAck(MSG_RESULT_SERVICE_NOT_EXIST);
 	}
 
-	
+
 	return COMMON_RESULT_SUCCEED;
 }
 int CServerManagerClient::ProcessShutdown(UINT ProcessID, BYTE ShutdownType)
@@ -452,7 +568,7 @@ int CServerManagerClient::ExecuteScript(UINT ServiceID, const CEasyString& Scrip
 			CServiceInfoEx * pServiceInfo = m_pManager->GetServiceInfo(ServiceID);
 			if (pServiceInfo)
 			{
-				
+
 				m_IsInScriptExecute = true;
 				if (FromFile)
 				{
@@ -531,7 +647,7 @@ int CServerManagerClient::BrowseServiceDir(UINT ServiceID, const CEasyString& Di
 
 		if (Page == 0 || m_RecentBrosweDir.CompareNoCase(SearchDir) != 0 || m_DirBrosweCacheTimeout.IsTimeOut(DIR_BROWSE_TIMEOUT))
 		{
-			//刷新目录浏览缓冲		
+			//刷新目录浏览缓冲
 			CFileSearcher FileSearcher;
 			if (FileSearcher.FindFirst(SearchDir))
 			{
@@ -544,12 +660,7 @@ int CServerManagerClient::BrowseServiceDir(UINT ServiceID, const CEasyString& Di
 					if ((!IsWorkDir) || (!FileSearcher.IsDots()))
 					{
 						FILE_INFO * pFileInfo = m_DirBrosweCache.AddEmpty();
-						//文件名统一使用UTF8，所以WIN平台需要转码
-#ifdef WIN32
-						pFileInfo->Name = LocalToUTF8(FileSearcher.GetFileName(),FileSearcher.GetFileName().GetLength());
-#else
 						pFileInfo->Name = FileSearcher.GetFileName();
-#endif
 						if (FileSearcher.IsDirectory())
 							pFileInfo->Attribute = FILE_ATTRIBUTE_FLAG_DIRECTORY;
 						else
@@ -573,7 +684,7 @@ int CServerManagerClient::BrowseServiceDir(UINT ServiceID, const CEasyString& Di
 		}
 
 		m_PacketBuffer1.Clear();
-		
+
 		short TotalPage = m_DirBrosweCache.GetCount() / PageLen + ((m_DirBrosweCache.GetCount() % PageLen) ? 1 : 0);
 		UINT StartIndex = Page * PageLen;
 		UINT PackCount = PageLen;
@@ -598,133 +709,130 @@ int CServerManagerClient::BrowseServiceDir(UINT ServiceID, const CEasyString& Di
 	}
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerManagerClient::FileDownloadStart(UINT ServiceID, const CEasyString& FilePath)
+int CServerManagerClient::FileDownloadStart(UINT ServiceID, const CEasyString& FilePath, UINT64 StartOffset)
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
 
-	LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
-	if (szWorkDir)
-	{
-		SAFE_RELEASE(m_pCurDownloadFile);
-		m_pCurDownloadFile = CFileSystemManager::GetInstance()->CreateFileAccessor(FILE_CHANNEL_NORMAL1);
-		if (m_pCurDownloadFile)
-		{
-			CEasyString Path;
-			Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)FilePath);
-#ifdef WIN32
-			Path = UTF8ToLocal(Path, Path.GetLength());
-#else
-			Path.Replace('\\', '/');
-#endif // !WIN32
-			Path = CFileTools::MakeFullPath(Path);
-			if (m_pCurDownloadFile->Open(Path, IFileAccessor::modeOpen | IFileAccessor::modeRead | IFileAccessor::shareShareAll))
-			{
-				MsgCaller.FileDownloadStartAck(MSG_RESULT_SUCCEED, ServiceID, FilePath, m_pCurDownloadFile->GetSize());
-				Log("开始下载文件%s", (LPCTSTR)Path);
-			}
-			else
-			{
-				SAFE_RELEASE(m_pCurDownloadFile);
-				MsgCaller.FileDownloadStartAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath, 0);
-				Log("打开下载文件失败%s", (LPCTSTR)Path);
-			}
-		}
-		else
-		{
-			MsgCaller.FileDownloadStartAck(MSG_RESULT_FAILED, ServiceID, FilePath, 0);
-			Log("创建文件访问器失败");
-		}
-	}
-	else
-	{
-		MsgCaller.FileDownloadStartAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath, 0);
-		Log("服务%u不存在", ServiceID);
-	}
-	return COMMON_RESULT_SUCCEED;
-}
-int CServerManagerClient::FileDownloadData(UINT64 Offset, UINT Length)
-{
-	CServerManagerAckMsgCaller MsgCaller(this);
-	if (m_pCurDownloadFile)
-	{
-		if (Length <= m_FileTransferBuffer.GetBufferSize())
-		{
-			if(m_pCurDownloadFile->Seek(Offset, IFileAccessor::seekBegin))
-			{
-				UINT64 ReadLen = m_pCurDownloadFile->Read(m_FileTransferBuffer.GetBuffer(), Length);
-				if (ReadLen)
-				{
-					size_t PackSize = m_CompressBuffer.GetBufferSize() - LZMA_PROPS_SIZE;
-					size_t PackPropSize = LZMA_PROPS_SIZE;
-
-					int ErrCode = LzmaCompress(((BYTE *)m_CompressBuffer.GetBuffer()) + LZMA_PROPS_SIZE, &PackSize,
-						(BYTE *)m_FileTransferBuffer.GetBuffer(), ReadLen,
-						(BYTE *)m_CompressBuffer.GetBuffer(), &PackPropSize, 5,
-						1 << 24, 3, 0, 2, 32, 2);
-					if (ErrCode == SZ_OK)
-					{
-						PackSize += LZMA_PROPS_SIZE;
-						m_CompressBuffer.SetUsedSize(PackSize);
-
-						MsgCaller.FileDownloadDataAck(MSG_RESULT_SUCCEED, Offset, ReadLen, m_CompressBuffer);
-					}
-					else
-					{
-						MsgCaller.FileDownloadDataAck(MSG_RESULT_DATA_COMPRESS_ERROR, Offset, 0, CEasyBuffer());
-					}
-				}
-				else
-				{
-					MsgCaller.FileDownloadDataAck(MSG_RESULT_SUCCEED, Offset, 0, CEasyBuffer());
-				}
-			}
-			else
-			{
-				MsgCaller.FileDownloadDataAck(MSG_RESULT_FILE_READ_ERROR, Offset, 0, CEasyBuffer());
-			}
-		}
-		else
-		{
-			MsgCaller.FileDownloadDataAck(MSG_RESULT_QUERY_SIZE_TOO_BIG, Offset, 0, CEasyBuffer());
-		}
-	}
-	else
-	{
-		
-		MsgCaller.FileDownloadDataAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, Offset, 0, CEasyBuffer());
-	}
+	LogDebug("请求下载文件%s", (LPCTSTR)FilePath);
 	
-	return COMMON_RESULT_SUCCEED;
-}
-int CServerManagerClient::FileDownloadEnd()
-{
-	CServerManagerAckMsgCaller MsgCaller(this);
-	if (m_pCurDownloadFile)
+	if (StartOffset)
 	{
-		CEasyTime LastWriteTime;
-		m_pCurDownloadFile->GetLastWriteTime(LastWriteTime);
-		MsgCaller.FileDownloadEndAck(MSG_RESULT_SUCCEED, (time_t)LastWriteTime);
-		m_pCurDownloadFile->Close();
-		SAFE_RELEASE(m_pCurDownloadFile);	
-		Log("下载文件成功");
+		MsgCaller.FileDownloadStartAck(MSG_RESULT_NOT_SUPPORT, ServiceID, FilePath, 0, 0);
+		Log("服务%u不支持断点续传", ServiceID);
 	}
 	else
 	{
-		MsgCaller.FileDownloadEndAck(MSG_RESULT_FAILED, 0);
-		Log("下载文件失败");
-	}	
+		if (m_pManager->GetTaskManager().GetTask(GetID()) == NULL)
+		{
+			LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
+			if (szWorkDir)
+			{
+				CEasyString Path;
+				Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)FilePath);
+#ifdef WIN32
+				Path = UTF8ToLocal(Path, Path.GetLength());
+#else
+				Path.Replace('\\', '/');
+#endif // !WIN32
+				Path = CFileTools::MakeFullPath(Path);
+				CFileTask* pTask = NULL;
+				int Result = m_pManager->GetTaskManager().AddDownloadTask(GetID(), ServiceID, Path, StartOffset, &pTask);
+				if (Result == MSG_RESULT_SUCCEED)
+				{
+					MsgCaller.FileDownloadStartAck(MSG_RESULT_SUCCEED, ServiceID, FilePath, pTask->GetFileSize(), pTask->GetFileLastWriteTime());
+					Log("已添加下载任务%s", (LPCTSTR)Path);
+				}
+				else
+				{
+					MsgCaller.FileDownloadStartAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath, 0, 0);
+					Log("添加下载任务失败%s", (LPCTSTR)Path);
+				}
+
+		}
+			else
+			{
+				MsgCaller.FileDownloadStartAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath, 0, 0);
+				Log("服务%u不存在", ServiceID);
+			}
+	}
+		else
+		{
+			MsgCaller.FileDownloadStartAck(MSG_RESULT_IS_BUSY, ServiceID, FilePath, 0, 0);
+			Log("服务%u还有文件任务未完成", ServiceID);
+		}
+}
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerManagerClient::FileUploadStart(UINT ServiceID, const CEasyString& FilePath)
+int CServerManagerClient::FileDownloadData()
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
 
-	LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
-	if (szWorkDir)
+	CFileTask* pTask = m_pManager->GetTaskManager().GetTask(GetID());
+	if (pTask)
 	{
-		SAFE_RELEASE(m_pCurUploadFile);
-		m_pCurUploadFile = CFileSystemManager::GetInstance()->CreateFileAccessor(FILE_CHANNEL_NORMAL1);
-		if (m_pCurUploadFile)
+		if((pTask->GetType() == TASK_TYPE_READ))
+		{
+			if (pTask->GetWorkingQueryCount() < CMainConfig::GetInstance()->GetTaskManagerConfig().MaxDownloadAcceptCount)
+			{
+				pTask->AddReadQuery();
+			}
+			else
+			{
+				LogDebug("队列忙");
+				MsgCaller.FileDownloadDataAck(MSG_RESULT_IS_BUSY, 0, 0, CEasyBuffer(), false);
+			}
+		}
+		else
+		{
+			LogDebug("当前活动任务不是下载任务");
+			MsgCaller.FileDownloadDataAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, 0, 0, CEasyBuffer(), false);
+		}
+	}
+	else
+	{
+		LogDebug("当前无活动任务");
+		MsgCaller.FileDownloadDataAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, 0, 0, CEasyBuffer(), false);
+	}
+
+	return COMMON_RESULT_SUCCEED;
+}
+
+int CServerManagerClient::FileDownloadFinish()
+{
+	CServerManagerAckMsgCaller MsgCaller(this);
+	LogDebug("请求完成下载");
+	CFileTask* pTask = m_pManager->GetTaskManager().GetTask(GetID());
+	if (pTask)
+	{
+		if (pTask->GetType() == TASK_TYPE_READ)
+		{
+			LogDebug("下载任务结束,MD5=%s,FilePath=%s", (LPCTSTR)pTask->GetFileMD5(), (LPCTSTR)pTask->GetFilePath());
+			MsgCaller.FileDownloadFinishAck(MSG_RESULT_SUCCEED, pTask->GetFileMD5());
+			m_pManager->GetTaskManager().CancelTask(GetID());
+		}
+		else
+		{
+			LogDebug("当前活动任务不是下载任务");
+			MsgCaller.FileDownloadFinishAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, "");
+		}
+	}
+	else
+	{
+		LogDebug("当前无活动任务");
+		MsgCaller.FileDownloadFinishAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, "");
+	}
+
+	return COMMON_RESULT_SUCCEED;
+}
+
+int CServerManagerClient::FileUploadStart(UINT ServiceID, const CEasyString& FilePath, UINT FileLastWriteTime)
+{
+	CServerManagerAckMsgCaller MsgCaller(this);
+
+	if (m_pManager->GetTaskManager().GetTask(GetID()) == NULL)
+	{
+		LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
+		if (szWorkDir)
 		{
 			CEasyString Path;
 			Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)FilePath);
@@ -734,100 +842,101 @@ int CServerManagerClient::FileUploadStart(UINT ServiceID, const CEasyString& Fil
 			Path.Replace('\\', '/');
 #endif // !WIN32
 			Path = CFileTools::MakeFullPath(Path);
-			if (m_pCurUploadFile->Open(Path, IFileAccessor::modeCreateAlways | IFileAccessor::modeWrite))
-			{				
-				MsgCaller.FileUploadStartAck(MSG_RESULT_SUCCEED, ServiceID, FilePath, m_pCurUploadFile->GetSize());
-				Log("开始上传文件到%s", (LPCTSTR)Path);
-			}
-			else
+			CEasyString Dir = CFileTools::GetPathDirectory(Path);
+			if(CFileTools::CreateDirEx(Dir))
 			{
-				SAFE_RELEASE(m_pCurUploadFile);
-				MsgCaller.FileUploadStartAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath, 0);
-				Log("上传文件无法打开%s", (LPCTSTR)Path);
-			}
-		}
-		else
-		{
-			MsgCaller.FileUploadStartAck(MSG_RESULT_FAILED, ServiceID, FilePath, 0);
-			Log("创建文件访问器失败");
-		}
-	}
-	else
-	{
-		MsgCaller.FileUploadStartAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath, 0);
-		Log("服务%u不存在", ServiceID);
-	}
-	return COMMON_RESULT_SUCCEED;
-}
-int CServerManagerClient::FileUploadData(UINT64 Offset, UINT Length, const CEasyBuffer& FileData)
-{	
-	CServerManagerAckMsgCaller MsgCaller(this);
-	if (m_pCurUploadFile)
-	{
-		if (Length <= m_CompressBuffer.GetBufferSize())
-		{
-			size_t UnpackSize = Length;
-			size_t SourceSize = FileData.GetUsedSize() - LZMA_PROPS_SIZE;
-
-			int ErrCode = LzmaUncompress((BYTE *)m_CompressBuffer.GetBuffer(), &UnpackSize,
-				((BYTE *)FileData.GetBuffer()) + LZMA_PROPS_SIZE, &SourceSize,
-				(BYTE *)FileData.GetBuffer(), LZMA_PROPS_SIZE);
-			if (ErrCode == SZ_OK)
-			{
-				m_CompressBuffer.SetUsedSize(UnpackSize);
-				if (m_pCurUploadFile->Seek(Offset, IFileAccessor::seekBegin))
+				CFileTask* pTask = NULL;
+				int Result = m_pManager->GetTaskManager().AddUploadTask(GetID(), ServiceID, Path, 0, &pTask);
+				if (Result == MSG_RESULT_SUCCEED)
 				{
-					UINT64 WriteSize = m_pCurUploadFile->Write(m_CompressBuffer.GetBuffer(), UnpackSize);
-					if (WriteSize == UnpackSize)
-					{
-						MsgCaller.FileUploadDataAck(MSG_RESULT_SUCCEED, Offset, WriteSize);
-					}
-					else
-					{
-						MsgCaller.FileUploadDataAck(MSG_RESULT_FILE_WRITE_ERROR, Offset, 0);
-					}
+					pTask->SetFileLastWriteTime(FileLastWriteTime);
+					MsgCaller.FileUploadStartAck(MSG_RESULT_SUCCEED, ServiceID, FilePath, pTask->GetFileSize());
+					Log("已添加上传任务%s,FileTime=%u", (LPCTSTR)Path, FileLastWriteTime);
 				}
 				else
 				{
-					MsgCaller.FileUploadDataAck(MSG_RESULT_FILE_WRITE_ERROR, Offset, 0);
+					MsgCaller.FileUploadStartAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath, 0);
+					Log("添加上传任务失败%s", (LPCTSTR)Path);
 				}
 			}
 			else
 			{
-				MsgCaller.FileUploadDataAck(MSG_RESULT_DATA_COMPRESS_ERROR, Offset, 0);
+				MsgCaller.FileUploadStartAck(MSG_RESULT_FILE_WRITE_ERROR, ServiceID, FilePath, 0);
+				Log("创建目录失败%s", (LPCTSTR)Dir);
 			}
 		}
 		else
 		{
-			MsgCaller.FileUploadDataAck(MSG_RESULT_QUERY_SIZE_TOO_BIG, Offset, 0);
+			MsgCaller.FileUploadStartAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath, 0);
+			Log("服务%u不存在", ServiceID);
+		}
+	}
+	else
+	{
+		MsgCaller.FileUploadStartAck(MSG_RESULT_IS_BUSY, ServiceID, FilePath, 0);
+		Log("服务%u还有文件任务未完成", ServiceID);
+	}
+	return COMMON_RESULT_SUCCEED;
+}
+int CServerManagerClient::FileUploadData(UINT Length, const CEasyBuffer& FileData, bool IsLast)
+{
+	CServerManagerAckMsgCaller MsgCaller(this);
+	//LogDebug("收到上传数据%u,原大%u %s", FileData.GetUsedSize(), Length, IsLast ? "IsLast" : "");
+	CFileTask * pTask = m_pManager->GetTaskManager().GetTask(GetID());
+	if ((pTask && (pTask->GetType() == TASK_TYPE_WRITE)))
+	{
+		bool NeedAck = (pTask->GetWorkingQueryCount() >= CMainConfig::GetInstance()->GetTaskManagerConfig().MaxUploadAcceptCount);
+		if (pTask->AddWriteQuery(Length, FileData, IsLast, NeedAck))
+		{
+			if (NeedAck)
+			{
+				//LogDebug("并发上传数已满%u", pTask->GetWorkingQueryCount());
+			}
+			else
+			{
+				//LogDebug("已接受上传数据");
+				MsgCaller.FileUploadDataAck(MSG_RESULT_SUCCEED, 0, IsLast);
+			}
+		}
+		else
+		{
+			MsgCaller.FileUploadDataAck(MSG_RESULT_QUERY_SIZE_TOO_BIG, 0, IsLast);
 		}
 	}
 	else
 	{
 
-		MsgCaller.FileUploadDataAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, Offset, 0);
+		MsgCaller.FileUploadDataAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, 0, IsLast);
 	}
 
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerManagerClient::FileUploadEnd(UINT FileLastWriteTime)
+int CServerManagerClient::FileUploadFinish()
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
-	if (m_pCurUploadFile)
+	LogDebug("请求完成上传");
+	CFileTask* pTask = m_pManager->GetTaskManager().GetTask(GetID());
+	if (pTask)
 	{
-		m_pCurUploadFile->SetLastWriteTime((time_t)FileLastWriteTime);
-		m_pCurUploadFile->Close();
-		SAFE_RELEASE(m_pCurUploadFile);
-		MsgCaller.FileUploadEndAck(MSG_RESULT_SUCCEED);
-		Log("上传文件完毕");
+		if (pTask->GetType() == TASK_TYPE_WRITE)
+		{
+			pTask->WaitFinish(NULL, this, &CServerManagerClient::OnTaskFinish);
+		}
+		else
+		{
+			LogDebug("当前活动任务不是上传任务");
+			MsgCaller.FileUploadFinishAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, "");
+		}
 	}
 	else
 	{
-		Log("上传文件失败");
-		MsgCaller.FileUploadEndAck(MSG_RESULT_FAILED);
+		LogDebug("当前无活动任务");
+		MsgCaller.FileUploadFinishAck(MSG_RESULT_QUERY_SEQUENCE_ERROR, "");
 	}
+
 	return COMMON_RESULT_SUCCEED;
 }
+
 int CServerManagerClient::CreateDir(UINT ServiceID, const CEasyString& Dir)
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
@@ -835,7 +944,7 @@ int CServerManagerClient::CreateDir(UINT ServiceID, const CEasyString& Dir)
 	LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
 	if (szWorkDir)
 	{
-		
+
 		CEasyString Path;
 		Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)Dir);
 #ifdef WIN32
@@ -850,10 +959,10 @@ int CServerManagerClient::CreateDir(UINT ServiceID, const CEasyString& Dir)
 		}
 		else
 		{
-			SAFE_RELEASE(m_pCurDownloadFile);
+			//SAFE_RELEASE(m_pCurDownloadFile);
 			MsgCaller.CreateDirAck(MSG_RESULT_FAILED, ServiceID, Dir);
 		}
-		
+
 	}
 	else
 	{
@@ -916,7 +1025,7 @@ int CServerManagerClient::ChangeFileMode(UINT ServiceID, const CEasyString& File
 		}
 		else
 		{
-			SAFE_RELEASE(m_pCurDownloadFile);
+			//SAFE_RELEASE(m_pCurDownloadFile);
 			MsgCaller.ChangeFileModeAck(MSG_RESULT_FAILED, ServiceID, FilePath, Mode);
 		}
 
@@ -955,7 +1064,7 @@ int CServerManagerClient::DeleteService(UINT ServiceID)
 	MsgCaller.DeleteServiceAck(Result, ServiceID);
 	return COMMON_RESULT_SUCCEED;
 }
-int CServerManagerClient::SendCommand(UINT ServiceID, LPCTSTR Command)
+int CServerManagerClient::SendCommand(UINT ServiceID, const CEasyString& Command)
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
 	CServiceInfoEx * pServiceInfo = m_pManager->GetServiceInfo(ServiceID);
@@ -1069,70 +1178,56 @@ int CServerManagerClient::GetServerStatusFormat(UINT ServiceID)
 	return COMMON_RESULT_SUCCEED;
 }
 
-int CServerManagerClient::FileCompare(UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize, LPCTSTR FileMD5)
+int CServerManagerClient::FileCompare(UINT ServiceID, const CEasyString& FilePath, UINT64 FileSize, const CEasyString& FileMD5)
 {
 	CServerManagerAckMsgCaller MsgCaller(this);
 
-	LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
-	if (szWorkDir)
-	{
+	LogDebug("请求对比文件%s,MD5=%s", (LPCTSTR)FilePath, (LPCTSTR)FileMD5);
 
-		CEasyString Path;
-		Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)FilePath);
-#ifdef WIN32
-		Path = UTF8ToLocal(Path, Path.GetLength());
-#else
-		Path.Replace('\\', '/');		
-#endif // !WIN32
-		Path = CFileTools::MakeFullPath(Path);
-		CFileInfo FileInfo;
-		if (FileInfo.FetchFileInfo(Path))
+	if (m_pManager->GetTaskManager().GetTask(GetID()) == NULL)
+	{
+		LPCTSTR szWorkDir = m_pManager->GetServiceWorkDir(ServiceID);
+		if (szWorkDir)
 		{
-			if (FileInfo.GetFileSize() == FileSize)
+
+			CEasyString Path;
+			Path.Format("%s%c%s", szWorkDir, DIR_SLASH, (LPCTSTR)FilePath);
+#ifdef WIN32
+			Path = UTF8ToLocal(Path, Path.GetLength());
+#else
+			Path.Replace('\\', '/');
+#endif // !WIN32
+			Path = CFileTools::MakeFullPath(Path);
+			CFileInfo FileInfo;
+			if (FileInfo.FetchFileInfo(Path))
 			{
-				SAFE_RELEASE(m_pCurDownloadFile);
-				m_pCurDownloadFile = CFileSystemManager::GetInstance()->CreateFileAccessor(FILE_CHANNEL_NORMAL1);
-				if (m_pCurDownloadFile)
+				if (FileInfo.GetFileSize() == FileSize)
 				{
-					if (m_pCurDownloadFile->Open(Path, IFileAccessor::modeOpen | IFileAccessor::modeRead | IFileAccessor::shareShareAll))
+					CFileTask * pTask = NULL;
+					int Result = m_pManager->GetTaskManager().AddFileCompareTask(GetID(), ServiceID, Path, FileMD5, &pTask);
+					if (Result != MSG_RESULT_SUCCEED)
 					{
-						CHashMD5 MD5;
-						UINT64 ReadLen;
-						do{
-							ReadLen = m_pCurDownloadFile->Read(m_FileTransferBuffer.GetBuffer(), m_FileTransferBuffer.GetBufferSize());
-							MD5.AddData((BYTE *)m_FileTransferBuffer.GetBuffer(), ReadLen);
-						} while (ReadLen >= m_FileTransferBuffer.GetBufferSize());
-						MD5.MD5Final();
-						if (MD5.GetHashCodeString().CompareNoCase(FileMD5) == 0)
-						{
-							MsgCaller.FileCompareAck(MSG_RESULT_SUCCEED, ServiceID, FilePath);
-						}
-						else
-						{
-							MsgCaller.FileCompareAck(MSG_RESULT_FAILED, ServiceID, FilePath);
-						}
-					}
-					else
-					{
-						MsgCaller.FileDownloadStartAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath, 0);
-						Log("打开文件失败%s", (LPCTSTR)Path);
-					}
-					SAFE_RELEASE(m_pCurDownloadFile);
+						MsgCaller.FileCompareAck(Result, ServiceID, FilePath);
+					}					
+				}
+				else
+				{
+					MsgCaller.FileCompareAck(MSG_RESULT_FAILED, ServiceID, FilePath);
 				}
 			}
 			else
 			{
-				MsgCaller.FileCompareAck(MSG_RESULT_FAILED, ServiceID, FilePath);
+				MsgCaller.FileCompareAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath);
 			}
 		}
 		else
 		{
-			MsgCaller.FileCompareAck(MSG_RESULT_FILE_NOT_EXIST, ServiceID, FilePath);
+			MsgCaller.FileCompareAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath);
 		}
 	}
 	else
 	{
-		MsgCaller.FileCompareAck(MSG_RESULT_SERVICE_NOT_EXIST, ServiceID, FilePath);
+		MsgCaller.FileCompareAck(MSG_RESULT_IS_BUSY, ServiceID, FilePath);
 	}
 	return COMMON_RESULT_SUCCEED;
 }

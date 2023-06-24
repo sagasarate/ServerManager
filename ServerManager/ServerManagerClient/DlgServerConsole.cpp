@@ -1,4 +1,4 @@
-// DlgServerConsole.cpp : ÊµÏÖÎÄ¼ş
+ï»¿// DlgServerConsole.cpp : å®ç°æ–‡ä»¶
 //
 
 #include "stdafx.h"
@@ -6,7 +6,7 @@
 
 
 
-// CDlgServerConsole ¶Ô»°¿ò
+// CDlgServerConsole å¯¹è¯æ¡†
 
 IMPLEMENT_DYNAMIC(CDlgServerConsole, CDialog)
 
@@ -39,17 +39,17 @@ BEGIN_MESSAGE_MAP(CDlgServerConsole, CDialog)
 END_MESSAGE_MAP()
 
 
-// CDlgServerConsole ÏûÏ¢´¦Àí³ÌĞò
+// CDlgServerConsole æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 
 BOOL CDlgServerConsole::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// TODO:  ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯
+	// TODO:  åœ¨æ­¤æ·»åŠ é¢å¤–çš„åˆå§‹åŒ–
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// Òì³£:  OCX ÊôĞÔÒ³Ó¦·µ»Ø FALSE
+	// å¼‚å¸¸:  OCX å±æ€§é¡µåº”è¿”å› FALSE
 }
 
 void CDlgServerConsole::Open(UINT ConnectionID, UINT ServiceID, LPCTSTR ServerAddress, LPCTSTR ServiceName, int CharSet)
@@ -89,7 +89,7 @@ void CDlgServerConsole::Close()
 
 void CDlgServerConsole::OnBnClickedButtonExec()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	UpdateData(true);
 	if ((!m_Command.IsEmpty()) && m_ConnectionID && m_ServiceID)
 	{
@@ -106,7 +106,7 @@ void CDlgServerConsole::OnBnClickedButtonExec()
 
 void CDlgServerConsole::OnBnClickedButtonShowLog()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	if (m_ConnectionID&&m_ServiceID)
 	{
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(m_ConnectionID);
@@ -120,7 +120,7 @@ void CDlgServerConsole::OnBnClickedButtonShowLog()
 
 void CDlgServerConsole::OnBnClickedButtonHideLog()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	if (m_ConnectionID&&m_ServiceID)
 	{
 		CServerConnection * pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(m_ConnectionID);
@@ -134,7 +134,7 @@ void CDlgServerConsole::OnBnClickedButtonHideLog()
 
 void CDlgServerConsole::OnBnClickedButtonServerStatus()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ æ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 }
 
 void CDlgServerConsole::OnLogMsg(UINT ConnectionID, UINT ServiceID, LPCTSTR szLogMsg)
@@ -147,12 +147,12 @@ void CDlgServerConsole::OnLogMsg(UINT ConnectionID, UINT ServiceID, LPCTSTR szLo
 
 	char Buffer[5001];
 
-	if (m_CharSet == CP_UTF8)
-	{
-		UINT Len = UTF8ToAnsi(szLogMsg, strlen(szLogMsg), Buffer, 5000);
-		Buffer[Len] = 0;
-		szLogMsg = Buffer;
-	}
+	//if (m_CharSet == CP_UTF8)
+	//{
+	//	UINT Len = UTF8ToAnsi(szLogMsg, strlen(szLogMsg), Buffer, 5000);
+	//	Buffer[Len] = 0;
+	//	szLogMsg = Buffer;
+	//}
 
 	m_edLog.SetRedraw(false);
 
@@ -196,7 +196,7 @@ void CDlgServerConsole::OnLogMsg(UINT ConnectionID, UINT ServiceID, LPCTSTR szLo
 
 void CDlgServerConsole::OnCancel()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó×¨ÓÃ´úÂëºÍ/»òµ÷ÓÃ»ùÀà
+	// TODO:  åœ¨æ­¤æ·»åŠ ä¸“ç”¨ä»£ç å’Œ/æˆ–è°ƒç”¨åŸºç±»
 
 	CDialog::OnCancel();
 	Close();
@@ -205,7 +205,7 @@ void CDlgServerConsole::OnCancel()
 
 void CDlgServerConsole::OnOK()
 {
-	// TODO:  ÔÚ´ËÌí¼Ó×¨ÓÃ´úÂëºÍ/»òµ÷ÓÃ»ùÀà
+	// TODO:  åœ¨æ­¤æ·»åŠ ä¸“ç”¨ä»£ç å’Œ/æˆ–è°ƒç”¨åŸºç±»
 
 	CDialog::OnOK();
 	Close();

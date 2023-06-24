@@ -2,98 +2,34 @@
 
 class CServerManagerClientView;
 class CServerConnection;
-class CTaskQueue :
-	public CEasyThread
+class CTaskQueue 
 {
 public:
-	enum TASK_TYPE
-	{
-		TASK_TYPE_NONE,
-		TASK_TYPE_DOWNLOAD,
-		TASK_TYPE_UPLOAD,
-		TASK_TYPE_DELETE_FILE,
-		TASK_TYPE_CREATE_DIR,
-		TASK_TYPE_CHANGE_FILE_MODE,
-		TASK_TYPE_STARTUP_SERVICE,
-		TASK_TYPE_SHUTDOWN_SERVICE,
-		TASK_TYPE_RELOAD_CONFIG_DATA,
-		TASK_TYPE_COMPARE,
-	};
-	enum TASK_STATUS
-	{
-		TASK_STATUS_NONE,
-		TASK_STATUS_STARTING,
-		TASK_STATUS_TRANSFER_DATA,
-		TASK_STATUS_WAIT_SERVICE_STATUS,
-		TASK_STATUS_END,
-	};
-	enum COMPRESS_WORK_STATUS
-	{
-		COMPRESS_WORK_STATUS_NONE,
-		COMPRESS_WORK_STATUS_SAVE,
-		COMPRESS_WORK_STATUS_LOAD,
-		COMPRESS_WORK_STATUS_MD5,
-		COMPRESS_WORK_STATUS_FINISH,
-		COMPRESS_WORK_STATUS_ERROR,
-	};
-	enum TASK_USAGE
-	{
-		TASK_USAGE_NONE,
-		TASK_USAGE_CHECK_BEFORE_UPDATE,
-		TASK_USAGE_UPDATE,
-		TASK_USAGE_CHECK_AFTER_UPDATE,
-	};
-	struct TASK_INFO
-	{
-		UINT					ID;
-		TASK_TYPE				Type;
-		TASK_STATUS				Status;
-		UINT					ServiceID;
-		CEasyString				SourceFilePath;
-		CEasyString				TargetFilePath;
-		UINT					FileMode;
-		UINT64					FileSize;
-		UINT64					TransferOffset;
-		UINT64					TransferSize;
-		bool					ContinueTransfer;
-		UINT					TransferStartTime;
-		UINT					Usage;
-		void Clear()
-		{
-			ID = 0;
-			Type = TASK_TYPE_NONE;
-			Status = TASK_STATUS_NONE;
-			ServiceID = 0;
-			SourceFilePath.Clear();
-			TargetFilePath.Clear();
-			FileMode = 0;
-			FileSize = 0;
-			TransferOffset = 0;
-			TransferSize = 0;
-			ContinueTransfer = false;
-			TransferStartTime = 0;
-			Usage = 0;
-		}
-	};
+	
 protected:
 	
 	
 	
 
-	CServerManagerClientView *		m_pView;
-	CServerConnection *				m_pConnection;
-	CIDStorage<TASK_INFO>			m_TaskQueue;
-	volatile COMPRESS_WORK_STATUS	m_CompressWorkStatus;
-	CEasyBuffer						m_InputBuffer;
-	CEasyBuffer						m_OutputBuffer;
-	CWinFileAccessor				m_CurTransferFile;
-	bool							m_IsInTransfer;
-	CHashMD5						m_HashMD5;
+	CServerManagerClientView *					m_pView;
+	CServerConnection *							m_pConnection;
+	CIDStorage<TASK_INFO>						m_TaskQueue;
+	CThreadSafeIDStorage<FILE_DATA_INFO>		m_FileDataPool;
+	CEasyArray<FILE_DATA_INFO *>				m_FinishedWorkList;
+	CEasyCriticalSection						m_FinishedWorkListLock;
+	CEasyArray<CWorkThread>						m_WorkThreadList;
+	
+	//CWinFileAccessor							m_CurTransferFile;
+	bool										m_IsInTransfer;
 public:
 	CTaskQueue();
 	~CTaskQueue();
 
 	bool Init(CServerManagerClientView * pView, CServerConnection * pConnection);
+
+	CWorkThread * AllocWorkThread();
+	UINT GetFreeThreadCount();
+	bool IsAllWorkThreadIdle();
 	UINT AddDownloadTask(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, bool ContinueTransfer);
 	UINT AddUploadTask(UINT ServiceID, LPCTSTR SourceFilePath, LPCTSTR TargetFilePath, bool ContinueTransfer);
 	UINT AddDeleteFileTask(UINT ServiceID, LPCTSTR TargetFilePath);
@@ -107,16 +43,21 @@ public:
 	bool CancelFileTransfer(UINT ID);
 	void DeleteAllTask();
 	void Update();
-	virtual BOOL OnRun();
+	//virtual BOOL OnRun();
 
-	
+	FILE_DATA_INFO * AllocFileDataInfo(UINT BufferSize);
+	void DeleteFileDataInfo(FILE_DATA_INFO * pInfo);
+	bool OnWorkFinish(FILE_DATA_INFO * pData);
+	FILE_DATA_INFO * GetFinishedFileData(UINT Index);
+	void OnTaskFinish(TASK_INFO * pTaskInfo);
+	void OnTaskError(TASK_INFO * pTaskInfo);
 
-	void OnStartDownloadResult(short Result, UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize);
-	void OnDownloadData(short Result, UINT64 Offset, UINT Length, const CEasyBuffer& FileData);
-	void OnEndDownloadResult(short Result, UINT FileLastWriteTime);
+	void OnStartDownloadResult(short Result, UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize, UINT FileLastWriteTime);
+	void OnDownloadData(short Result, UINT64 Offset, UINT Length, const CEasyBuffer& FileData, bool IsLast);	
+	void OnDownloadFinish(short Result, const CEasyString& MD5);
 	void OnUploadStartResult(short Result, UINT ServiceID, LPCTSTR FilePath, UINT64 FileSize);
-	void OnUploadData(short Result, UINT64 Offset, UINT Length);
-	void OnEndUploadResult(short Result);
+	void OnUploadData(short Result, UINT Length, bool IsLast);
+	void OnUploadFinish(short Result, const CEasyString& MD5);
 	void OnDeleteFileResult(short Result, UINT ServiceID, LPCTSTR FilePath);
 	void OnCreateDirResult(short Result, UINT ServiceID, LPCTSTR Dir);
 	void OnChangeFileModeResult(short Result, UINT ServiceID, LPCTSTR FilePath, UINT Mode);
@@ -126,10 +67,15 @@ public:
 	void OnServiceInfo(CServiceInfo& ServiceInfo);
 	void OnFileCompareResult(short Result, UINT ServiceID, LPCTSTR FilePath);
 protected:
-	void DeleteTask(UINT ID);
+	void DeleteTask(TASK_INFO * pTaskInfo);
 	void PrintLog(short Result, LPCTSTR szFormat, ...);
-	void DoDownload(TASK_INFO * pFileInfo);
-	void DoUpload(TASK_INFO * pFileInfo);
-	void DoCompare(TASK_INFO * pTaskInfo);
+	void SendDownloadQuery(TASK_INFO * pTaskInfo, UINT Count);
+	void StopDownload(TASK_INFO* pTaskInfo);
+	void EndDownload(TASK_INFO* pTaskInfo, int Result, const CEasyString& MD5);
+	void StopUpload(TASK_INFO * pTaskInfo);
+	void EndUpload(TASK_INFO* pTaskInfo, int Result, const CEasyString& MD5);
+	//void DoDownload(TASK_INFO * pFileInfo);
+	//void DoUpload(TASK_INFO * pFileInfo);
+	//void DoCompare(TASK_INFO * pTaskInfo);
 };
 

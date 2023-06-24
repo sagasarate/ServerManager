@@ -160,9 +160,10 @@ public:
 		ServiceID				
 		FilePath				
 		FileSize				
+		FileLastWriteTime				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadStartAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize );
+	virtual int FileDownloadStartAck(short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,UINT FileLastWriteTime );
 		
 	
 	
@@ -174,21 +175,22 @@ public:
 		Offset				
 		Length				
 		FileData				
+		IsLast				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadDataAck(short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData );
+	virtual int FileDownloadDataAck(short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ,bool IsLast );
 		
 	
 	
 	/*************************************************
-	函数名:	FileDownloadEndAck
+	函数名:	FileDownloadFinishAck
 	用途:	
 	参数:
 		Result				
-		FileLastWriteTime				
+		MD5				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadEndAck(short Result ,UINT FileLastWriteTime );
+	virtual int FileDownloadFinishAck(short Result ,const CEasyString& MD5 );
 		
 	
 	
@@ -211,22 +213,23 @@ public:
 	用途:	
 	参数:
 		Result				
-		Offset				
 		Length				
+		IsLast				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadDataAck(short Result ,UINT64 Offset ,UINT Length );
+	virtual int FileUploadDataAck(short Result ,UINT Length ,bool IsLast );
 		
 	
 	
 	/*************************************************
-	函数名:	FileUploadEndAck
+	函数名:	FileUploadFinishAck
 	用途:	
 	参数:
 		Result				
+		MD5				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadEndAck(short Result );
+	virtual int FileUploadFinishAck(short Result ,const CEasyString& MD5 );
 		
 	
 	
@@ -337,7 +340,7 @@ public:
 		LogMsg				
 	返回值:无特别意义
 	*************************************************/
-	virtual int ConsoleLogNotify(UINT ServiceID ,LPCTSTR LogMsg );
+	virtual int ConsoleLogNotify(UINT ServiceID ,const CEasyString& LogMsg );
 		
 	
 	
@@ -376,7 +379,7 @@ public:
 		FilePath				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileCompareAck(short Result ,UINT ServiceID ,LPCTSTR FilePath );
+	virtual int FileCompareAck(short Result ,UINT ServiceID ,const CEasyString& FilePath );
 		
 	
 	static bool PackMsgLoginAck(CSmartStruct& Packet,short Result );
@@ -390,12 +393,12 @@ public:
 	static bool PackMsgProcessShutdownAck(CSmartStruct& Packet,short Result ,UINT ProcessID );
 	static bool PackMsgExecuteScriptAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,int ErrorCode ,int LastLine );
 	static bool PackMsgBrowseServiceDirAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& Dir ,short Page ,short PageLen ,short TotalPage ,const CSmartStruct& FileListData );
-	static bool PackMsgFileDownloadStartAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize );
-	static bool PackMsgFileDownloadDataAck(CSmartStruct& Packet,short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData );
-	static bool PackMsgFileDownloadEndAck(CSmartStruct& Packet,short Result ,UINT FileLastWriteTime );
+	static bool PackMsgFileDownloadStartAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,UINT FileLastWriteTime );
+	static bool PackMsgFileDownloadDataAck(CSmartStruct& Packet,short Result ,UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ,bool IsLast );
+	static bool PackMsgFileDownloadFinishAck(CSmartStruct& Packet,short Result ,const CEasyString& MD5 );
 	static bool PackMsgFileUploadStartAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize );
-	static bool PackMsgFileUploadDataAck(CSmartStruct& Packet,short Result ,UINT64 Offset ,UINT Length );
-	static bool PackMsgFileUploadEndAck(CSmartStruct& Packet,short Result );
+	static bool PackMsgFileUploadDataAck(CSmartStruct& Packet,short Result ,UINT Length ,bool IsLast );
+	static bool PackMsgFileUploadFinishAck(CSmartStruct& Packet,short Result ,const CEasyString& MD5 );
 	static bool PackMsgCreateDirAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& Dir );
 	static bool PackMsgDeleteFileAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath );
 	static bool PackMsgChangeFileModeAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath ,UINT Mode );
@@ -404,9 +407,9 @@ public:
 	static bool PackMsgDeleteServiceAck(CSmartStruct& Packet,short Result ,UINT ServiceID );
 	static bool PackMsgSendCommandAck(CSmartStruct& Packet,short Result ,UINT ServiceID );
 	static bool PackMsgEnableLogRecvAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,bool Enable );
-	static bool PackMsgConsoleLogNotify(CSmartStruct& Packet,UINT ServiceID ,LPCTSTR LogMsg );
+	static bool PackMsgConsoleLogNotify(CSmartStruct& Packet,UINT ServiceID ,const CEasyString& LogMsg );
 	static bool PackMsgGetServerStatusAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CSmartStruct& StatusListPacket );
 	static bool PackMsgGetServerStatusFormatAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CSmartStruct& StatusFormatPacket );
-	static bool PackMsgFileCompareAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,LPCTSTR FilePath );
+	static bool PackMsgFileCompareAck(CSmartStruct& Packet,short Result ,UINT ServiceID ,const CEasyString& FilePath );
 	
 };

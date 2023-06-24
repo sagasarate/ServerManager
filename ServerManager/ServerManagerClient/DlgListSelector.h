@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include "afxcmn.h"
 #include "afxwin.h"
 
 
-// CDlgListSelector ¶Ô»°¿ò
+// CDlgListSelector å¯¹è¯æ¡†
 
 class CDlgListSelector : public CDialog
 {
@@ -16,14 +16,14 @@ public:
 	CString m_Title;
 	CEasyArray<SELECT_ITEM_INFO>		m_ItemList;
 
-	CDlgListSelector(CWnd* pParent = NULL);   // ±ê×¼¹¹Ôìº¯Êı
+	CDlgListSelector(CWnd* pParent = NULL);   // æ ‡å‡†æ„é€ å‡½æ•°
 	virtual ~CDlgListSelector();
 
-// ¶Ô»°¿òÊı¾İ
+// å¯¹è¯æ¡†æ•°æ®
 	enum { IDD = IDD_DIALOG_LIST_SELECTOR };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV æ”¯æŒ
 
 	DECLARE_MESSAGE_MAP()
 public:

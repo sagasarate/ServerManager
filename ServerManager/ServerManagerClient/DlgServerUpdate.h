@@ -1,8 +1,8 @@
-#pragma once
+Ôªø#pragma once
 #include "afxcmn.h"
 
 
-// CDlgServerUpdate ∂‘ª∞øÚ
+// CDlgServerUpdate ÂØπËØùÊ°Ü
 
 class CDlgServerUpdate : public CDialog
 {
@@ -10,21 +10,20 @@ class CDlgServerUpdate : public CDialog
 protected:
 	enum UPDTAE_TYPE
 	{
-		UPDTAE_TYPE_NONE,
-		UPDTAE_TYPE_EXEC,
-		UPDTAE_TYPE_CONFIG,
+		UPDTAE_TYPE_EXEC = 1,
+		UPDTAE_TYPE_CONFIG = (1 << 1),
+		UPDTAE_TYPE_ALL = 0xFFFF,
 	};
 	struct UPDATE_FILE_INFO
 	{
 		int			UpdateType;
-		CEasyString SrcPath;
-		CEasyString DestPath;
-	};
-	struct UPDATE_INFO
-	{
-		CEasyString						ServiceName;
-		CEasyArray<UPDATE_FILE_INFO>	UpdateFileList;
-	};
+		bool		IncludeChildDir;
+		CEasyString	ServiceName;
+		CEasyString SrcDir;
+		CEasyString DestDir;
+		CEasyArray<CEasyString> Files;
+		CEasyArray<CEasyString> ExceptPatterns;
+	};	
 	struct UPDATE_SERVICE_INFO
 	{
 		UINT			ConnectionID;
@@ -33,26 +32,29 @@ protected:
 		CEasyString		ServerAddress;
 	};
 
-	CEasyArray<UPDATE_INFO>				m_UpdateList;
+	CEasyArray<UPDATE_FILE_INFO>		m_UpdateFileList;
 	CEasyArray<UPDATE_SERVICE_INFO>		m_ServiceList;
 	CListCtrl							m_lvList;
 public:
-	CDlgServerUpdate(CWnd* pParent = NULL);   // ±Í◊ºππ‘Ï∫Ø ˝
+	CDlgServerUpdate(CWnd* pParent = NULL);   // Ê†áÂáÜÊûÑÈÄ†ÂáΩÊï∞
 	virtual ~CDlgServerUpdate();
 
-// ∂‘ª∞øÚ ˝æ›
+// ÂØπËØùÊ°ÜÊï∞ÊçÆ
 	enum { IDD = IDD_DIALOG_SERVER_UPDATE };
-
+	bool LoadUpdateList(LPCTSTR szFileName);
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV ÷ß≥÷
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV ÊîØÊåÅ
 
 	DECLARE_MESSAGE_MAP()
 protected:
-	UPDATE_INFO * GetUpdateInfo(LPCTSTR szServiceName, bool NewOnNotExist);
-public:
+	LPCTSTR HaveUpdate(const CEasyString& ServiceName, UPDTAE_TYPE UpdateType);
+
 	virtual BOOL OnInitDialog();
-	bool LoadUpdateList(LPCTSTR szFileName);
+	
 	void FillList();
+	bool IsMatch(CEasyArray<CEasyString> Patterns, const CEasyString& FileName);
+	void SearchFiles(LPCTSTR SearchDir, LPCTSTR FilePattern, CEasyArray<CEasyString> ExceptPatterns, LPCTSTR DestDir, CEasyArray<SELECT_ITEM_INFO>& FileList, bool Recursion);
+	void GetFiles(const CEasyArray<UPDATE_FILE_INFO>& UpdateList, CEasyArray<SELECT_ITEM_INFO>& FileList, const CEasyString& ServiceName, UPDTAE_TYPE MatchType);
 	
 	afx_msg void OnBnClickedButtonLoadUpdateList();
 	

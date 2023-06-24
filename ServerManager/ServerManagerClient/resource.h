@@ -1,6 +1,6 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ …˙≥…µƒ∞¸∫¨Œƒº˛°£
-// π© ServerManagerClient.rc  π”√
+Ôªø//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ ÁîüÊàêÁöÑÂåÖÂê´Êñá‰ª∂„ÄÇ
+// ‰æõ ServerManagerClient.rc ‰ΩøÁî®
 //
 #define IDD_ABOUTBOX                    100
 #define IDP_OLE_INIT_FAILED             100
@@ -41,7 +41,9 @@
 #define IDC_EDIT_PASSWORD               1010
 #define IDC_EDIT2                       1010
 #define IDC_TRANSFER_PROGRESS           1011
+#define IDC_EDIT_NAME                   1011
 #define IDC_STATIC_TRANSFER_RATE        1012
+#define IDC_EDIT_GROUP                  1012
 #define IDC_CHECK_SELECT_ALL            1013
 #define IDC_EDIT_SERVICE_ID             1014
 #define IDC_EDIT_SERVICE_NAME           1015
@@ -59,7 +61,6 @@
 #define IDC_EDIT_CONTROL_PIPE_NAME      1024
 #define IDC_BUTTON_SERVER_STATUS        1025
 #define IDC_EDIT_SHUTDOWN_CMD           1025
-#define IDC_CHECK_KEEP_RUNNING2         1026
 #define IDC_CHECK_LOG_SERVER_STATUS     1026
 #define IDC_EDIT_CMD                    1028
 #define IDC_CHECK_UPDATE_CONFIG         1029
@@ -128,7 +129,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        145
+#define _APS_NEXT_RESOURCE_VALUE        147
 #define _APS_NEXT_COMMAND_VALUE         32820
 #define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101

@@ -23,6 +23,8 @@ enum MSG_RESULT
 	MSG_RESULT_USER_NAME_OR_PASSWORD_ERROR,
 	MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE,
 	MSG_RESULT_SHUTDOWN_CMD_NOT_SET,
+	MSG_RESULT_IS_BUSY,
+	MSG_RESULT_NOT_SUPPORT,
 	MSG_RESULT_MAX,
 
 };
@@ -77,7 +79,7 @@ enum SERVICE_SHUTDOWN_TYPE
 
 
 
-const LPCTSTR g_szMSG_RESULT[20]={_T("成功"),_T("失败"),_T("文件不存在"),_T("目录不存在"),_T("非法脚本"),_T("已有脚本在执行"),_T("脚本文件不存在"),_T("脚本文件读取错误"),_T("服务不存在"),_T("请求序列错误"),_T("请就数据过大"),_T("数据压缩错误"),_T("文件写入错误"),_T("文件读取错误"),_T("服务ID已被占用"),_T("服务类型不支持"),_T("用户名或密码错误"),_T("控制管道不可用"),_T("关服命令未设置"),_T("")};
+const LPCTSTR g_szMSG_RESULT[22]={_T("成功"),_T("失败"),_T("文件不存在"),_T("目录不存在"),_T("非法脚本"),_T("已有脚本在执行"),_T("脚本文件不存在"),_T("脚本文件读取错误"),_T("服务不存在"),_T("请求序列错误"),_T("请就数据过大"),_T("数据压缩错误"),_T("文件写入错误"),_T("文件读取错误"),_T("服务ID已被占用"),_T("服务类型不支持"),_T("用户名或密码错误"),_T("控制管道不可用"),_T("关服命令未设置"),_T("系统忙"),_T("功能不支持"),_T("")};
 
 const LPCTSTR g_szSERVICE_TYPE[4]={_T("普通服务"),_T("Windows服务"),_T("目录"),_T("")};
 

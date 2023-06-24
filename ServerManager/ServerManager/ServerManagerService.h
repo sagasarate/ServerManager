@@ -38,6 +38,11 @@ protected:
 
 	CEasyString									m_ServerIP;
 
+	CTaskManager								m_TaskManager;
+
+	CEasyString									m_WeChatToken;
+	UINT										m_WeChatTokenExpireTime;
+
 
 	DECLARE_CLASS_INFO_STATIC(CServerManagerService);
 public:
@@ -59,6 +64,7 @@ public:
 	CEasyArray<CServiceInfoEx>& GetServiceInfoList();
 	CProcessInfoList& GetProcessInfoList();
 	NET_ADAPTER_INFO_LIST& GetNetAdapterInfo();
+	CTaskManager& GetTaskManager();
 
 	CServiceInfoEx * GetServiceInfo(UINT ServiceID);
 	LPCTSTR GetServiceWorkDir(UINT ServiceID);
@@ -134,4 +140,8 @@ inline CProcessInfoList& CServerManagerService::GetProcessInfoList()
 inline NET_ADAPTER_INFO_LIST& CServerManagerService::GetNetAdapterInfo()
 {
 	return m_NetAdapterInfoList;
+}
+inline CTaskManager& CServerManagerService::GetTaskManager()
+{
+	return m_TaskManager;
 }

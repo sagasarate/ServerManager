@@ -30,7 +30,9 @@ void CServiceInfo::Clear()
 	m_ControlPipeName.Clear();
 	m_ShutdownCmd.Clear();
 	m_CharSet=0;
+	m_KeepRunning=false;
 	m_LogStatusToFile=false;
+	m_OtherExecFileList.SetTag(_T("StructData"));
 	m_OtherExecFileList.Clear();
 	m_OtherExecFileList.Create(16,8);
 	
@@ -68,7 +70,7 @@ bool CServiceInfo::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 	IsModified=IsModified||(m_ModifyFlag&MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO])!=0;
 	
 	IsModified=IsModified
-		||false;
+		;
 	
 //<GenerateArea3End>
 	return IsModified;
@@ -168,6 +170,11 @@ bool CServiceInfo::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAG
 	if(Flag&MF_CHAR_SET)
 	{
 		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_CHAR_SET,m_CharSet),FailCount);
+	}
+	
+	if(Flag&MF_KEEP_RUNNING)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_KEEP_RUNNING,m_KeepRunning),FailCount);
 	}
 	
 	if(Flag&MF_LOG_STATUS_TO_FILE)
@@ -304,6 +311,13 @@ void CServiceInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODI
 				UpdateFlag|=MF_CHAR_SET;
 			}
 			break;
+		case SST_SRVI_KEEP_RUNNING:
+			if(Flag&MF_KEEP_RUNNING)
+			{
+				m_KeepRunning=Value;
+				UpdateFlag|=MF_KEEP_RUNNING;
+			}
+			break;
 		case SST_SRVI_LOG_STATUS_TO_FILE:
 			if(Flag&MF_LOG_STATUS_TO_FILE)
 			{
@@ -421,6 +435,11 @@ void CServiceInfo::CloneFrom(const CServiceInfo& DataObject,const DATA_OBJECT_MO
 		m_CharSet=DataObject.m_CharSet;
 		UpdateFlag|=MF_CHAR_SET;
 	}
+	if(Flag&MF_KEEP_RUNNING)
+	{
+		m_KeepRunning=DataObject.m_KeepRunning;
+		UpdateFlag|=MF_KEEP_RUNNING;
+	}
 	if(Flag&MF_LOG_STATUS_TO_FILE)
 	{
 		m_LogStatusToFile=DataObject.m_LogStatusToFile;
@@ -441,26 +460,91 @@ void CServiceInfo::CloneFrom(const CServiceInfo& DataObject,const DATA_OBJECT_MO
 UINT CServiceInfo::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 {
 //<GenerateArea9Start>
+	UINT64 Flag=MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO];
 	UINT Size=0;
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
-	Size+=CSmartStruct::GetStringMemberSize((UINT)m_Name.GetLength());
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
-	Size+=CSmartStruct::GetStringMemberSize((UINT)m_WorkDir.GetLength());
-	Size+=CSmartStruct::GetStringMemberSize((UINT)m_StartupParam.GetLength());
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
-	Size+=CSmartStruct::GetStringMemberSize((UINT)m_ControlPipeName.GetLength());
-	Size+=CSmartStruct::GetStringMemberSize((UINT)m_ShutdownCmd.GetLength());
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(int));
-	Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
-	for(size_t i=0;i<m_OtherExecFileList.GetCount();i++)
+	if(Flag&MF_SERVICE_ID)
 	{
-		Size+=CSmartStruct::GetStringMemberSize((UINT)m_OtherExecFileList[i].GetLength());
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
 	}
-	Size+=CSmartStruct::GetStructMemberSize(0);
+	
+	if(Flag&MF_NAME)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_Name);
+	}
+	
+	if(Flag&MF_TYPE)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+	}
+	
+	if(Flag&MF_WORK_DIR)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_WorkDir);
+	}
+	
+	if(Flag&MF_STARTUP_PARAM)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_StartupParam);
+	}
+	
+	if(Flag&MF_STATUS)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+	}
+	
+	if(Flag&MF_WORK_STATUS)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+	}
+	
+	if(Flag&MF_LAST_OPERATION)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+	}
+	
+	if(Flag&MF_LAST_STATUS_CHANGE_TIME)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
+	}
+	
+	if(Flag&MF_RESTARTUP_TIME)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
+	}
+	
+	if(Flag&MF_CONTROL_PIPE_NAME)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_ControlPipeName);
+	}
+	
+	if(Flag&MF_SHUTDOWN_CMD)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_ShutdownCmd);
+	}
+	
+	if(Flag&MF_CHAR_SET)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(int));
+	}
+	
+	if(Flag&MF_KEEP_RUNNING)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+	}
+	
+	if(Flag&MF_LOG_STATUS_TO_FILE)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(BYTE));
+	}
+	
+	if(Flag&MF_OTHER_EXEC_FILE_LIST)
+	{
+		for(size_t i=0;i<m_OtherExecFileList.GetCount();i++)
+		{
+			Size+=CSmartStruct::GetStringMemberSize(m_OtherExecFileList[i]);
+		}
+		Size+=CSmartStruct::GetStructMemberSize(0);
+	}
 	
 		
 	

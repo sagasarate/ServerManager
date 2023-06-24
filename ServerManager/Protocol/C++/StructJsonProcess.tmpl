@@ -1,7 +1,7 @@
 bool ToJson(rapidjson::Value& StructNode, rapidjson::Document::AllocatorType& Alloc)
 {
 	<IfHaveBaseClass>
-	if (!<BaseClass>::ToJson(StructNode))
+	if (!<BaseClass>::ToJson(StructNode,Alloc))
 		return false;
 	</IfHaveBaseClass>
 	<ToJsonOperations>

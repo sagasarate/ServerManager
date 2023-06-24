@@ -22,10 +22,10 @@ public:
 		METHOD_BROWSE_SERVICE_DIR=5,
 		METHOD_FILE_DOWNLOAD_START=6,
 		METHOD_FILE_DOWNLOAD_DATA=7,
-		METHOD_FILE_DOWNLOAD_END=8,
+		METHOD_FILE_DOWNLOAD_FINISH=32,
 		METHOD_FILE_UPLOAD_START=9,
 		METHOD_FILE_UPLOAD_DATA=10,
-		METHOD_FILE_UPLOAD_END=11,
+		METHOD_FILE_UPLOAD_FINISH=33,
 		METHOD_CREATE_DIR=12,
 		METHOD_DELETE_FILE=13,
 		METHOD_CHANGE_FILE_MODE=19,
@@ -52,7 +52,7 @@ public:
 		Password				
 	返回值:无特别意义
 	*************************************************/
-	virtual int Login(LPCTSTR UserName ,LPCTSTR Password ) {return COMMON_RESULT_FAILED;}
+	virtual int Login(const CEasyString& UserName ,const CEasyString& Password ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -183,9 +183,10 @@ public:
 	参数:
 		ServiceID				
 		FilePath				
+		StartOffset				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadStart(UINT ServiceID ,const CEasyString& FilePath ) {return COMMON_RESULT_FAILED;}
+	virtual int FileDownloadStart(UINT ServiceID ,const CEasyString& FilePath ,UINT64 StartOffset ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -193,22 +194,21 @@ public:
 	函数名:	FileDownloadData
 	用途:	
 	参数:
-		Offset				
-		Length				
+		
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadData(UINT64 Offset ,UINT Length ) {return COMMON_RESULT_FAILED;}
+	virtual int FileDownloadData() {return COMMON_RESULT_FAILED;}
 		
 	
 	
 	/*************************************************
-	函数名:	FileDownloadEnd
+	函数名:	FileDownloadFinish
 	用途:	
 	参数:
 		
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileDownloadEnd() {return COMMON_RESULT_FAILED;}
+	virtual int FileDownloadFinish() {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -218,9 +218,10 @@ public:
 	参数:
 		ServiceID				
 		FilePath				
+		FileLastWriteTime				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadStart(UINT ServiceID ,const CEasyString& FilePath ) {return COMMON_RESULT_FAILED;}
+	virtual int FileUploadStart(UINT ServiceID ,const CEasyString& FilePath ,UINT FileLastWriteTime ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -228,23 +229,23 @@ public:
 	函数名:	FileUploadData
 	用途:	
 	参数:
-		Offset				
 		Length				
 		FileData				
+		IsLast				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadData(UINT64 Offset ,UINT Length ,const CEasyBuffer& FileData ) {return COMMON_RESULT_FAILED;}
+	virtual int FileUploadData(UINT Length ,const CEasyBuffer& FileData ,bool IsLast ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
 	/*************************************************
-	函数名:	FileUploadEnd
+	函数名:	FileUploadFinish
 	用途:	
 	参数:
-		FileLastWriteTime				
+		
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileUploadEnd(UINT FileLastWriteTime ) {return COMMON_RESULT_FAILED;}
+	virtual int FileUploadFinish() {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -327,7 +328,7 @@ public:
 		Command				
 	返回值:无特别意义
 	*************************************************/
-	virtual int SendCommand(UINT ServiceID ,LPCTSTR Command ) {return COMMON_RESULT_FAILED;}
+	virtual int SendCommand(UINT ServiceID ,const CEasyString& Command ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -387,7 +388,7 @@ public:
 		FileMD5				
 	返回值:无特别意义
 	*************************************************/
-	virtual int FileCompare(UINT ServiceID ,LPCTSTR FilePath ,UINT64 FileSize ,LPCTSTR FileMD5 ) {return COMMON_RESULT_FAILED;}
+	virtual int FileCompare(UINT ServiceID ,const CEasyString& FilePath ,UINT64 FileSize ,const CEasyString& FileMD5 ) {return COMMON_RESULT_FAILED;}
 		
 	
 	
@@ -462,15 +463,14 @@ protected:
 	{
 		SST_FILE_DOWNLOAD_START_SERVICE_ID=1,
 		SST_FILE_DOWNLOAD_START_FILE_PATH=2,
+		SST_FILE_DOWNLOAD_START_START_OFFSET=8,
 	
 	};
 	enum SERVER_MANAGER_FILE_DOWNLOAD_DATA_MEMBER_IDS
 	{
-		SST_FILE_DOWNLOAD_DATA_OFFSET=1,
-		SST_FILE_DOWNLOAD_DATA_LENGTH=2,
-	
+		
 	};
-	enum SERVER_MANAGER_FILE_DOWNLOAD_END_MEMBER_IDS
+	enum SERVER_MANAGER_FILE_DOWNLOAD_FINISH_MEMBER_IDS
 	{
 		
 	};
@@ -478,19 +478,19 @@ protected:
 	{
 		SST_FILE_UPLOAD_START_SERVICE_ID=1,
 		SST_FILE_UPLOAD_START_FILE_PATH=2,
+		SST_FILE_UPLOAD_START_FILE_LAST_WRITE_TIME=8,
 	
 	};
 	enum SERVER_MANAGER_FILE_UPLOAD_DATA_MEMBER_IDS
 	{
-		SST_FILE_UPLOAD_DATA_OFFSET=1,
 		SST_FILE_UPLOAD_DATA_LENGTH=2,
 		SST_FILE_UPLOAD_DATA_FILE_DATA=4,
+		SST_FILE_UPLOAD_DATA_IS_LAST=8,
 	
 	};
-	enum SERVER_MANAGER_FILE_UPLOAD_END_MEMBER_IDS
+	enum SERVER_MANAGER_FILE_UPLOAD_FINISH_MEMBER_IDS
 	{
-		SST_FILE_UPLOAD_END_FILE_LAST_WRITE_TIME=2,
-	
+		
 	};
 	enum SERVER_MANAGER_CREATE_DIR_MEMBER_IDS
 	{

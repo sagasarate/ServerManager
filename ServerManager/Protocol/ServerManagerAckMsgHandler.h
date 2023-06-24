@@ -22,10 +22,10 @@ public:
 	int HandleMsgBrowseServiceDirAck(CSmartStruct& Packet);
 	int HandleMsgFileDownloadStartAck(CSmartStruct& Packet);
 	int HandleMsgFileDownloadDataAck(CSmartStruct& Packet);
-	int HandleMsgFileDownloadEndAck(CSmartStruct& Packet);
+	int HandleMsgFileDownloadFinishAck(CSmartStruct& Packet);
 	int HandleMsgFileUploadStartAck(CSmartStruct& Packet);
 	int HandleMsgFileUploadDataAck(CSmartStruct& Packet);
-	int HandleMsgFileUploadEndAck(CSmartStruct& Packet);
+	int HandleMsgFileUploadFinishAck(CSmartStruct& Packet);
 	int HandleMsgCreateDirAck(CSmartStruct& Packet);
 	int HandleMsgDeleteFileAck(CSmartStruct& Packet);
 	int HandleMsgChangeFileModeAck(CSmartStruct& Packet);

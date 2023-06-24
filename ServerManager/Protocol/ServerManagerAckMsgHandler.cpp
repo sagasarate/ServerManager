@@ -51,8 +51,8 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_DATA,true),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
-	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileDownloadEndAck;
-	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_END,true),MsgHandleInfo);
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileDownloadFinishAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_DOWNLOAD_FINISH,true),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_START,true),MsgHandleInfo);
@@ -60,8 +60,8 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_DATA,true),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
-	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileUploadEndAck;
-	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_END,true),MsgHandleInfo);
+	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgFileUploadFinishAck;
+	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_FILE_UPLOAD_FINISH,true),MsgHandleInfo);
 	MsgHandleInfo.pObject=this;
 	MsgHandleInfo.pFN=(MSG_HANDLE_FN)&CServerManagerAckMsgHandler::HandleMsgCreateDirAck;
 	MsgMap.Insert(MAKE_MSG_ID(MODULE_ID_SVR_MGR,SVR_MGR_INTERFACE_SERVER_MANAGER,IServerManager::METHOD_CREATE_DIR,true),MsgHandleInfo);
@@ -537,7 +537,7 @@ int CServerManagerAckMsgHandler::HandleMsgBrowseServiceDirAck(CSmartStruct& Pack
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_DIR:
 			{
-				Value.GetString(Dir);
+				Value.GetStringRef(Dir);
 		
 			}
 			break;
@@ -578,12 +578,14 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(CSmartStruct& Pac
 	UINT			ServiceID;
 	CEasyString		FilePath;
 	UINT64			FileSize;
+	UINT			FileLastWriteTime;
 	
 	
 	Result=0;
 	ServiceID=0;
 	FilePath.Clear();
 	FileSize=0;
+	FileLastWriteTime=0;
 	
 
 	
@@ -608,7 +610,7 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(CSmartStruct& Pac
 			break;
 		case SST_FILE_DOWNLOAD_START_ACK_FILE_PATH:
 			{
-				Value.GetString(FilePath);
+				Value.GetStringRef(FilePath);
 		
 			}
 			break;
@@ -618,12 +620,18 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(CSmartStruct& Pac
 		
 			}
 			break;
+		case SST_FILE_DOWNLOAD_START_ACK_FILE_LAST_WRITE_TIME:
+			{
+				FileLastWriteTime=Value;
+		
+			}
+			break;
 		
 		}
 	}
 		
 
-	return FileDownloadStartAck( Result , ServiceID , FilePath , FileSize );
+	return FileDownloadStartAck( Result , ServiceID , FilePath , FileSize , FileLastWriteTime );
 }
 int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Packet)
 {
@@ -631,12 +639,15 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Pack
 	UINT64			Offset;
 	UINT			Length;
 	CEasyBuffer		FileData;
+	bool			IsLast;
 	
 	
 	Result=0;
 	Offset=0;
 	Length=0;
+	FileData.SetTag(_T("StructData"));
 	FileData.Destory();
+	IsLast=false;
 	
 
 	
@@ -668,7 +679,13 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Pack
 		case SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA:
 			{
 				FileData.Create(Value.GetLength());
-		FileData.PushBack((LPCSTR)Value,Value.GetLength());
+		FileData.PushBack((BYTE *)Value.GetValueData(),Value.GetLength());
+		
+			}
+			break;
+		case SST_FILE_DOWNLOAD_DATA_ACK_IS_LAST:
+			{
+				IsLast=Value;
 		
 			}
 			break;
@@ -677,16 +694,16 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Pack
 	}
 		
 
-	return FileDownloadDataAck( Result , Offset , Length , FileData );
+	return FileDownloadDataAck( Result , Offset , Length , FileData , IsLast );
 }
-int CServerManagerAckMsgHandler::HandleMsgFileDownloadEndAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileDownloadFinishAck(CSmartStruct& Packet)
 {
-	short		Result;
-	UINT		FileLastWriteTime;
+	short			Result;
+	CEasyString		MD5;
 	
 	
 	Result=0;
-	FileLastWriteTime=0;
+	MD5.Clear();
 	
 
 	
@@ -697,15 +714,15 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadEndAck(CSmartStruct& Packe
 		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
 		switch(MemberID)
 		{
-		case SST_FILE_DOWNLOAD_END_ACK_RESULT:
+		case SST_FILE_DOWNLOAD_FINISH_ACK_RESULT:
 			{
 				Result=Value;
 		
 			}
 			break;
-		case SST_FILE_DOWNLOAD_END_ACK_FILE_LAST_WRITE_TIME:
+		case SST_FILE_DOWNLOAD_FINISH_ACK_MD5:
 			{
-				FileLastWriteTime=Value;
+				Value.GetStringRef(MD5);
 		
 			}
 			break;
@@ -714,7 +731,7 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadEndAck(CSmartStruct& Packe
 	}
 		
 
-	return FileDownloadEndAck( Result , FileLastWriteTime );
+	return FileDownloadFinishAck( Result , MD5 );
 }
 int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(CSmartStruct& Packet)
 {
@@ -752,7 +769,7 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(CSmartStruct& Packe
 			break;
 		case SST_FILE_UPLOAD_START_ACK_FILE_PATH:
 			{
-				Value.GetString(FilePath);
+				Value.GetStringRef(FilePath);
 		
 			}
 			break;
@@ -772,13 +789,13 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(CSmartStruct& Packe
 int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(CSmartStruct& Packet)
 {
 	short		Result;
-	UINT64		Offset;
 	UINT		Length;
+	bool		IsLast;
 	
 	
 	Result=0;
-	Offset=0;
 	Length=0;
+	IsLast=false;
 	
 
 	
@@ -795,15 +812,15 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(CSmartStruct& Packet
 		
 			}
 			break;
-		case SST_FILE_UPLOAD_DATA_ACK_OFFSET:
-			{
-				Offset=Value;
-		
-			}
-			break;
 		case SST_FILE_UPLOAD_DATA_ACK_LENGTH:
 			{
 				Length=Value;
+		
+			}
+			break;
+		case SST_FILE_UPLOAD_DATA_ACK_IS_LAST:
+			{
+				IsLast=Value;
 		
 			}
 			break;
@@ -812,14 +829,16 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(CSmartStruct& Packet
 	}
 		
 
-	return FileUploadDataAck( Result , Offset , Length );
+	return FileUploadDataAck( Result , Length , IsLast );
 }
-int CServerManagerAckMsgHandler::HandleMsgFileUploadEndAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileUploadFinishAck(CSmartStruct& Packet)
 {
-	short		Result;
+	short			Result;
+	CEasyString		MD5;
 	
 	
 	Result=0;
+	MD5.Clear();
 	
 
 	
@@ -830,9 +849,15 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadEndAck(CSmartStruct& Packet)
 		CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
 		switch(MemberID)
 		{
-		case SST_FILE_UPLOAD_END_ACK_RESULT:
+		case SST_FILE_UPLOAD_FINISH_ACK_RESULT:
 			{
 				Result=Value;
+		
+			}
+			break;
+		case SST_FILE_UPLOAD_FINISH_ACK_MD5:
+			{
+				Value.GetStringRef(MD5);
 		
 			}
 			break;
@@ -841,7 +866,7 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadEndAck(CSmartStruct& Packet)
 	}
 		
 
-	return FileUploadEndAck( Result );
+	return FileUploadFinishAck( Result , MD5 );
 }
 int CServerManagerAckMsgHandler::HandleMsgCreateDirAck(CSmartStruct& Packet)
 {
@@ -877,7 +902,7 @@ int CServerManagerAckMsgHandler::HandleMsgCreateDirAck(CSmartStruct& Packet)
 			break;
 		case SST_CREATE_DIR_ACK_DIR:
 			{
-				Value.GetString(Dir);
+				Value.GetStringRef(Dir);
 		
 			}
 			break;
@@ -922,7 +947,7 @@ int CServerManagerAckMsgHandler::HandleMsgDeleteFileAck(CSmartStruct& Packet)
 			break;
 		case SST_DELETE_FILE_ACK_FILE_PATH:
 			{
-				Value.GetString(FilePath);
+				Value.GetStringRef(FilePath);
 		
 			}
 			break;
@@ -969,7 +994,7 @@ int CServerManagerAckMsgHandler::HandleMsgChangeFileModeAck(CSmartStruct& Packet
 			break;
 		case SST_CHANGE_FILE_MODE_ACK_FILE_PATH:
 			{
-				Value.GetString(FilePath);
+				Value.GetStringRef(FilePath);
 		
 			}
 			break;
@@ -1165,12 +1190,12 @@ int CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck(CSmartStruct& Packet)
 }
 int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(CSmartStruct& Packet)
 {
-	UINT		ServiceID;
-	LPCTSTR		LogMsg;
+	UINT			ServiceID;
+	CEasyString		LogMsg;
 	
 	
 	ServiceID=0;
-	LogMsg=NULL;
+	LogMsg.Clear();
 	
 
 	
@@ -1189,7 +1214,7 @@ int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(CSmartStruct& Packet)
 			break;
 		case SST_CONSOLE_LOG_NOTIFY_LOG_MSG:
 			{
-				LogMsg=Value;
+				Value.GetStringRef(LogMsg);
 		
 			}
 			break;
@@ -1292,14 +1317,14 @@ int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(CSmartStruct&
 }
 int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(CSmartStruct& Packet)
 {
-	short		Result;
-	UINT		ServiceID;
-	LPCTSTR		FilePath;
+	short			Result;
+	UINT			ServiceID;
+	CEasyString		FilePath;
 	
 	
 	Result=0;
 	ServiceID=0;
-	FilePath=NULL;
+	FilePath.Clear();
 	
 
 	
@@ -1324,7 +1349,7 @@ int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(CSmartStruct& Packet)
 			break;
 		case SST_FILE_COMPARE_ACK_FILE_PATH:
 			{
-				FilePath=Value;
+				Value.GetStringRef(FilePath);
 		
 			}
 			break;

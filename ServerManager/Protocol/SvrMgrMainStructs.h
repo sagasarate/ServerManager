@@ -37,6 +37,7 @@ struct NET_ADAPTER_INFO
 	{
 
 		Index=0;
+		IPAddressList.SetTag(_T("StructData"));
 		IPAddressList.Clear();
 		IPAddressList.Create(16,8);
 		Name.Clear();
@@ -172,17 +173,37 @@ struct NET_ADAPTER_INFO
 	UINT GetSmartStructSize() const
 	{
 		UINT Size=0;
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
-		for(size_t i=0;i<IPAddressList.GetCount();i++)
 		{
-			Size+=CSmartStruct::GetStringMemberSize((UINT)IPAddressList[i].GetLength());
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
 		}
-		Size+=CSmartStruct::GetStructMemberSize(0);
-		Size+=CSmartStruct::GetStringMemberSize((UINT)Name.GetLength());
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
+		
+		{
+			for(size_t i=0;i<IPAddressList.GetCount();i++)
+			{
+				Size+=CSmartStruct::GetStringMemberSize(IPAddressList[i]);
+			}
+			Size+=CSmartStruct::GetStructMemberSize(0);
+		}
+		{
+			Size+=CSmartStruct::GetStringMemberSize(Name);
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
+		}
+		
 		
 		return Size;
 	}
@@ -216,6 +237,7 @@ struct NET_ADAPTER_INFO
 		CloneFrom(Value);
 		return *this;
 	}
+	
 	 
 };
 
@@ -243,6 +265,7 @@ struct NET_ADAPTER_INFO_LIST
 	void Clear()
 	{
 
+		List.SetTag(_T("StructData"));
 		List.Clear();
 		List.Create(16,8);
 		
@@ -317,12 +340,14 @@ struct NET_ADAPTER_INFO_LIST
 	UINT GetSmartStructSize() const
 	{
 		UINT Size=0;
-		for(size_t i=0;i<List.GetCount();i++)
 		{
-			Size+=CSmartStruct::GetStructMemberSize(List[i].GetSmartStructSize())
+			for(size_t i=0;i<List.GetCount();i++)
+			{
+				Size+=CSmartStruct::GetStructMemberSize(List[i].GetSmartStructSize())
 		;
+			}
+			Size+=CSmartStruct::GetStructMemberSize(0);
 		}
-		Size+=CSmartStruct::GetStructMemberSize(0);
 		
 		return Size;
 	}
@@ -338,6 +363,7 @@ struct NET_ADAPTER_INFO_LIST
 		CloneFrom(Value);
 		return *this;
 	}
+	
 	 
 };
 
@@ -472,12 +498,30 @@ struct FILE_INFO
 	UINT GetSmartStructSize() const
 	{
 		UINT Size=0;
-		Size+=CSmartStruct::GetStringMemberSize((UINT)Name.GetLength());
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
-		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		{
+			Size+=CSmartStruct::GetStringMemberSize(Name);
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		}
+		
+		{
+			Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+		}
+		
 		
 		return Size;
 	}
@@ -508,6 +552,7 @@ struct FILE_INFO
 		CloneFrom(Value);
 		return *this;
 	}
+	
 	 
 };
 
@@ -535,6 +580,7 @@ struct FILE_INFO_LIST
 	void Clear()
 	{
 
+		List.SetTag(_T("StructData"));
 		List.Clear();
 		List.Create(16,8);
 		
@@ -609,12 +655,14 @@ struct FILE_INFO_LIST
 	UINT GetSmartStructSize() const
 	{
 		UINT Size=0;
-		for(size_t i=0;i<List.GetCount();i++)
 		{
-			Size+=CSmartStruct::GetStructMemberSize(List[i].GetSmartStructSize())
+			for(size_t i=0;i<List.GetCount();i++)
+			{
+				Size+=CSmartStruct::GetStructMemberSize(List[i].GetSmartStructSize())
 		;
+			}
+			Size+=CSmartStruct::GetStructMemberSize(0);
 		}
-		Size+=CSmartStruct::GetStructMemberSize(0);
 		
 		return Size;
 	}
@@ -630,6 +678,7 @@ struct FILE_INFO_LIST
 		CloneFrom(Value);
 		return *this;
 	}
+	
 	 
 };
 

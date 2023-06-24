@@ -20,6 +20,7 @@ CMainConfig::CMainConfig(void)
 	m_KeepAliveTime = 5 * 1000;
 	m_KeepAliveCount = 10;
 	m_ProcessInfoFetchTime=5000;
+	m_MaxWorkThreadCount = 5;
 	FUNCTION_END;
 }
 
@@ -37,6 +38,14 @@ bool CMainConfig::LoadConfig(LPCTSTR FileName)
 
 		if(Config.moveto_child("Main"))
 		{
+			if (Config.has_attribute("MaxWorkThreadCount"))
+				m_MaxWorkThreadCount = Config.attribute("MaxWorkThreadCount");
+
+			xml_node PoolConfig = Config;
+			if (PoolConfig.moveto_child("PoolConfig"))
+			{
+				ReadPoolConfigs(PoolConfig, m_PoolConfigs);
+			}
 
 			xml_node ClientListen=Config;
 			if(ClientListen.moveto_child("ClientListen"))
@@ -99,6 +108,25 @@ bool CMainConfig::LoadConfig(LPCTSTR FileName)
 						}
 					}
 				}
+			}
+
+			xml_node TaskManagerConfig = Config;
+			if (TaskManagerConfig.moveto_child("TaskManagerConfig"))
+			{
+				if (TaskManagerConfig.has_attribute("SerialWorkThreadCount"))
+					m_TaskManagerConfig.SerialWorkThreadCount = TaskManagerConfig.attribute("SerialWorkThreadCount");
+
+				if (TaskManagerConfig.has_attribute("ParallelWorkThreadCount"))
+					m_TaskManagerConfig.ParallelWorkThreadCount = TaskManagerConfig.attribute("ParallelWorkThreadCount");
+
+				if (TaskManagerConfig.has_attribute("MaxUploadAcceptCount"))
+					m_TaskManagerConfig.MaxUploadAcceptCount = TaskManagerConfig.attribute("MaxUploadAcceptCount");
+
+				if (TaskManagerConfig.has_attribute("MaxDownloadAcceptCount"))
+					m_TaskManagerConfig.MaxDownloadAcceptCount = TaskManagerConfig.attribute("MaxDownloadAcceptCount");
+
+				if (TaskManagerConfig.has_attribute("TaskTimeOut"))
+					m_TaskManagerConfig.TaskTimeOut = TaskManagerConfig.attribute("TaskTimeOut");
 			}
 		}
 		else
@@ -170,16 +198,8 @@ bool CMainConfig::LoadServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& 
 
 						if (Service.has_attribute("KeepRunning"))
 						{
-							bool KeepRunning = Service.attribute("KeepRunning");
-							if (KeepRunning)
-								pServiceInfo->SetLastOperation(SERVICE_OPERATION_STARTUP);
-							else
-								pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
-						}
-						else
-						{
-							pServiceInfo->SetLastOperation(SERVICE_OPERATION_STARTUP);
-						}
+							pServiceInfo->SetKeepRunning(Service.attribute("KeepRunning"));
+						}						
 
 						if (Service.has_attribute("RestartupTime"))
 						{
@@ -254,10 +274,7 @@ bool CMainConfig::SaveServiceList(LPCTSTR FileName, CEasyArray<CServiceInfoEx>& 
 		Service.append_attribute(_T("ImageFilePath"), (LPCTSTR)ServiceList[i].GetImageFilePath());
 		Service.append_attribute(_T("WorkDir"), (LPCTSTR)ServiceList[i].GetWorkDir());
 		Service.append_attribute(_T("StartupParam"), (LPCTSTR)ServiceList[i].GetStartupParam());
-		if (ServiceList[i].GetLastOperation() == SERVICE_OPERATION_STARTUP)
-			Service.append_attribute(_T("KeepRunning"), true);
-		else
-			Service.append_attribute(_T("KeepRunning"), false);
+		Service.append_attribute(_T("KeepRunning"), ServiceList[i].GetKeepRunning());
 		Service.append_attribute(_T("RestartupTime"), ServiceList[i].GetRestartupTime());
 		Service.append_attribute(_T("ControlPipeName"), (LPCTSTR)ServiceList[i].GetControlPipeName());
 		Service.append_attribute(_T("ShutdownCmd"), (LPCTSTR)ServiceList[i].GetShutdownCmd());
@@ -288,4 +305,34 @@ bool CMainConfig::VerfyUser(LPCTSTR UserName, LPCTSTR Password)
 		}
 	}
 	return false;
+}
+
+bool CMainConfig::ReadPoolConfigs(xml_node& XMLContent, POOL_CONFIGS& Config)
+{
+	xml_node FileTaskPoolConfig = XMLContent;
+	if (FileTaskPoolConfig.moveto_child("FileTaskPoolConfig"))
+	{
+		ReadPoolConfig(FileTaskPoolConfig, Config.FileTaskPoolConfig);
+	}	
+	xml_node FileDataBlockPoolConfig = XMLContent;
+	if (FileDataBlockPoolConfig.moveto_child("FileDataBlockPoolConfig"))
+	{
+		ReadPoolConfig(FileDataBlockPoolConfig, Config.FileDataBlockPoolConfig);
+	}
+	xml_node SerialOperationPoolConfig = XMLContent;
+	if (SerialOperationPoolConfig.moveto_child("SerialOperationPoolConfig"))
+	{
+		ReadPoolConfig(SerialOperationPoolConfig, Config.SerialOperationPoolConfig);
+	}
+	xml_node ParallelOperationPoolConfig = XMLContent;
+	if (ParallelOperationPoolConfig.moveto_child("ParallelOperationPoolConfig"))
+	{
+		ReadPoolConfig(ParallelOperationPoolConfig, Config.ParallelOperationPoolConfig);
+	}
+	xml_node FinishOperationPoolConfig = XMLContent;
+	if (FinishOperationPoolConfig.moveto_child("FinishOperationPoolConfig"))
+	{
+		ReadPoolConfig(FinishOperationPoolConfig, Config.FinishOperationPoolConfig);
+	}
+	return true;
 }

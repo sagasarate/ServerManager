@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
-<Setting ServerUpdateListFile="E:\Work\1000game\src\WM2GameServer\Work\ServerUpdateList.csv" SystemServiceName="ServerManager">
+<Setting ServerUpdateListFile="F:\MMOPrj\Dev\Server\MMOServer\Work\UpdateList.csv" SystemServiceName="ServerManager">
 	<ServerList>
-		<Server Address="192.168.0.18" Port="8300" UserName="test" Password="123"/>
-		<Server Address="101.201.77.93" Port="8300" UserName="test" Password="123"/>
-		<Server Address="60.205.56.41" Port="8300" UserName="test" Password="123"/>
-		<Server Address="127.0.0.1" Port="8300" UserName="test" Password="123"/>
+		<Server Name="MMOServer" Group="MMO" Address="192.168.100.2" Port="8300" UserName="test" Password="123"/>
+		<Server Name="MMOServer" Group="MMO" Address="106.53.145.116" Port="8300" UserName="test" Password="123456"/>
 	</ServerList>
 </Setting>
