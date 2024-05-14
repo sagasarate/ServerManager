@@ -37,7 +37,7 @@ int CServerManagerAckMsgCaller::LoginAck(short Result )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgLoginAck(Packet, Result ))
+	if(PackMsgLoginAck(Packet,Result))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -85,7 +85,7 @@ int CServerManagerAckMsgCaller::GetServiceListAck(short Result ,const CSmartStru
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgGetServiceListAck(Packet, Result , ServiceListData ))
+	if(PackMsgGetServiceListAck(Packet,Result,ServiceListData))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -136,7 +136,7 @@ int CServerManagerAckMsgCaller::GetProcessListAck(short Result ,short Page ,shor
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgGetProcessListAck(Packet, Result , Page , PageLen , TotalPage , ProcessListData ))
+	if(PackMsgGetProcessListAck(Packet,Result,Page,PageLen,TotalPage,ProcessListData))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -184,7 +184,7 @@ int CServerManagerAckMsgCaller::GetNetAdapterListAck(short Result ,const CSmartS
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgGetNetAdapterListAck(Packet, Result , NetAdapterListData ))
+	if(PackMsgGetNetAdapterListAck(Packet,Result,NetAdapterListData))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -232,7 +232,7 @@ int CServerManagerAckMsgCaller::GetServiceInfoAck(short Result ,const CSmartStru
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgGetServiceInfoAck(Packet, Result , ServiceInfoPacket ))
+	if(PackMsgGetServiceInfoAck(Packet,Result,ServiceInfoPacket))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -280,7 +280,7 @@ int CServerManagerAckMsgCaller::ServiceStartupAck(short Result ,UINT ServiceID )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgServiceStartupAck(Packet, Result , ServiceID ))
+	if(PackMsgServiceStartupAck(Packet,Result,ServiceID))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -328,7 +328,7 @@ int CServerManagerAckMsgCaller::ServiceShutdownAck(short Result ,UINT ServiceID 
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgServiceShutdownAck(Packet, Result , ServiceID ))
+	if(PackMsgServiceShutdownAck(Packet,Result,ServiceID))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -375,7 +375,7 @@ int CServerManagerAckMsgCaller::RunProgramAck(short Result )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgRunProgramAck(Packet, Result ))
+	if(PackMsgRunProgramAck(Packet,Result))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -423,7 +423,7 @@ int CServerManagerAckMsgCaller::ProcessShutdownAck(short Result ,UINT ProcessID 
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgProcessShutdownAck(Packet, Result , ProcessID ))
+	if(PackMsgProcessShutdownAck(Packet,Result,ProcessID))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -473,7 +473,7 @@ int CServerManagerAckMsgCaller::ExecuteScriptAck(short Result ,UINT ServiceID ,i
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgExecuteScriptAck(Packet, Result , ServiceID , ErrorCode , LastLine ))
+	if(PackMsgExecuteScriptAck(Packet,Result,ServiceID,ErrorCode,LastLine))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -526,7 +526,7 @@ int CServerManagerAckMsgCaller::BrowseServiceDirAck(short Result ,UINT ServiceID
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgBrowseServiceDirAck(Packet, Result , ServiceID , Dir , Page , PageLen , TotalPage , FileListData ))
+	if(PackMsgBrowseServiceDirAck(Packet,Result,ServiceID,Dir,Page,PageLen,TotalPage,FileListData))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -577,7 +577,7 @@ int CServerManagerAckMsgCaller::FileDownloadStartAck(short Result ,UINT ServiceI
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileDownloadStartAck(Packet, Result , ServiceID , FilePath , FileSize , FileLastWriteTime ))
+	if(PackMsgFileDownloadStartAck(Packet,Result,ServiceID,FilePath,FileSize,FileLastWriteTime))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -628,7 +628,7 @@ int CServerManagerAckMsgCaller::FileDownloadDataAck(short Result ,UINT64 Offset 
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileDownloadDataAck(Packet, Result , Offset , Length , FileData , IsLast ))
+	if(PackMsgFileDownloadDataAck(Packet,Result,Offset,Length,FileData,IsLast))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -677,7 +677,7 @@ int CServerManagerAckMsgCaller::FileDownloadFinishAck(short Result ,const CEasyS
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileDownloadFinishAck(Packet, Result , MD5 ))
+	if(PackMsgFileDownloadFinishAck(Packet,Result,MD5))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -727,7 +727,7 @@ int CServerManagerAckMsgCaller::FileUploadStartAck(short Result ,UINT ServiceID 
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileUploadStartAck(Packet, Result , ServiceID , FilePath , FileSize ))
+	if(PackMsgFileUploadStartAck(Packet,Result,ServiceID,FilePath,FileSize))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -776,7 +776,7 @@ int CServerManagerAckMsgCaller::FileUploadDataAck(short Result ,UINT Length ,boo
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileUploadDataAck(Packet, Result , Length , IsLast ))
+	if(PackMsgFileUploadDataAck(Packet,Result,Length,IsLast))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -825,7 +825,7 @@ int CServerManagerAckMsgCaller::FileUploadFinishAck(short Result ,const CEasyStr
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileUploadFinishAck(Packet, Result , MD5 ))
+	if(PackMsgFileUploadFinishAck(Packet,Result,MD5))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -874,7 +874,7 @@ int CServerManagerAckMsgCaller::CreateDirAck(short Result ,UINT ServiceID ,const
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgCreateDirAck(Packet, Result , ServiceID , Dir ))
+	if(PackMsgCreateDirAck(Packet,Result,ServiceID,Dir))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -923,7 +923,7 @@ int CServerManagerAckMsgCaller::DeleteFileAck(short Result ,UINT ServiceID ,cons
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgDeleteFileAck(Packet, Result , ServiceID , FilePath ))
+	if(PackMsgDeleteFileAck(Packet,Result,ServiceID,FilePath))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -973,7 +973,7 @@ int CServerManagerAckMsgCaller::ChangeFileModeAck(short Result ,UINT ServiceID ,
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgChangeFileModeAck(Packet, Result , ServiceID , FilePath , Mode ))
+	if(PackMsgChangeFileModeAck(Packet,Result,ServiceID,FilePath,Mode))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1020,7 +1020,7 @@ int CServerManagerAckMsgCaller::AddServiceAck(short Result )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgAddServiceAck(Packet, Result ))
+	if(PackMsgAddServiceAck(Packet,Result))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1067,7 +1067,7 @@ int CServerManagerAckMsgCaller::EditServiceAck(short Result )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgEditServiceAck(Packet, Result ))
+	if(PackMsgEditServiceAck(Packet,Result))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1115,7 +1115,7 @@ int CServerManagerAckMsgCaller::DeleteServiceAck(short Result ,UINT ServiceID )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgDeleteServiceAck(Packet, Result , ServiceID ))
+	if(PackMsgDeleteServiceAck(Packet,Result,ServiceID))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1163,7 +1163,7 @@ int CServerManagerAckMsgCaller::SendCommandAck(short Result ,UINT ServiceID )
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgSendCommandAck(Packet, Result , ServiceID ))
+	if(PackMsgSendCommandAck(Packet,Result,ServiceID))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1212,7 +1212,7 @@ int CServerManagerAckMsgCaller::EnableLogRecvAck(short Result ,UINT ServiceID ,b
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgEnableLogRecvAck(Packet, Result , ServiceID , Enable ))
+	if(PackMsgEnableLogRecvAck(Packet,Result,ServiceID,Enable))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1260,7 +1260,7 @@ int CServerManagerAckMsgCaller::ConsoleLogNotify(UINT ServiceID ,const CEasyStri
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgConsoleLogNotify(Packet, ServiceID , LogMsg ))
+	if(PackMsgConsoleLogNotify(Packet,ServiceID,LogMsg))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1309,7 +1309,7 @@ int CServerManagerAckMsgCaller::GetServerStatusAck(short Result ,UINT ServiceID 
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgGetServerStatusAck(Packet, Result , ServiceID , StatusListPacket ))
+	if(PackMsgGetServerStatusAck(Packet,Result,ServiceID,StatusListPacket))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1358,7 +1358,7 @@ int CServerManagerAckMsgCaller::GetServerStatusFormatAck(short Result ,UINT Serv
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgGetServerStatusFormatAck(Packet, Result , ServiceID , StatusFormatPacket ))
+	if(PackMsgGetServerStatusFormatAck(Packet,Result,ServiceID,StatusFormatPacket))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1407,7 +1407,7 @@ int CServerManagerAckMsgCaller::FileCompareAck(short Result ,UINT ServiceID ,con
 	
 	CSmartStruct Packet=pMsg->GetEmptyDataPacket();
 	
-	if(PackMsgFileCompareAck(Packet, Result , ServiceID , FilePath ))
+	if(PackMsgFileCompareAck(Packet,Result,ServiceID,FilePath))
 	{			
 		if(m_pNet->SendMessage(pMsg))
 		{
@@ -1694,7 +1694,7 @@ bool CServerManagerAckMsgCaller::PackMsgFileDownloadDataAck(CSmartStruct& Packet
 	}
 	
 	{
-		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA,(BYTE *)FileData.GetBuffer(),FileData.GetUsedSize()),FailCount);
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA,FileData),FailCount);
 	}
 	
 	{

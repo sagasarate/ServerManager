@@ -16,15 +16,17 @@ struct NET_ADAPTER_INFO
 	
 	enum NET_ADAPTER_INFO_MEMBER_IDS
 	{
-		SST_NET_ADAPTER_INFO_INDEX=1,
-		SST_NET_ADAPTER_INFO_IPADDRESS_LIST=2,
-		SST_NET_ADAPTER_INFO_NAME=7,
-		SST_NET_ADAPTER_INFO_SEND_BYTES=5,
-		SST_NET_ADAPTER_INFO_SEND_FLUX=3,
-		SST_NET_ADAPTER_INFO_RECV_BYTES=6,
-		SST_NET_ADAPTER_INFO_RECV_FLUX=4,
-	
+		SST_NET_ADAPTER_INFO_INDEX = 1,
+		SST_NET_ADAPTER_INFO_IPADDRESS_LIST = 2,
+		SST_NET_ADAPTER_INFO_NAME = 7,
+		SST_NET_ADAPTER_INFO_SEND_BYTES = 5,
+		SST_NET_ADAPTER_INFO_SEND_FLUX = 3,
+		SST_NET_ADAPTER_INFO_RECV_BYTES = 6,
+		SST_NET_ADAPTER_INFO_RECV_FLUX = 4,
+		
 	};
+	
+	
 	NET_ADAPTER_INFO()
 	{
 		Clear();
@@ -35,7 +37,6 @@ struct NET_ADAPTER_INFO
 	}
 	void Clear()
 	{
-
 		Index=0;
 		IPAddressList.SetTag(_T("StructData"));
 		IPAddressList.Clear();
@@ -51,23 +52,18 @@ struct NET_ADAPTER_INFO
 	{
 		UINT FailCount=0;
 
-
 		{
 			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_NET_ADAPTER_INFO_INDEX,Index),FailCount);
 		}
 		
 		{
-			UINT BufferSize;
-			void * pBuffer=Packet.PrepareMember(BufferSize);
+			CSmartStruct& ParentPacket=Packet;
 			{
-				CSmartStruct Packet(pBuffer,BufferSize,true);
-				for(size_t i=0;i<IPAddressList.GetCount();i++)
-				{
-					CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_NET_ADAPTER_INFO_IPADDRESS_LIST,IPAddressList[i]),FailCount);
-				}
-				BufferSize=Packet.GetDataLen();
+				CSmartArray Packet=ParentPacket.PrepareSubArray();
+				Packet.AddArray(IPAddressList);
+				if(!ParentPacket.FinishMember(SST_NET_ADAPTER_INFO_IPADDRESS_LIST,Packet.GetDataLen()))
+					FailCount++;
 			}
-			Packet.FinishMember(SST_NET_ADAPTER_INFO_IPADDRESS_LIST,BufferSize);
 		}
 		{
 			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_NET_ADAPTER_INFO_NAME,Name),FailCount);
@@ -95,7 +91,6 @@ struct NET_ADAPTER_INFO
 	}
 	bool ParsePacket(const CSmartStruct& Packet)
 	{
-
 		
 		void * Pos=Packet.GetFirstMemberPosition();
 		while(Pos)
@@ -107,61 +102,39 @@ struct NET_ADAPTER_INFO
 			case SST_NET_ADAPTER_INFO_INDEX:
 				{
 					Index=Value;
-					
 				}
 				break;
 			case SST_NET_ADAPTER_INFO_IPADDRESS_LIST:
 				{
 					IPAddressList.Clear();
-					CSmartStruct Packet=Value;
-					void * Pos=Packet.GetFirstMemberPosition();
-					while(Pos)
-					{
-						WORD MemberID;
-						CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
-						switch(MemberID)
-						{
-						case SST_NET_ADAPTER_INFO_IPADDRESS_LIST:
-							{	
-								CEasyString	ArrayElement;
-								Value.GetString(ArrayElement);
-								
-								IPAddressList.Add(ArrayElement);
-							}
-							break;
-						}
-					}
+					CSmartArray Packet=Value;
+					Packet.GetArray(IPAddressList);
 				}
 				break;
 			
 			case SST_NET_ADAPTER_INFO_NAME:
 				{
 					Value.GetString(Name);
-					
 				}
 				break;
 			case SST_NET_ADAPTER_INFO_SEND_BYTES:
 				{
 					SendBytes=Value;
-					
 				}
 				break;
 			case SST_NET_ADAPTER_INFO_SEND_FLUX:
 				{
 					SendFlux=Value;
-					
 				}
 				break;
 			case SST_NET_ADAPTER_INFO_RECV_BYTES:
 				{
 					RecvBytes=Value;
-					
 				}
 				break;
 			case SST_NET_ADAPTER_INFO_RECV_FLUX:
 				{
 					RecvFlux=Value;
-					
 				}
 				break;
 			
@@ -180,9 +153,9 @@ struct NET_ADAPTER_INFO
 		{
 			for(size_t i=0;i<IPAddressList.GetCount();i++)
 			{
-				Size+=CSmartStruct::GetStringMemberSize(IPAddressList[i]);
+				Size+=CSmartArray::GetStringMemberSize(IPAddressList[i]);
 			}
-			Size+=CSmartStruct::GetStructMemberSize(0);
+			Size+=CSmartStruct::GetArrayMemberSize(0);
 		}
 		{
 			Size+=CSmartStruct::GetStringMemberSize(Name);
@@ -238,7 +211,12 @@ struct NET_ADAPTER_INFO
 		return *this;
 	}
 	
-	 
+	
+	
+	
+	
+	
+
 };
 
 
@@ -251,9 +229,11 @@ struct NET_ADAPTER_INFO_LIST
 	
 	enum NET_ADAPTER_INFO_LIST_MEMBER_IDS
 	{
-		SST_NET_ADAPTER_INFO_LIST_LIST=1,
-	
+		SST_NET_ADAPTER_INFO_LIST_LIST = 1,
+		
 	};
+	
+	
 	NET_ADAPTER_INFO_LIST()
 	{
 		Clear();
@@ -264,7 +244,6 @@ struct NET_ADAPTER_INFO_LIST
 	}
 	void Clear()
 	{
-
 		List.SetTag(_T("StructData"));
 		List.Clear();
 		List.Create(16,8);
@@ -274,23 +253,21 @@ struct NET_ADAPTER_INFO_LIST
 	{
 		UINT FailCount=0;
 
-
 		{
-			UINT BufferSize;
-			void * pBuffer=Packet.PrepareMember(BufferSize);
+			CSmartStruct& ParentPacket=Packet;
 			{
-				CSmartStruct Packet(pBuffer,BufferSize,true);
+				CSmartArray Packet=ParentPacket.PrepareSubArray();
 				for(size_t i=0;i<List.GetCount();i++)
 				{
-					UINT BufferSize;
-					void * pBuffer=Packet.PrepareMember(BufferSize);
-					CSmartStruct SubPacket(pBuffer,BufferSize,true);
-					if(!List[i].MakePacket(SubPacket)) FailCount++;
-					Packet.FinishMember(SST_NET_ADAPTER_INFO_LIST_LIST,SubPacket.GetDataLen());
+					CSmartStruct SubPacket=Packet.PrepareSubStruct();
+					if(!List[i].MakePacket(SubPacket))
+						FailCount++;
+					if(!Packet.FinishMember(SubPacket.GetDataLen()))
+						FailCount++;
 				}
-				BufferSize=Packet.GetDataLen();
+				if(!ParentPacket.FinishMember(SST_NET_ADAPTER_INFO_LIST_LIST,Packet.GetDataLen()))
+					FailCount++;
 			}
-			Packet.FinishMember(SST_NET_ADAPTER_INFO_LIST_LIST,BufferSize);
 		}
 		
 
@@ -298,7 +275,6 @@ struct NET_ADAPTER_INFO_LIST
 	}
 	bool ParsePacket(const CSmartStruct& Packet)
 	{
-
 		
 		void * Pos=Packet.GetFirstMemberPosition();
 		while(Pos)
@@ -310,23 +286,12 @@ struct NET_ADAPTER_INFO_LIST
 			case SST_NET_ADAPTER_INFO_LIST_LIST:
 				{
 					List.Clear();
-					CSmartStruct Packet=Value;
-					void * Pos=Packet.GetFirstMemberPosition();
-					while(Pos)
+					CSmartArray Packet=Value;
+					for(CSmartValue Value : Packet)
 					{
-						WORD MemberID;
-						CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
-						switch(MemberID)
-						{
-						case SST_NET_ADAPTER_INFO_LIST_LIST:
-							{	
-								NET_ADAPTER_INFO	ArrayElement;
-								ArrayElement.ParsePacket(Value);
-								
-								List.Add(ArrayElement);
-							}
-							break;
-						}
+						NET_ADAPTER_INFO& ArrayElement=*List.AddEmpty();
+						ArrayElement.ParsePacket(Value);
+						
 					}
 				}
 				break;
@@ -343,10 +308,9 @@ struct NET_ADAPTER_INFO_LIST
 		{
 			for(size_t i=0;i<List.GetCount();i++)
 			{
-				Size+=CSmartStruct::GetStructMemberSize(List[i].GetSmartStructSize())
-		;
+				Size+=CSmartArray::GetStructMemberSize(List[i].GetSmartStructSize());
 			}
-			Size+=CSmartStruct::GetStructMemberSize(0);
+			Size+=CSmartStruct::GetArrayMemberSize(0);
 		}
 		
 		return Size;
@@ -364,7 +328,12 @@ struct NET_ADAPTER_INFO_LIST
 		return *this;
 	}
 	
-	 
+	
+	
+	
+	
+	
+
 };
 
 
@@ -382,14 +351,16 @@ struct FILE_INFO
 	
 	enum FILE_INFO_MEMBER_IDS
 	{
-		SST_FILE_INFO_NAME=1,
-		SST_FILE_INFO_ATTRIBUTE=2,
-		SST_FILE_INFO_SIZE=3,
-		SST_FILE_INFO_CREATE_TIME=4,
-		SST_FILE_INFO_LAST_ACCESS_TIME=5,
-		SST_FILE_INFO_LAST_WRITE_TIME=6,
-	
+		SST_FILE_INFO_NAME = 1,
+		SST_FILE_INFO_ATTRIBUTE = 2,
+		SST_FILE_INFO_SIZE = 3,
+		SST_FILE_INFO_CREATE_TIME = 4,
+		SST_FILE_INFO_LAST_ACCESS_TIME = 5,
+		SST_FILE_INFO_LAST_WRITE_TIME = 6,
+		
 	};
+	
+	
 	FILE_INFO()
 	{
 		Clear();
@@ -400,7 +371,6 @@ struct FILE_INFO
 	}
 	void Clear()
 	{
-
 		Name.Clear();
 		Attribute=0;
 		Size=0;
@@ -412,7 +382,6 @@ struct FILE_INFO
 	bool MakePacket(CSmartStruct& Packet) const
 	{
 		UINT FailCount=0;
-
 
 		{
 			CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_FILE_INFO_NAME,Name),FailCount);
@@ -444,7 +413,6 @@ struct FILE_INFO
 	}
 	bool ParsePacket(const CSmartStruct& Packet)
 	{
-
 		
 		void * Pos=Packet.GetFirstMemberPosition();
 		while(Pos)
@@ -456,37 +424,31 @@ struct FILE_INFO
 			case SST_FILE_INFO_NAME:
 				{
 					Value.GetString(Name);
-					
 				}
 				break;
 			case SST_FILE_INFO_ATTRIBUTE:
 				{
 					Attribute=Value;
-					
 				}
 				break;
 			case SST_FILE_INFO_SIZE:
 				{
 					Size=Value;
-					
 				}
 				break;
 			case SST_FILE_INFO_CREATE_TIME:
 				{
 					CreateTime=Value;
-					
 				}
 				break;
 			case SST_FILE_INFO_LAST_ACCESS_TIME:
 				{
 					LastAccessTime=Value;
-					
 				}
 				break;
 			case SST_FILE_INFO_LAST_WRITE_TIME:
 				{
 					LastWriteTime=Value;
-					
 				}
 				break;
 			
@@ -553,7 +515,12 @@ struct FILE_INFO
 		return *this;
 	}
 	
-	 
+	
+	
+	
+	
+	
+
 };
 
 
@@ -566,9 +533,11 @@ struct FILE_INFO_LIST
 	
 	enum FILE_INFO_LIST_MEMBER_IDS
 	{
-		SST_FILE_INFO_LIST_LIST=1,
-	
+		SST_FILE_INFO_LIST_LIST = 1,
+		
 	};
+	
+	
 	FILE_INFO_LIST()
 	{
 		Clear();
@@ -579,7 +548,6 @@ struct FILE_INFO_LIST
 	}
 	void Clear()
 	{
-
 		List.SetTag(_T("StructData"));
 		List.Clear();
 		List.Create(16,8);
@@ -589,23 +557,21 @@ struct FILE_INFO_LIST
 	{
 		UINT FailCount=0;
 
-
 		{
-			UINT BufferSize;
-			void * pBuffer=Packet.PrepareMember(BufferSize);
+			CSmartStruct& ParentPacket=Packet;
 			{
-				CSmartStruct Packet(pBuffer,BufferSize,true);
+				CSmartArray Packet=ParentPacket.PrepareSubArray();
 				for(size_t i=0;i<List.GetCount();i++)
 				{
-					UINT BufferSize;
-					void * pBuffer=Packet.PrepareMember(BufferSize);
-					CSmartStruct SubPacket(pBuffer,BufferSize,true);
-					if(!List[i].MakePacket(SubPacket)) FailCount++;
-					Packet.FinishMember(SST_FILE_INFO_LIST_LIST,SubPacket.GetDataLen());
+					CSmartStruct SubPacket=Packet.PrepareSubStruct();
+					if(!List[i].MakePacket(SubPacket))
+						FailCount++;
+					if(!Packet.FinishMember(SubPacket.GetDataLen()))
+						FailCount++;
 				}
-				BufferSize=Packet.GetDataLen();
+				if(!ParentPacket.FinishMember(SST_FILE_INFO_LIST_LIST,Packet.GetDataLen()))
+					FailCount++;
 			}
-			Packet.FinishMember(SST_FILE_INFO_LIST_LIST,BufferSize);
 		}
 		
 
@@ -613,7 +579,6 @@ struct FILE_INFO_LIST
 	}
 	bool ParsePacket(const CSmartStruct& Packet)
 	{
-
 		
 		void * Pos=Packet.GetFirstMemberPosition();
 		while(Pos)
@@ -625,23 +590,12 @@ struct FILE_INFO_LIST
 			case SST_FILE_INFO_LIST_LIST:
 				{
 					List.Clear();
-					CSmartStruct Packet=Value;
-					void * Pos=Packet.GetFirstMemberPosition();
-					while(Pos)
+					CSmartArray Packet=Value;
+					for(CSmartValue Value : Packet)
 					{
-						WORD MemberID;
-						CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
-						switch(MemberID)
-						{
-						case SST_FILE_INFO_LIST_LIST:
-							{	
-								FILE_INFO	ArrayElement;
-								ArrayElement.ParsePacket(Value);
-								
-								List.Add(ArrayElement);
-							}
-							break;
-						}
+						FILE_INFO& ArrayElement=*List.AddEmpty();
+						ArrayElement.ParsePacket(Value);
+						
 					}
 				}
 				break;
@@ -658,10 +612,9 @@ struct FILE_INFO_LIST
 		{
 			for(size_t i=0;i<List.GetCount();i++)
 			{
-				Size+=CSmartStruct::GetStructMemberSize(List[i].GetSmartStructSize())
-		;
+				Size+=CSmartArray::GetStructMemberSize(List[i].GetSmartStructSize());
 			}
-			Size+=CSmartStruct::GetStructMemberSize(0);
+			Size+=CSmartStruct::GetArrayMemberSize(0);
 		}
 		
 		return Size;
@@ -679,7 +632,12 @@ struct FILE_INFO_LIST
 		return *this;
 	}
 	
-	 
+	
+	
+	
+	
+	
+
 };
 
 

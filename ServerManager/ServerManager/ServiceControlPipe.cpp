@@ -24,10 +24,17 @@ int CServiceControlPipe::Update(int ProcessLimit)
 		CServiceInfoEx * pServiceInfo = CMainThread::GetInstance()->GetService()->GetServiceInfo(m_ServiceID);
 		if (pServiceInfo)
 		{
-			CEasyString PipeName;
-			PipeName.Format(_T("%s(%u)"), (LPCTSTR)pServiceInfo->GetControlPipeName(), pServiceInfo->GetProcessID());
-			Open(PipeName, CONTROL_PIPE_BUFFER_SIZE);
-			LogDebug(_T("尝试连接管道[%s]"), (LPCTSTR)PipeName);
+			if(pServiceInfo->GetProcessList().GetCount())
+			{
+				CEasyString PipeName;
+				PipeName.Format(_T("%s(%u)"), (LPCTSTR)pServiceInfo->GetControlPipeName(), pServiceInfo->GetProcessList()[0].GetProcessID());
+				Open(PipeName, CONTROL_PIPE_BUFFER_SIZE);
+				LogDebug(_T("尝试连接管道[%s]"), (LPCTSTR)PipeName);
+			}
+			else
+			{
+				Log(_T("服务[%u]没有运行"), m_ServiceID);
+			}
 		}
 		else
 		{
@@ -66,7 +73,7 @@ void CServiceControlPipe::OnRecvData(const BYTE * pData, UINT DataSize)
 	if (m_AssembleBuffer.PushBack(pData, DataSize))
 	{
 		UINT PacketSize = 0;
-		UINT Pos = 1;
+		size_t Pos = 1;
 		while (m_AssembleBuffer.Peek(Pos, &PacketSize, sizeof(UINT)))
 		{
 			PacketSize += CSmartStruct::GetEmptyStructSize();

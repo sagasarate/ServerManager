@@ -171,7 +171,7 @@ void CServerManagerClient::OnRecvData(const BYTE * pData, UINT DataSize)
 		}
 		if (m_AssembleBuffer.GetUsedSize() >= pMsg->GetMsgLength())
 		{
-			if (pMsg->GetMsgFlag()&MESSAGE_FLAG_SYSTEM_MESSAGE)
+			if (pMsg->GetMsgFlag()& DOS_MESSAGE_FLAG_SYSTEM_MESSAGE)
 				OnSystemMsg(pMsg);
 			else
 				OnMsg(pMsg);
@@ -424,13 +424,13 @@ int CServerManagerClient::GetServiceList()
 
 	m_PacketBuffer1.Clear();
 	CEasyArray<CServiceInfoEx>& ServiceList = m_pManager->GetServiceInfoList();
-	CSmartStruct Packet = m_PacketBuffer1.PrepareSubStruct();
+	CSmartArray Packet = m_PacketBuffer1.PrepareSubArray();
 
 	for (UINT i = 0; i < ServiceList.GetCount(); i++)
 	{
 		CSmartStruct InfoPacket = Packet.PrepareSubStruct();
 		ServiceList[i].MakePacket(InfoPacket,DOMF_SERVICE_INFO_LIST_FOR_CLIENT_FETCH);
-		Packet.FinishMember(CServiceInfoList::SST_SRVIL_LIST, InfoPacket.GetDataLen());
+		Packet.FinishMember(InfoPacket.GetDataLen());
 	}
 	m_PacketBuffer1.FinishMember(CServiceInfoList::SST_SRVIL_LIST, Packet.GetDataLen());
 	MsgCaller.GetServiceListAck(MSG_RESULT_SUCCEED, m_PacketBuffer1);
@@ -449,15 +449,12 @@ int CServerManagerClient::GetProcessList(short Page, short PageLen)
 		UINT StartIndex = Page * PageLen;
 		UINT PackCount = PageLen;
 
-		UINT BufferSize;
-		void * pBuffer = m_PacketBuffer1.PrepareMember(BufferSize);
-		CSmartStruct Packet(pBuffer, BufferSize, true);
+		CSmartArray Packet = m_PacketBuffer1.PrepareSubArray();
 		for (size_t i = StartIndex; i < ProcessList.GetCount() && PackCount; i++, PackCount--)
 		{
-			pBuffer = Packet.PrepareMember(BufferSize);
-			CSmartStruct SubPacket(pBuffer, BufferSize, true);
+			CSmartStruct SubPacket = Packet.PrepareSubStruct();
 			ProcessList[i].MakePacket(SubPacket,DOMF_PROCESS_INFO_FULL);
-			Packet.FinishMember(CProcessInfoList::SST_PROCIL_LIST, SubPacket.GetDataLen());
+			Packet.FinishMember(SubPacket.GetDataLen());
 		}
 		m_PacketBuffer1.FinishMember(CProcessInfoList::SST_PROCIL_LIST, Packet.GetDataLen());
 

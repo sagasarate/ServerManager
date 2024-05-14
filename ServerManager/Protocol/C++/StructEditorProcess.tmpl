@@ -1,0 +1,51 @@
+﻿#ifdef ENABLE_EDITOR_AUTOMAKE
+static bool CreateListHeader(CListCtrl& ListCtrl, int& StartIndex)
+{
+	<IfHaveBaseClass>
+	if (!<BaseClass>::CreateListHeader(ListCtrl, StartIndex))
+		return false;
+	</IfHaveBaseClass>
+	<CreateListHeaderOperations>
+	return true;
+}
+bool FillListItem(CListCtrl& ListCtrl, int Item, int& StartIndex) const
+{
+	<IfHaveBaseClass>
+	if (!<BaseClass>::FillListItem(ListCtrl, Item, StartIndex))
+		return false;
+	</IfHaveBaseClass>
+
+	TCHAR CharBuffer[64];
+	<FillListItemOperations>
+	return true;
+}
+int FillPropertyGrid(IPropertyGridItem* pPGItem)
+{
+	<IfHaveBaseClass>
+	if (<BaseClass>::FillPropertyGrid(pPGItem) < 0)
+		return -1;
+	</IfHaveBaseClass>
+	//TCHAR CharBuffer[64];
+	IPropertyGridItem* pBindParent = NULL;
+	<PropertyGridFillOperations>
+	pPGItem->Expand(true);
+	return 0;
+}
+template<typename T>
+static int FillPropertyGridByBindData(IPropertyGridItem* pPGItem, CEasyArray<T>& BindData, UINT StartIndex, UINT MemberID)
+{
+	int FillCount = 0;
+	<IfHaveBaseClass>
+	FillCount = <BaseClass>::FillPropertyGridByBindData(pPGItem, BindData, StartIndex, MemberID);
+	if (FillCount < 0)
+		return -1;
+	</IfHaveBaseClass>
+	if(BindData.GetCount() < (StartIndex + FillCount + <BindDataLen>))
+			BindData.Resize(StartIndex + FillCount + <BindDataLen>);
+	//TCHAR CharBuffer[64];
+	IPropertyGridItem* pBindParent = NULL;
+	<PropertyGridBindDataFillOperations>
+	pPGItem->Expand(true);
+	return FillCount;
+}
+#endif

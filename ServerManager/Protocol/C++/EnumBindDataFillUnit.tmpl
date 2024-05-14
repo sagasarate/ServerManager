@@ -1,0 +1,13 @@
+case <EnumName>::<EnumValue>:
+	{
+		<HaveBindStruct>		
+		if(BindData.GetCount() < (StartIndex + <BindDataLen>))
+			BindData.Resize(StartIndex + <BindDataLen>);
+		IPropertyGridItem* pBindParent = NULL;
+		int FillCount = 0;
+		<PropertyGridFillOperations>
+		<!HaveBindStruct>
+		return CPropertyGridTools::FillBindData(pPGItem, _T("<EnumName>.<EnumValue>"), BindData, StartIndex, MemberID);
+		</HaveBindStruct>
+	}
+	break;

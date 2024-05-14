@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 
 
@@ -44,7 +44,6 @@ void <ClassName>::GetModifyFlag(DATA_OBJECT_MODIFY_FLAGS& ModifyFlags,int GetTyp
 
 bool <ClassName>::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 {
-
 	bool IsModified=false;
 //<GenerateArea3Start>	
 	<IfHaveBaseClass>IsModified=IsModified||<BaseClass>::IsModified(MemberFlags);</IfHaveBaseClass>
@@ -166,3 +165,8 @@ UINT <ClassName>::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags
 //<GenerateArea11Start>
 <JsonProcess>
 //<GenerateArea11End>
+
+//<GenerateArea12Start>
+<DBProcess>
+//<GenerateArea12End>
+

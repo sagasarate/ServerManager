@@ -18,16 +18,19 @@ public:
 	
 	enum PROCESS_INFO_LIST_MEMBER_IDS
 	{
-		SST_PROCIL_LIST=201,
-	
+		SST_PROCIL_LIST = 201,
+		
 	};
+	
+	
 	
 	enum PROCESS_INFO_LIST_MODIFY_FLAGS:UINT64
 	{
-		MF_LIST=(((UINT64)1)<<0),
-		MF_ALL=0x1,
-	
+		MF_LIST = (((UINT64)1) << 0),
+		
 	};
+	
+	
 //<GenerateArea3End>
 
 public:
@@ -59,6 +62,8 @@ public:
 	virtual void CloneFrom(const CProcessInfoList& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
 	virtual UINT GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
 	CProcessInfoList& operator=(const CProcessInfoList& DataObject);
+	
+	
 	
 //<GenerateArea4End>
 

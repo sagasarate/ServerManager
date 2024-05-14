@@ -4,124 +4,128 @@
 	<GlobalDefine>
 		<Consts Name="Main" IgnoreOnExport="false"/>
 		<Enums Name="Main" IgnoreOnExport="false">
-			<Enum Name="MSG_RESULT" ShortName="MSG_RESULT" Flag="2" Description="">
-				<Member Name="MSG_RESULT_SUCCEED" Value="0" StrValue="成功" Description=""/>
-				<Member Name="MSG_RESULT_FAILED" Value="" StrValue="失败" Description=""/>
-				<Member Name="MSG_RESULT_FILE_NOT_EXIST" Value="" StrValue="文件不存在" Description=""/>
-				<Member Name="MSG_RESULT_DIR_NOT_EXIST" Value="" StrValue="目录不存在" Description=""/>
-				<Member Name="MSG_RESULT_INVALID_SCRIPT" Value="" StrValue="非法脚本" Description=""/>
-				<Member Name="MSG_RESULT_ONE_SCRIPT_IS_EXCUTING" Value="" StrValue="已有脚本在执行" Description=""/>
-				<Member Name="MSG_RESULT_SCRIPT_FILE_NOT_EXIST" Value="" StrValue="脚本文件不存在" Description=""/>
-				<Member Name="MSG_RESULT_SCRIPT_FILE_READ_ERROR" Value="" StrValue="脚本文件读取错误" Description=""/>
-				<Member Name="MSG_RESULT_SERVICE_NOT_EXIST" Value="" StrValue="服务不存在" Description=""/>
-				<Member Name="MSG_RESULT_QUERY_SEQUENCE_ERROR" Value="" StrValue="请求序列错误" Description=""/>
-				<Member Name="MSG_RESULT_QUERY_SIZE_TOO_BIG" Value="" StrValue="请就数据过大" Description=""/>
-				<Member Name="MSG_RESULT_DATA_COMPRESS_ERROR" Value="" StrValue="数据压缩错误" Description=""/>
-				<Member Name="MSG_RESULT_FILE_WRITE_ERROR" Value="" StrValue="文件写入错误" Description=""/>
-				<Member Name="MSG_RESULT_FILE_READ_ERROR" Value="" StrValue="文件读取错误" Description=""/>
-				<Member Name="MSG_RESULT_SERVICE_ID_IS_USED" Value="" StrValue="服务ID已被占用" Description=""/>
-				<Member Name="MSG_RESULT_SERVICE_TYPE_NOT_SUPPORT" Value="" StrValue="服务类型不支持" Description=""/>
-				<Member Name="MSG_RESULT_USER_NAME_OR_PASSWORD_ERROR" Value="" StrValue="用户名或密码错误" Description=""/>
-				<Member Name="MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE" Value="" StrValue="控制管道不可用" Description=""/>
-				<Member Name="MSG_RESULT_SHUTDOWN_CMD_NOT_SET" Value="" StrValue="关服命令未设置" Description=""/>
-				<Member Name="MSG_RESULT_IS_BUSY" Value="" StrValue="系统忙" Description=""/>
-				<Member Name="MSG_RESULT_NOT_SUPPORT" Value="" StrValue="功能不支持" Description=""/>
-				<Member Name="MSG_RESULT_MAX" Value="" StrValue="" Description=""/>
+			<Enum Name="MSG_RESULT" ShortName="MSG_RESULT" ShowName="" Flag="26" Description="">
+				<Member Name="MSG_RESULT_SUCCEED" Value="" Flag="0" StrValue="成功" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_FAILED" Value="" Flag="0" StrValue="失败" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_FILE_NOT_EXIST" Value="" Flag="0" StrValue="文件不存在" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_DIR_NOT_EXIST" Value="" Flag="0" StrValue="目录不存在" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_INVALID_SCRIPT" Value="" Flag="0" StrValue="非法脚本" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_ONE_SCRIPT_IS_EXCUTING" Value="" Flag="0" StrValue="已有脚本在执行" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_SCRIPT_FILE_NOT_EXIST" Value="" Flag="0" StrValue="脚本文件不存在" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_SCRIPT_FILE_READ_ERROR" Value="" Flag="0" StrValue="脚本文件读取错误" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_SERVICE_NOT_EXIST" Value="" Flag="0" StrValue="服务不存在" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_QUERY_SEQUENCE_ERROR" Value="" Flag="0" StrValue="请求序列错误" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_QUERY_SIZE_TOO_BIG" Value="" Flag="0" StrValue="请就数据过大" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_DATA_COMPRESS_ERROR" Value="" Flag="0" StrValue="数据压缩错误" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_FILE_WRITE_ERROR" Value="" Flag="0" StrValue="文件写入错误" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_FILE_READ_ERROR" Value="" Flag="0" StrValue="文件读取错误" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_SERVICE_ID_IS_USED" Value="" Flag="0" StrValue="服务ID已被占用" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_SERVICE_TYPE_NOT_SUPPORT" Value="" Flag="0" StrValue="服务类型不支持" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_USER_NAME_OR_PASSWORD_ERROR" Value="" Flag="0" StrValue="用户名或密码错误" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_CONTROL_PIPE_NOT_AVAILABLE" Value="" Flag="0" StrValue="控制管道不可用" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_SHUTDOWN_CMD_NOT_SET" Value="" Flag="0" StrValue="关服命令未设置" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_IS_BUSY" Value="" Flag="0" StrValue="系统忙" Description="" BindDataType=""/>
+				<Member Name="MSG_RESULT_NOT_SUPPORT" Value="" Flag="0" StrValue="功能不支持" Description="" BindDataType=""/>
 			</Enum>
-			<Enum Name="SERVICE_STATUS_TYPE" ShortName="SRVICES_STATUS_TYPE" Flag="0" Description="">
-				<Member Name="SERVICE_STATUS_NONE" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_STATUS_STOP" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_STATUS_RUNNING" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_STATUS_SHUTDOWNNING" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_STATUS_STARTUPPING" Value="" StrValue="" Description=""/>
+			<Enum Name="SERVICE_STATUS_TYPE" ShortName="SRVICES_STATUS_TYPE" ShowName="" Flag="0" Description="">
+				<Member Name="SERVICE_STATUS_NONE" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_STATUS_STOP" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_STATUS_RUNNING" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_STATUS_SHUTDOWNNING" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_STATUS_STARTUPPING" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
 			</Enum>
-			<Enum Name="SERVICE_TYPE" ShortName="SERVICE_TYPE" Flag="2" Description="">
-				<Member Name="SERVICE_TYPE_NORMAL" Value="" StrValue="普通服务" Description=""/>
-				<Member Name="SERVICE_TYPE_WIN_SERVICE" Value="" StrValue="Windows服务" Description=""/>
-				<Member Name="SERVICE_TYPE_DIRECTORY" Value="" StrValue="目录" Description=""/>
-				<Member Name="SERVICE_TYPE_MAX" Value="" StrValue="" Description=""/>
+			<Enum Name="SERVICE_TYPE" ShortName="SERVICE_TYPE" ShowName="" Flag="26" Description="">
+				<Member Name="SERVICE_TYPE_NORMAL" Value="" Flag="0" StrValue="普通服务" Description="" BindDataType=""/>
+				<Member Name="SERVICE_TYPE_WIN_SERVICE" Value="" Flag="0" StrValue="Windows服务" Description="" BindDataType=""/>
+				<Member Name="SERVICE_TYPE_DIRECTORY" Value="" Flag="0" StrValue="目录" Description="" BindDataType=""/>
 			</Enum>
-			<Enum Name="SERVICE_OPERATION_TYPE" ShortName="SERVICE_OPERATION_TYPE" Flag="0" Description="">
-				<Member Name="SERVICE_OPERATION_NONE" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_OPERATION_STARTUP" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_OPERATION_SHUTDOWN" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_OPERATION_MAX" Value="" StrValue="" Description=""/>
+			<Enum Name="SERVICE_OPERATION_TYPE" ShortName="SERVICE_OPERATION_TYPE" ShowName="" Flag="0" Description="">
+				<Member Name="SERVICE_OPERATION_NONE" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_OPERATION_STARTUP" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_OPERATION_SHUTDOWN" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
 			</Enum>
-			<Enum Name="FILE_ATTRIBUTE_FLAG" ShortName="FILE_ATTRIBUTE_FLAG" Flag="0" Description="">
-				<Member Name="FILE_ATTRIBUTE_FLAG_DIRECTORY" Value="1" StrValue="" Description=""/>
-				<Member Name="FILE_ATTRIBUTE_FLAG_CAN_EXEC" Value="(1&lt;&lt;1)" StrValue="" Description=""/>
+			<Enum Name="FILE_ATTRIBUTE_FLAG" ShortName="FILE_ATTRIBUTE_FLAG" ShowName="" Flag="0" Description="">
+				<Member Name="FILE_ATTRIBUTE_FLAG_DIRECTORY" Value="1" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="FILE_ATTRIBUTE_FLAG_CAN_EXEC" Value="(1&lt;&lt;1)" Flag="0" StrValue="" Description="" BindDataType=""/>
 			</Enum>
-			<Enum Name="SERVICE_SHUTDOWN_TYPE" ShortName="SERVICE_SHUTDOWN_TYPE" Flag="0" Description="">
-				<Member Name="SERVICE_SHUTDOWN_TYPE_NORMAL" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_SHUTDOWN_TYPE_FORCE" Value="" StrValue="" Description=""/>
-				<Member Name="SERVICE_SHUTDOWN_TYPE_SAFE" Value="" StrValue="" Description=""/>
+			<Enum Name="SERVICE_SHUTDOWN_TYPE" ShortName="SERVICE_SHUTDOWN_TYPE" ShowName="" Flag="0" Description="">
+				<Member Name="SERVICE_SHUTDOWN_TYPE_NORMAL" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_SHUTDOWN_TYPE_FORCE" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
+				<Member Name="SERVICE_SHUTDOWN_TYPE_SAFE" Value="" Flag="0" StrValue="" Description="" BindDataType=""/>
 			</Enum>
 		</Enums>
 		<Structs Name="Main" IgnoreOnExport="false">
-			<Struct Name="CProcessInfo" ShortName="PROCI" BaseStruct="" Description="" IDSeed="11" Flag="1" ObjectID="100">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="ProcessID" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-				<Member Name="ImageFilePath" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
-				<Member Name="ImageFileTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
-				<Member Name="CPUUsedTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="9"/>
-				<Member Name="CPUUsed" Type="float" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="6"/>
-				<Member Name="MemoryUsed" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="7"/>
-				<Member Name="VirtualMemoryUsed" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="8"/>
-				<Member Name="DiskFree" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="10"/>
+			<Struct Name="CProcessInfo" ShortName="PROCI" ShowName="" BaseStruct="" Description="" IDSeed="11" Flag="1" ObjectID="100">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="ProcessID" Type="UINT" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
+				<Member Name="ImageFilePath" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="3" BindData="" ExtendType=""/>
+				<Member Name="ImageFileTime" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="4" BindData="" ExtendType=""/>
+				<Member Name="CPUUsedTime" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="9" BindData="" ExtendType=""/>
+				<Member Name="CPUUsed" Type="float" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="6" BindData="" ExtendType=""/>
+				<Member Name="MemoryUsed" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="7" BindData="" ExtendType=""/>
+				<Member Name="VirtualMemoryUsed" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="8" BindData="" ExtendType=""/>
+				<Member Name="DiskFree" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="10" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="CProcessInfoList" ShortName="PROCIL" BaseStruct="" Description="" IDSeed="2" Flag="1" ObjectID="200">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="List" Type="CProcessInfo" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+			<Struct Name="CProcessInfoList" ShortName="PROCIL" ShowName="" BaseStruct="" Description="" IDSeed="2" Flag="1" ObjectID="200">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="List" Type="CProcessInfo" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="CServiceInfo" ShortName="SRVI" BaseStruct="CProcessInfo" Description="" IDSeed="24" Flag="1" ObjectID="300">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="ServiceID" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-				<Member Name="Name" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="13"/>
-				<Member Name="Type" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
-				<Member Name="WorkDir" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
-				<Member Name="StartupParam" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="5"/>
-				<Member Name="Status" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="8"/>
-				<Member Name="WorkStatus" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="19"/>
-				<Member Name="LastOperation" Type="BYTE" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="14"/>
-				<Member Name="LastStatusChangeTime" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="15"/>
-				<Member Name="RestartupTime" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="16"/>
-				<Member Name="ControlPipeName" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="17"/>
-				<Member Name="ShutdownCmd" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="18"/>
-				<Member Name="CharSet" Type="int" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="20"/>
-				<Member Name="KeepRunning" Type="bool" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="23"/>
-				<Member Name="LogStatusToFile" Type="bool" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="22"/>
-				<Member Name="OtherExecFileList" Type="String" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="21"/>
+			<Struct Name="CServiceInfo" ShortName="SRVI" ShowName="" BaseStruct="" Description="" IDSeed="31" Flag="1" ObjectID="300">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="ServiceID" Type="UINT" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
+				<Member Name="Name" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="13" BindData="" ExtendType=""/>
+				<Member Name="Type" Type="BYTE" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="2" BindData="" ExtendType=""/>
+				<Member Name="WorkDir" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="4" BindData="" ExtendType=""/>
+				<Member Name="StartupParam" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="5" BindData="" ExtendType=""/>
+				<Member Name="Status" Type="BYTE" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="8" BindData="" ExtendType=""/>
+				<Member Name="WorkStatus" Type="BYTE" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="19" BindData="" ExtendType=""/>
+				<Member Name="LastOperation" Type="BYTE" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="14" BindData="" ExtendType=""/>
+				<Member Name="LastStatusChangeTime" Type="UINT" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="15" BindData="" ExtendType=""/>
+				<Member Name="RestartupTime" Type="UINT" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="16" BindData="" ExtendType=""/>
+				<Member Name="ControlPipeName" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="17" BindData="" ExtendType=""/>
+				<Member Name="ShutdownCmd" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="18" BindData="" ExtendType=""/>
+				<Member Name="CharSet" Type="int" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="20" BindData="" ExtendType=""/>
+				<Member Name="KeepRunning" Type="bool" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="23" BindData="" ExtendType=""/>
+				<Member Name="LogStatusToFile" Type="bool" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="22" BindData="" ExtendType=""/>
+				<Member Name="OtherExecFileList" Type="String" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="21" BindData="" ExtendType=""/>
+				<Member Name="ImageFilePath" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="0" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="26" BindData="" ExtendType=""/>
+				<Member Name="ImageFileTime" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="0" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="27" BindData="" ExtendType=""/>
+				<Member Name="CPUUsed" Type="float" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="0" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="28" BindData="" ExtendType=""/>
+				<Member Name="MemoryUsed" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="0" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="29" BindData="" ExtendType=""/>
+				<Member Name="VirtualMemoryUsed" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="0" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="30" BindData="" ExtendType=""/>
+				<Member Name="DiskFree" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="24" BindData="" ExtendType=""/>
+				<Member Name="ProcessList" Type="CProcessInfo" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="25" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="CServiceInfoList" ShortName="SRVIL" BaseStruct="" Description="" IDSeed="2" Flag="1" ObjectID="400">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="List" Type="CServiceInfo" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+			<Struct Name="CServiceInfoList" ShortName="SRVIL" ShowName="" BaseStruct="" Description="" IDSeed="2" Flag="1" ObjectID="400">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="List" Type="CServiceInfo" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="NET_ADAPTER_INFO" ShortName="NET_ADAPTER_INFO" BaseStruct="" Description="" IDSeed="8" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="Index" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-				<Member Name="IPAddressList" Type="String" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
-				<Member Name="Name" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="7"/>
-				<Member Name="SendBytes" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="5"/>
-				<Member Name="SendFlux" Type="float" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
-				<Member Name="RecvBytes" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="6"/>
-				<Member Name="RecvFlux" Type="float" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
+			<Struct Name="NET_ADAPTER_INFO" ShortName="NET_ADAPTER_INFO" ShowName="" BaseStruct="" Description="" IDSeed="8" Flag="0" ObjectID="0">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="Index" Type="UINT" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
+				<Member Name="IPAddressList" Type="String" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="2" BindData="" ExtendType=""/>
+				<Member Name="Name" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="7" BindData="" ExtendType=""/>
+				<Member Name="SendBytes" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="5" BindData="" ExtendType=""/>
+				<Member Name="SendFlux" Type="float" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="3" BindData="" ExtendType=""/>
+				<Member Name="RecvBytes" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="6" BindData="" ExtendType=""/>
+				<Member Name="RecvFlux" Type="float" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="4" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="NET_ADAPTER_INFO_LIST" ShortName="NET_ADAPTER_INFO_LIST" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="List" Type="NET_ADAPTER_INFO" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+			<Struct Name="NET_ADAPTER_INFO_LIST" ShortName="NET_ADAPTER_INFO_LIST" ShowName="" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="List" Type="NET_ADAPTER_INFO" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="FILE_INFO" ShortName="FILE_INFO" BaseStruct="" Description="" IDSeed="7" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="Name" Type="String" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
-				<Member Name="Attribute" Type="UINT" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="2"/>
-				<Member Name="Size" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="3"/>
-				<Member Name="CreateTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="4"/>
-				<Member Name="LastAccessTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="5"/>
-				<Member Name="LastWriteTime" Type="UINT64" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="6"/>
+			<Struct Name="FILE_INFO" ShortName="FILE_INFO" ShowName="" BaseStruct="" Description="" IDSeed="7" Flag="0" ObjectID="0">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="Name" Type="String" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
+				<Member Name="Attribute" Type="UINT" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="2" BindData="" ExtendType=""/>
+				<Member Name="Size" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="3" BindData="" ExtendType=""/>
+				<Member Name="CreateTime" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="4" BindData="" ExtendType=""/>
+				<Member Name="LastAccessTime" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="5" BindData="" ExtendType=""/>
+				<Member Name="LastWriteTime" Type="UINT64" DBIndexType="0" Flag="0" IsArray="false" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="6" BindData="" ExtendType=""/>
 			</Struct>
-			<Struct Name="FILE_INFO_LIST" ShortName="FILE_INFO_LIST" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
-				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation=""/>
-				<Member Name="List" Type="FILE_INFO" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" Description="" ID="1"/>
+			<Struct Name="FILE_INFO_LIST" ShortName="FILE_INFO_LIST" ShowName="" BaseStruct="" Description="" IDSeed="2" Flag="0" ObjectID="0">
+				<GenerateOperations PackOperation="" UnpackOperation="" SizeCaculateOperation="" ToXMLOperation="" FromXMLOperation="" ToJsonOperation="" FromJsonOperation="" ReferenceDefine="" ReferenceUse="" VariableDefine="" InitOperation="" CloneOperation="" GetMethodDeclare="" GetMethodDefine="" SetMethodDeclare="" SetMethodDefine="" IndexOperation="" ConstIndexOperation="" ToStringOperation="" DBFieldDefineOperation="" DBInsertFormatOperation="" DBPutOperation="" DBGetOperation="" PropertyGridFillOperation="" LogSendOperation="" ToLuaOperation="" FromLuaOperation="" CreateXLSColumnOperation="" CheckXLSColumnOperation="" ToXLSOperation="" FromXLSOperation=""/>
+				<Member Name="List" Type="FILE_INFO" DBIndexType="0" Flag="0" IsArray="true" ArrayStartLength="16" ArrayGrowLength="8" DBLength="" ShowName="" Description="" PackFlag="" ID="1" BindData="" ExtendType=""/>
 			</Struct>
 		</Structs>
 		<DataObjectModifyFlags>
@@ -130,13 +134,14 @@
 					<Flag Name="ProcessID"/>
 					<Flag Name="ImageFilePath"/>
 					<Flag Name="ImageFileTime"/>
-					<Flag Name="CPUUsedTime"/>
 					<Flag Name="CPUUsed"/>
 					<Flag Name="MemoryUsed"/>
 					<Flag Name="VirtualMemoryUsed"/>
 					<Flag Name="DiskFree"/>
 				</Unit>
-				<Unit ClassName="CProcessInfoList"/>
+				<Unit ClassName="CProcessInfoList">
+					<Flag Name="List"/>
+				</Unit>
 				<Unit ClassName="CServiceInfo">
 					<Flag Name="ServiceID"/>
 					<Flag Name="Name"/>
@@ -146,23 +151,16 @@
 					<Flag Name="WorkStatus"/>
 					<Flag Name="RestartupTime"/>
 					<Flag Name="CharSet"/>
-				</Unit>
-				<Unit ClassName="CServiceInfoList">
-					<Flag Name="List"/>
-				</Unit>
-			</ModifyFlag>
-			<ModifyFlag Name="DOMF_PROCESS_INFO_FOR_STATUS_FETCH">
-				<Unit ClassName="CProcessInfo">
-					<Flag Name="ProcessID"/>
-					<Flag Name="CPUUsedTime"/>
+					<Flag Name="ImageFilePath"/>
+					<Flag Name="ImageFileTime"/>
 					<Flag Name="CPUUsed"/>
 					<Flag Name="MemoryUsed"/>
 					<Flag Name="VirtualMemoryUsed"/>
 					<Flag Name="DiskFree"/>
 				</Unit>
-				<Unit ClassName="CProcessInfoList"/>
-				<Unit ClassName="CServiceInfo"/>
-				<Unit ClassName="CServiceInfoList"/>
+				<Unit ClassName="CServiceInfoList">
+					<Flag Name="List"/>
+				</Unit>
 			</ModifyFlag>
 			<ModifyFlag Name="DOMF_SERVICE_INFO_FOR_EDIT">
 				<Unit ClassName="CProcessInfo">
@@ -185,204 +183,217 @@
 				</Unit>
 				<Unit ClassName="CServiceInfoList"/>
 			</ModifyFlag>
+			<ModifyFlag Name="DOMF_PROCESS_INFO_FOR_STATUS_FETCH">
+				<Unit ClassName="CProcessInfo">
+					<Flag Name="ProcessID"/>
+					<Flag Name="CPUUsedTime"/>
+					<Flag Name="CPUUsed"/>
+					<Flag Name="MemoryUsed"/>
+					<Flag Name="VirtualMemoryUsed"/>
+					<Flag Name="DiskFree"/>
+				</Unit>
+				<Unit ClassName="CProcessInfoList"/>
+				<Unit ClassName="CServiceInfo"/>
+				<Unit ClassName="CServiceInfoList"/>
+			</ModifyFlag>
 		</DataObjectModifyFlags>
 	</GlobalDefine>
 	<Interface Name="ServerManager" ID="1" IDSeed="34" Description="">
 		<Method Name="Login" Type="0" ID="23" Flag="0" ParamIDSeed="4" Description="">
-			<CallParam Name="UserName" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="Password" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="UserName" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Password" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetServiceList" Type="0" ID="1" Flag="0" ParamIDSeed="3" Description="">
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetProcessList" Type="0" ID="2" Flag="0" ParamIDSeed="8" Description="">
-			<CallParam Name="Page" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="PageLen" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Page" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="PageLen" Type="short" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="TotalPage" Type="short" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ProcessListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="Page" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="PageLen" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Page" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="PageLen" Type="short" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="TotalPage" Type="short" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ProcessListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetNetAdapterList" Type="0" ID="15" Flag="0" ParamIDSeed="3" Description="">
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="NetAdapterListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="NetAdapterListData" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetServiceInfo" Type="0" ID="30" Flag="0" ParamIDSeed="4" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceInfoPacket" Type="CSmartStruct" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceInfoPacket" Type="CSmartStruct" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="ServiceStartup" Type="0" ID="3" Flag="0" ParamIDSeed="4" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="ServiceShutdown" Type="0" ID="4" Flag="0" ParamIDSeed="5" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="ShutdownType" Type="BYTE" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="ShutdownType" Type="BYTE" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="RunProgram" Type="0" ID="14" Flag="0" ParamIDSeed="6" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FilePath" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="WorkDir" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="Param" Type="String" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FilePath" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="WorkDir" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Param" Type="String" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="ProcessShutdown" Type="0" ID="18" Flag="0" ParamIDSeed="5" Description="">
-			<CallParam Name="ProcessID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="ShutdownType" Type="BYTE" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ProcessID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ProcessID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="ShutdownType" Type="BYTE" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ProcessID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="ExecuteScript" Type="0" ID="16" Flag="0" ParamIDSeed="8" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="Script" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="FromFile" Type="bool" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ErrorCode" Type="int" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="LastLine" Type="int" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Script" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FromFile" Type="bool" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ErrorCode" Type="int" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="LastLine" Type="int" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="BrowseServiceDir" Type="0" ID="5" Flag="0" ParamIDSeed="12" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="Dir" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="Page" Type="short" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="PageLen" Type="short" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Dir" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Page" Type="short" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="PageLen" Type="short" ID="9" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="TotalPage" Type="short" ID="10" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FileListData" Type="CSmartStruct" ID="11" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Dir" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Page" Type="short" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="PageLen" Type="short" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Dir" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Page" Type="short" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="PageLen" Type="short" ID="9" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="TotalPage" Type="short" ID="10" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FileListData" Type="CSmartStruct" ID="11" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileDownloadStart" Type="0" ID="6" Flag="0" ParamIDSeed="9" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="StartOffset" Type="UINT64" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FilePath" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="FileSize" Type="UINT64" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FileLastWriteTime" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="StartOffset" Type="UINT64" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FilePath" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FileSize" Type="UINT64" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FileLastWriteTime" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileDownloadData" Type="0" ID="7" Flag="0" ParamIDSeed="9" Description="">
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Offset" Type="UINT64" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Length" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FileData" Type="ByteArray" ID="7" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="IsLast" Type="bool" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Offset" Type="UINT64" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Length" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FileData" Type="ByteArray" ID="7" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="IsLast" Type="bool" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileDownloadFinish" Type="0" ID="32" Flag="3" ParamIDSeed="3" Description="">
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="MD5" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="MD5" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileUploadStart" Type="0" ID="9" Flag="0" ParamIDSeed="9" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="FileLastWriteTime" Type="UINT" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FilePath" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="FileSize" Type="UINT64" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FileLastWriteTime" Type="UINT" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FilePath" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FileSize" Type="UINT64" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileUploadData" Type="0" ID="10" Flag="0" ParamIDSeed="10" Description="">
-			<CallParam Name="Length" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FileData" Type="ByteArray" ID="4" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="IsLast" Type="bool" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Length" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="IsLast" Type="bool" ID="9" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="Length" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FileData" Type="ByteArray" ID="4" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="IsLast" Type="bool" ID="8" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Length" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="IsLast" Type="bool" ID="9" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileUploadFinish" Type="0" ID="33" Flag="3" ParamIDSeed="3" Description="">
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="MD5" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="MD5" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="CreateDir" Type="0" ID="12" Flag="0" ParamIDSeed="6" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="Dir" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Dir" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Dir" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Dir" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="DeleteFile" Type="0" ID="13" Flag="0" ParamIDSeed="7" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="IsRecursive" Type="bool" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FilePath" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="IsRecursive" Type="bool" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FilePath" Type="String" ID="5" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="ChangeFileMode" Type="0" ID="19" Flag="0" ParamIDSeed="8" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="Mode" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FilePath" Type="String" ID="6" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Mode" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Mode" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FilePath" Type="String" ID="6" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Mode" Type="UINT" ID="7" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="AddService" Type="0" ID="20" Flag="0" ParamIDSeed="3" Description="">
-			<CallParam Name="ServiceInfo" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceInfo" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="EditService" Type="0" ID="21" Flag="0" ParamIDSeed="3" Description="">
-			<CallParam Name="ServiceInfo" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceInfo" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="DeleteService" Type="0" ID="22" Flag="0" ParamIDSeed="4" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="SendCommand" Type="0" ID="24" Flag="0" ParamIDSeed="5" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="Command" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Command" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="EnableLogRecv" Type="0" ID="25" Flag="0" ParamIDSeed="6" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="Enable" Type="bool" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Enable" Type="bool" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="Enable" Type="bool" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Enable" Type="bool" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="ConsoleLogNotify" Type="1" ID="26" Flag="0" ParamIDSeed="3" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="LogMsg" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="LogMsg" Type="String" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetServerStatus" Type="0" ID="27" Flag="0" ParamIDSeed="6" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="StatusListPacket" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="StatusListPacket" Type="CSmartStruct" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="StatusListPacket" Type="CSmartStruct" ID="1" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="2" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="StatusListPacket" Type="CSmartStruct" ID="3" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetAllServerStatus" Type="2" ID="28" Flag="0" ParamIDSeed="4" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="StatusListPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="StatusListPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="GetServerStatusFormat" Type="0" ID="29" Flag="0" ParamIDSeed="5" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="StatusFormatPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="4" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="StatusFormatPacket" Type="CSmartStruct" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 		<Method Name="FileCompare" Type="0" ID="31" Flag="0" ParamIDSeed="8" Description="">
-			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<CallParam Name="FileSize" Type="UINT64" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<CallParam Name="FileMD5" Type="String" ID="4" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
-			<AckParam Name="Result" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="ServiceID" Type="UINT" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description=""/>
-			<AckParam Name="FilePath" Type="String" ID="7" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description=""/>
+			<CallParam Name="ServiceID" Type="UINT" ID="1" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FilePath" Type="String" ID="2" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FileSize" Type="UINT64" ID="3" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<CallParam Name="FileMD5" Type="String" ID="4" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="Result" Type="short" ID="5" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="ServiceID" Type="UINT" ID="6" Length="0" CanNull="false" IsReference="false" DefaultValue="" Description="" PackFlag=""/>
+			<AckParam Name="FilePath" Type="String" ID="7" Length="0" CanNull="false" IsReference="true" DefaultValue="" Description="" PackFlag=""/>
 		</Method>
 	</Interface>
 	<Prefix Content=""/>

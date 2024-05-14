@@ -252,9 +252,9 @@ inline CServerManagerClientView * GetMainView()
 inline LPCTSTR GetResultStr(short Result)
 {
 	static TCHAR ResultStr[256];
-	if (Result >= 0 && Result < MSG_RESULT_MAX)
+	if (Result >= 0 && Result < g_MSG_RESULT_COUNT)
 	{
-		_stprintf_s(ResultStr, 128, "%d(%s)", Result, g_szMSG_RESULT[Result]);
+		_stprintf_s(ResultStr, 128, "%d(%s)", Result, MSG_RESULT_To_Str(Result));
 	}
 	else
 	{

@@ -1,5 +1,78 @@
-<Description>
-enum <EnumName><EnumType>
+﻿<Description>
+enum <EnumName>
 {
 	<EnumMembers>
 };
+
+<IfExportEnumList>
+const UINT g_<EnumName>_COUNT = <EnumMemberCount>;
+const UINT g_<EnumName>_LIST[<EnumMemberCount>]={<EnumValues>};
+</IfExportEnumList>
+
+<IfExportEnumStrList>
+const LPCTSTR g_sz<EnumName>[<EnumMemberCount>]={<EnumStrValues>};
+</IfExportEnumStrList>
+
+<IfExportEnumTransFn>
+
+<IsFlagEnum>
+inline const CEasyString <EnumName>_To_Str(UINT Value)
+{
+	CEasyString Str;
+	<EnumToStrs>
+	return Str;
+}
+
+inline UINT Str_To_<EnumName>(LPCTSTR Str)
+{
+	UINT Flag = 0;
+	CStringSplitter Splitter(Str, '|');
+	for (UINT i = 0; i < Splitter.GetCount(); i++)
+	{
+		<StrToEnums>
+	}	
+	return Flag;
+}
+<!IsFlagEnum>
+inline LPCTSTR <EnumName>_To_Str(UINT Value)
+{
+	<HaveEnumStrArray>
+	if (Value < <EnumMemberCount>)
+	{
+		return g_sz<EnumName>[Value];
+	}
+	</HaveEnumStrArray>
+	<NotHaveEnumStrArray>
+	switch(Value)
+	{
+		<EnumToStrs>
+	}
+	</NotHaveEnumStrArray>
+	return _T("未知");
+}
+
+inline UINT Str_To_<EnumName>(LPCTSTR Str)
+{
+	<StrToEnums>
+	return <EnumName>::<LastEnumValue>;
+}
+</IsFlagEnum>
+
+</IfExportEnumTransFn>
+
+<IfExportBindDataProcess>
+#ifdef ENABLE_EDITOR_AUTOMAKE
+template<typename T>
+inline bool FillBindData_<EnumName>(IPropertyGridItem* pPGItem, UINT FillType, CEasyArray<T>& BindData, UINT StartIndex, UINT MemberID)
+{
+	//TCHAR CharBuffer[64];	
+	switch(FillType)
+	{
+	<BindDataFillOperations>
+	default:
+		return false;
+	}
+	return true;
+}
+#endif
+</IfExportBindDataProcess>

@@ -223,12 +223,11 @@ int CServerManagerService::Update(int ProcessPacketLimit)
 		for (UINT i = 0; i < m_ServiceInfoList.GetCount(); i++)
 		{
 			CServiceInfoEx& SeriveInfo = m_ServiceInfoList[i];
-			if(SeriveInfo.LogID)
+			if (SeriveInfo.LogID)
 			{
-				CLogManager::GetInstance()->PrintLog(SeriveInfo.LogID, ILogPrinter::LOG_LEVEL_NORMAL, "", "%u,%u,%llu,%f,%llu,%llu",
-					SeriveInfo.GetStatus(), SeriveInfo.GetProcessID(), SeriveInfo.GetCPUUsedTime(), SeriveInfo.GetCPUUsed(),
-					SeriveInfo.GetMemoryUsed(),
-					SeriveInfo.GetVirtualMemoryUsed());
+				CEasyString ProcessIDs = JoinList<UINT>(SeriveInfo.GetProcessList(), ",", [](const CProcessInfo& Info)->UINT {return Info.GetProcessID(); });
+				CLogManager::GetInstance()->PrintLog(SeriveInfo.LogID, ILogPrinter::LOG_LEVEL_NORMAL, "", "%u,%f,%llu,%llu,[%s]",
+					SeriveInfo.GetStatus(), SeriveInfo.GetCPUUsed(), SeriveInfo.GetMemoryUsed(), SeriveInfo.GetVirtualMemoryUsed(), (LPCTSTR)ProcessIDs);
 			}
 			
 		}
@@ -373,15 +372,16 @@ int CServerManagerService::ShutdownService(UINT ServiceID, int ShutdownType)
 				}
 				else
 				{
-					if (ShutdownProcess(pServiceInfo->GetProcessID(), ShutdownType))
+					for (const CProcessInfo& Info : pServiceInfo->GetProcessList())
 					{
-						Log("服务%u成功执行关闭%d", ServiceID, ShutdownType);
-						pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
-						pServiceInfo->SetStatus(SERVICE_STATUS_SHUTDOWNNING);
-						pServiceInfo->SetLastStatusChangeTime(time(NULL));
-						SendNotify(pServiceInfo, "Service Shutdown");
-						return MSG_RESULT_SUCCEED;
+						ShutdownProcess(Info.GetProcessID(), ShutdownType);
 					}
+					Log("服务%u成功执行关闭%d", ServiceID, ShutdownType);
+					pServiceInfo->SetLastOperation(SERVICE_OPERATION_SHUTDOWN);
+					pServiceInfo->SetStatus(SERVICE_STATUS_SHUTDOWNNING);
+					pServiceInfo->SetLastStatusChangeTime(time(NULL));
+					SendNotify(pServiceInfo, "Service Shutdown");
+					return MSG_RESULT_SUCCEED;
 				}
 			}
 			else
@@ -461,48 +461,50 @@ void CServerManagerService::FetchProcessInfo()
 		m_ProcessInfoList.GetList()[i].SetVirtualMemoryUsed(ProcessList[i].VirtualMemoryUsed);
 	}
 
-	for(UINT j=0;j<m_ServiceInfoList.GetCount();j++)
+	for (CServiceInfoEx& ServiceInfo : m_ServiceInfoList)
 	{
-		CServiceInfoEx& ServiceInfo = m_ServiceInfoList[j];
-		ServiceInfo.SetProcessID(0);
-		ServiceInfo.SetCPUUsed(0);
-		ServiceInfo.SetMemoryUsed(0);
-		ServiceInfo.SetVirtualMemoryUsed(0);
-		for(UINT i=0;i<m_ProcessInfoList.GetList().GetCount();i++)
+		float CPUUsed = 0;
+		UINT64 MemoryUsed = 0;
+		UINT64 VirtualMemoryUsed = 0;
+		ServiceInfo.GetProcessList().Empty();
+		for (CProcessInfo& ProcessInfo : m_ProcessInfoList.GetList())
 		{
-			CProcessInfo& ProcessInfo = m_ProcessInfoList.GetList()[i];
-			if(!ServiceInfo.GetImageFilePath().IsEmpty())
+			if (!ServiceInfo.GetImageFilePath().IsEmpty())
 			{
 				if (ServiceInfo.GetImageFilePath().CompareNoCase(ProcessInfo.GetImageFilePath()) == 0)
 				{
-					ServiceInfo.CProcessInfo::CloneFrom(ProcessInfo, DOMF_PROCESS_INFO_FOR_STATUS_FETCH);					
+					CPUUsed += ProcessInfo.GetCPUUsed();
+					MemoryUsed += ProcessInfo.GetMemoryUsed();
+					VirtualMemoryUsed += ProcessInfo.GetVirtualMemoryUsed();
+					ServiceInfo.GetProcessList().Add(ProcessInfo);
 				}
 			}
 		}
-		if (ServiceInfo.GetProcessID())
+		ServiceInfo.SetCPUUsed(CPUUsed);
+		ServiceInfo.SetMemoryUsed(MemoryUsed);
+		ServiceInfo.SetVirtualMemoryUsed(VirtualMemoryUsed);
+		if (ServiceInfo.GetProcessList().GetCount())
 		{
 			if ((!ServiceInfo.GetControlPipeName().IsEmpty()) && (ServiceInfo.pControlPipe == NULL))
 			{
-				CEasyString PipeName;
-				PipeName.Format("%s(%u)", (LPCTSTR)ServiceInfo.GetControlPipeName(), ServiceInfo.GetProcessID());
 				ServiceInfo.pControlPipe = new CServiceControlPipe(ServiceInfo.GetServiceID());
 			}
 		}
 		if (ServiceInfo.GetLogStatusToFile())
 		{
-			if (ServiceInfo.LogID==0)
+			if (ServiceInfo.LogID == 0)
 			{
 				ServiceInfo.LogID = SERVICE_LOG_ID_SEED + ServiceInfo.GetServiceID();
 				CEasyString LogFileName;
 				LogFileName.Format("Log%cServiceStatus.%u", DIR_SLASH, ServiceInfo.GetServiceID());
-				CCSVFileLogPrinter * pStatusLog = new CCSVFileLogPrinter(ILogPrinter::LOG_LEVEL_NORMAL, CFileTools::MakeModuleFullPath(NULL, LogFileName),
-					"ServiceStatus,ProcessID,CPUUsedTime,CPUUsed,MemoryUsed,VirtualMemoryUsed");
+				CCSVFileLogPrinter* pStatusLog = new CCSVFileLogPrinter(ILogPrinter::LOG_LEVEL_NORMAL, CFileTools::MakeModuleFullPath(NULL, LogFileName),
+					"ServiceStatus,CPUUsedTime,CPUUsed,MemoryUsed,VirtualMemoryUsed,ProcessIDs");
 				pStatusLog->SetBackup(CSystemConfig::GetInstance()->GetLogBackupDir(), CSystemConfig::GetInstance()->GetLogBackupDelay());
 				CLogManager::GetInstance()->AddChannel(ServiceInfo.LogID, pStatusLog);
 				SAFE_RELEASE(pStatusLog);
 			}
 		}
-		else if(ServiceInfo.LogID)
+		else if (ServiceInfo.LogID)
 		{
 			CLogManager::GetInstance()->DelChannel(ServiceInfo.LogID);
 			ServiceInfo.LogID = 0;
@@ -514,7 +516,7 @@ void CServerManagerService::FetchProcessInfo()
 		switch (ServiceInfo.GetStatus())
 		{
 		case SERVICE_STATUS_NONE:
-			if (ServiceInfo.GetProcessID() == 0)
+			if (ServiceInfo.GetProcessList().GetCount() == 0)
 			{
 				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
@@ -526,14 +528,14 @@ void CServerManagerService::FetchProcessInfo()
 			}
 			break;
 		case SERVICE_STATUS_STOP:
-			if (ServiceInfo.GetProcessID() != 0)
+			if (ServiceInfo.GetProcessList().GetCount() != 0)
 			{
 				ServiceInfo.SetStatus(SERVICE_STATUS_RUNNING);
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
 		case SERVICE_STATUS_RUNNING:
-			if (ServiceInfo.GetProcessID() == 0)
+			if (ServiceInfo.GetProcessList().GetCount() == 0)
 			{
 				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
@@ -545,7 +547,7 @@ void CServerManagerService::FetchProcessInfo()
 			}
 			break;
 		case SERVICE_STATUS_SHUTDOWNNING:
-			if (ServiceInfo.GetProcessID() == 0)
+			if (ServiceInfo.GetProcessList().GetCount() == 0)
 			{
 				ServiceInfo.SetStatus(SERVICE_STATUS_STOP);
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
@@ -557,7 +559,7 @@ void CServerManagerService::FetchProcessInfo()
 			}
 			break;
 		case SERVICE_STATUS_STARTUPPING:
-			if (ServiceInfo.GetProcessID() != 0)
+			if (ServiceInfo.GetProcessList().GetCount() != 0)
 			{
 				ServiceInfo.SetStatus(SERVICE_STATUS_RUNNING);
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
@@ -568,7 +570,7 @@ void CServerManagerService::FetchProcessInfo()
 				ServiceInfo.SetLastStatusChangeTime(time(NULL));
 			}
 			break;
-		}		
+		}
 
 		CFileInfo FileInfo;
 

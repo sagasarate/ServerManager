@@ -101,7 +101,7 @@ void CServerManagerAckMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INF
 	
 }
 
-int CServerManagerAckMsgHandler::HandleMsgLoginAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgLoginAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	
@@ -120,7 +120,6 @@ int CServerManagerAckMsgHandler::HandleMsgLoginAck(CSmartStruct& Packet)
 		case SST_LOGIN_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		
@@ -128,9 +127,9 @@ int CServerManagerAckMsgHandler::HandleMsgLoginAck(CSmartStruct& Packet)
 	}
 		
 
-	return LoginAck( Result );
+	return LoginAck(Result);
 }
-int CServerManagerAckMsgHandler::HandleMsgGetServiceListAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgGetServiceListAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	CSmartStruct	ServiceListData;
@@ -151,13 +150,11 @@ int CServerManagerAckMsgHandler::HandleMsgGetServiceListAck(CSmartStruct& Packet
 		case SST_GET_SERVICE_LIST_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_GET_SERVICE_LIST_ACK_SERVICE_LIST_DATA:
 			{
-				ServiceListData.CloneFrom(Value);
-		
+				ServiceListData=Value;
 			}
 			break;
 		
@@ -165,9 +162,9 @@ int CServerManagerAckMsgHandler::HandleMsgGetServiceListAck(CSmartStruct& Packet
 	}
 		
 
-	return GetServiceListAck( Result , ServiceListData );
+	return GetServiceListAck(Result,ServiceListData);
 }
-int CServerManagerAckMsgHandler::HandleMsgGetProcessListAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgGetProcessListAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	short			Page;
@@ -194,31 +191,26 @@ int CServerManagerAckMsgHandler::HandleMsgGetProcessListAck(CSmartStruct& Packet
 		case SST_GET_PROCESS_LIST_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_GET_PROCESS_LIST_ACK_PAGE:
 			{
 				Page=Value;
-		
 			}
 			break;
 		case SST_GET_PROCESS_LIST_ACK_PAGE_LEN:
 			{
 				PageLen=Value;
-		
 			}
 			break;
 		case SST_GET_PROCESS_LIST_ACK_TOTAL_PAGE:
 			{
 				TotalPage=Value;
-		
 			}
 			break;
 		case SST_GET_PROCESS_LIST_ACK_PROCESS_LIST_DATA:
 			{
-				ProcessListData.CloneFrom(Value);
-		
+				ProcessListData=Value;
 			}
 			break;
 		
@@ -226,9 +218,9 @@ int CServerManagerAckMsgHandler::HandleMsgGetProcessListAck(CSmartStruct& Packet
 	}
 		
 
-	return GetProcessListAck( Result , Page , PageLen , TotalPage , ProcessListData );
+	return GetProcessListAck(Result,Page,PageLen,TotalPage,ProcessListData);
 }
-int CServerManagerAckMsgHandler::HandleMsgGetNetAdapterListAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgGetNetAdapterListAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	CSmartStruct	NetAdapterListData;
@@ -249,13 +241,11 @@ int CServerManagerAckMsgHandler::HandleMsgGetNetAdapterListAck(CSmartStruct& Pac
 		case SST_GET_NET_ADAPTER_LIST_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_GET_NET_ADAPTER_LIST_ACK_NET_ADAPTER_LIST_DATA:
 			{
-				NetAdapterListData.CloneFrom(Value);
-		
+				NetAdapterListData=Value;
 			}
 			break;
 		
@@ -263,9 +253,9 @@ int CServerManagerAckMsgHandler::HandleMsgGetNetAdapterListAck(CSmartStruct& Pac
 	}
 		
 
-	return GetNetAdapterListAck( Result , NetAdapterListData );
+	return GetNetAdapterListAck(Result,NetAdapterListData);
 }
-int CServerManagerAckMsgHandler::HandleMsgGetServiceInfoAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgGetServiceInfoAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	CSmartStruct	ServiceInfoPacket;
@@ -286,13 +276,11 @@ int CServerManagerAckMsgHandler::HandleMsgGetServiceInfoAck(CSmartStruct& Packet
 		case SST_GET_SERVICE_INFO_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_GET_SERVICE_INFO_ACK_SERVICE_INFO_PACKET:
 			{
-				ServiceInfoPacket.CloneFrom(Value);
-		
+				ServiceInfoPacket=Value;
 			}
 			break;
 		
@@ -300,9 +288,9 @@ int CServerManagerAckMsgHandler::HandleMsgGetServiceInfoAck(CSmartStruct& Packet
 	}
 		
 
-	return GetServiceInfoAck( Result , ServiceInfoPacket );
+	return GetServiceInfoAck(Result,ServiceInfoPacket);
 }
-int CServerManagerAckMsgHandler::HandleMsgServiceStartupAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgServiceStartupAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ServiceID;
@@ -323,13 +311,11 @@ int CServerManagerAckMsgHandler::HandleMsgServiceStartupAck(CSmartStruct& Packet
 		case SST_SERVICE_STARTUP_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_SERVICE_STARTUP_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -337,9 +323,9 @@ int CServerManagerAckMsgHandler::HandleMsgServiceStartupAck(CSmartStruct& Packet
 	}
 		
 
-	return ServiceStartupAck( Result , ServiceID );
+	return ServiceStartupAck(Result,ServiceID);
 }
-int CServerManagerAckMsgHandler::HandleMsgServiceShutdownAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgServiceShutdownAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ServiceID;
@@ -360,13 +346,11 @@ int CServerManagerAckMsgHandler::HandleMsgServiceShutdownAck(CSmartStruct& Packe
 		case SST_SERVICE_SHUTDOWN_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_SERVICE_SHUTDOWN_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -374,9 +358,9 @@ int CServerManagerAckMsgHandler::HandleMsgServiceShutdownAck(CSmartStruct& Packe
 	}
 		
 
-	return ServiceShutdownAck( Result , ServiceID );
+	return ServiceShutdownAck(Result,ServiceID);
 }
-int CServerManagerAckMsgHandler::HandleMsgRunProgramAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgRunProgramAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	
@@ -395,7 +379,6 @@ int CServerManagerAckMsgHandler::HandleMsgRunProgramAck(CSmartStruct& Packet)
 		case SST_RUN_PROGRAM_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		
@@ -403,9 +386,9 @@ int CServerManagerAckMsgHandler::HandleMsgRunProgramAck(CSmartStruct& Packet)
 	}
 		
 
-	return RunProgramAck( Result );
+	return RunProgramAck(Result);
 }
-int CServerManagerAckMsgHandler::HandleMsgProcessShutdownAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgProcessShutdownAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ProcessID;
@@ -426,13 +409,11 @@ int CServerManagerAckMsgHandler::HandleMsgProcessShutdownAck(CSmartStruct& Packe
 		case SST_PROCESS_SHUTDOWN_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_PROCESS_SHUTDOWN_ACK_PROCESS_ID:
 			{
 				ProcessID=Value;
-		
 			}
 			break;
 		
@@ -440,9 +421,9 @@ int CServerManagerAckMsgHandler::HandleMsgProcessShutdownAck(CSmartStruct& Packe
 	}
 		
 
-	return ProcessShutdownAck( Result , ProcessID );
+	return ProcessShutdownAck(Result,ProcessID);
 }
-int CServerManagerAckMsgHandler::HandleMsgExecuteScriptAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgExecuteScriptAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ServiceID;
@@ -467,25 +448,21 @@ int CServerManagerAckMsgHandler::HandleMsgExecuteScriptAck(CSmartStruct& Packet)
 		case SST_EXECUTE_SCRIPT_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_EXECUTE_SCRIPT_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_EXECUTE_SCRIPT_ACK_ERROR_CODE:
 			{
 				ErrorCode=Value;
-		
 			}
 			break;
 		case SST_EXECUTE_SCRIPT_ACK_LAST_LINE:
 			{
 				LastLine=Value;
-		
 			}
 			break;
 		
@@ -493,9 +470,9 @@ int CServerManagerAckMsgHandler::HandleMsgExecuteScriptAck(CSmartStruct& Packet)
 	}
 		
 
-	return ExecuteScriptAck( Result , ServiceID , ErrorCode , LastLine );
+	return ExecuteScriptAck(Result,ServiceID,ErrorCode,LastLine);
 }
-int CServerManagerAckMsgHandler::HandleMsgBrowseServiceDirAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgBrowseServiceDirAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -526,43 +503,36 @@ int CServerManagerAckMsgHandler::HandleMsgBrowseServiceDirAck(CSmartStruct& Pack
 		case SST_BROWSE_SERVICE_DIR_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_DIR:
 			{
-				Value.GetStringRef(Dir);
-		
+				Value.GetString(Dir);
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_PAGE:
 			{
 				Page=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_PAGE_LEN:
 			{
 				PageLen=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_TOTAL_PAGE:
 			{
 				TotalPage=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_ACK_FILE_LIST_DATA:
 			{
-				FileListData.CloneFrom(Value);
-		
+				FileListData=Value;
 			}
 			break;
 		
@@ -570,9 +540,9 @@ int CServerManagerAckMsgHandler::HandleMsgBrowseServiceDirAck(CSmartStruct& Pack
 	}
 		
 
-	return BrowseServiceDirAck( Result , ServiceID , Dir , Page , PageLen , TotalPage , FileListData );
+	return BrowseServiceDirAck(Result,ServiceID,Dir,Page,PageLen,TotalPage,FileListData);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -599,31 +569,26 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(CSmartStruct& Pac
 		case SST_FILE_DOWNLOAD_START_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_START_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_START_ACK_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_FILE_DOWNLOAD_START_ACK_FILE_SIZE:
 			{
 				FileSize=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_START_ACK_FILE_LAST_WRITE_TIME:
 			{
 				FileLastWriteTime=Value;
-		
 			}
 			break;
 		
@@ -631,9 +596,9 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadStartAck(CSmartStruct& Pac
 	}
 		
 
-	return FileDownloadStartAck( Result , ServiceID , FilePath , FileSize , FileLastWriteTime );
+	return FileDownloadStartAck(Result,ServiceID,FilePath,FileSize,FileLastWriteTime);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT64			Offset;
@@ -661,32 +626,27 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Pack
 		case SST_FILE_DOWNLOAD_DATA_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_DATA_ACK_OFFSET:
 			{
 				Offset=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_DATA_ACK_LENGTH:
 			{
 				Length=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_DATA_ACK_FILE_DATA:
 			{
 				FileData.Create(Value.GetLength());
-		FileData.PushBack((BYTE *)Value.GetValueData(),Value.GetLength());
-		
+		FileData.PushBack(Value.GetValueData(),Value.GetLength());
 			}
 			break;
 		case SST_FILE_DOWNLOAD_DATA_ACK_IS_LAST:
 			{
 				IsLast=Value;
-		
 			}
 			break;
 		
@@ -694,9 +654,9 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadDataAck(CSmartStruct& Pack
 	}
 		
 
-	return FileDownloadDataAck( Result , Offset , Length , FileData , IsLast );
+	return FileDownloadDataAck(Result,Offset,Length,FileData,IsLast);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileDownloadFinishAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileDownloadFinishAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	CEasyString		MD5;
@@ -717,13 +677,11 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadFinishAck(CSmartStruct& Pa
 		case SST_FILE_DOWNLOAD_FINISH_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_FINISH_ACK_MD5:
 			{
-				Value.GetStringRef(MD5);
-		
+				Value.GetString(MD5);
 			}
 			break;
 		
@@ -731,9 +689,9 @@ int CServerManagerAckMsgHandler::HandleMsgFileDownloadFinishAck(CSmartStruct& Pa
 	}
 		
 
-	return FileDownloadFinishAck( Result , MD5 );
+	return FileDownloadFinishAck(Result,MD5);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -758,25 +716,21 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(CSmartStruct& Packe
 		case SST_FILE_UPLOAD_START_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_START_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_START_ACK_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_FILE_UPLOAD_START_ACK_FILE_SIZE:
 			{
 				FileSize=Value;
-		
 			}
 			break;
 		
@@ -784,9 +738,9 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadStartAck(CSmartStruct& Packe
 	}
 		
 
-	return FileUploadStartAck( Result , ServiceID , FilePath , FileSize );
+	return FileUploadStartAck(Result,ServiceID,FilePath,FileSize);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		Length;
@@ -809,19 +763,16 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(CSmartStruct& Packet
 		case SST_FILE_UPLOAD_DATA_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_DATA_ACK_LENGTH:
 			{
 				Length=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_DATA_ACK_IS_LAST:
 			{
 				IsLast=Value;
-		
 			}
 			break;
 		
@@ -829,9 +780,9 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadDataAck(CSmartStruct& Packet
 	}
 		
 
-	return FileUploadDataAck( Result , Length , IsLast );
+	return FileUploadDataAck(Result,Length,IsLast);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileUploadFinishAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileUploadFinishAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	CEasyString		MD5;
@@ -852,13 +803,11 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadFinishAck(CSmartStruct& Pack
 		case SST_FILE_UPLOAD_FINISH_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_FINISH_ACK_MD5:
 			{
-				Value.GetStringRef(MD5);
-		
+				Value.GetString(MD5);
 			}
 			break;
 		
@@ -866,9 +815,9 @@ int CServerManagerAckMsgHandler::HandleMsgFileUploadFinishAck(CSmartStruct& Pack
 	}
 		
 
-	return FileUploadFinishAck( Result , MD5 );
+	return FileUploadFinishAck(Result,MD5);
 }
-int CServerManagerAckMsgHandler::HandleMsgCreateDirAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgCreateDirAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -891,19 +840,16 @@ int CServerManagerAckMsgHandler::HandleMsgCreateDirAck(CSmartStruct& Packet)
 		case SST_CREATE_DIR_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_CREATE_DIR_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_CREATE_DIR_ACK_DIR:
 			{
-				Value.GetStringRef(Dir);
-		
+				Value.GetString(Dir);
 			}
 			break;
 		
@@ -911,9 +857,9 @@ int CServerManagerAckMsgHandler::HandleMsgCreateDirAck(CSmartStruct& Packet)
 	}
 		
 
-	return CreateDirAck( Result , ServiceID , Dir );
+	return CreateDirAck(Result,ServiceID,Dir);
 }
-int CServerManagerAckMsgHandler::HandleMsgDeleteFileAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgDeleteFileAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -936,19 +882,16 @@ int CServerManagerAckMsgHandler::HandleMsgDeleteFileAck(CSmartStruct& Packet)
 		case SST_DELETE_FILE_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_DELETE_FILE_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_DELETE_FILE_ACK_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		
@@ -956,9 +899,9 @@ int CServerManagerAckMsgHandler::HandleMsgDeleteFileAck(CSmartStruct& Packet)
 	}
 		
 
-	return DeleteFileAck( Result , ServiceID , FilePath );
+	return DeleteFileAck(Result,ServiceID,FilePath);
 }
-int CServerManagerAckMsgHandler::HandleMsgChangeFileModeAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgChangeFileModeAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -983,25 +926,21 @@ int CServerManagerAckMsgHandler::HandleMsgChangeFileModeAck(CSmartStruct& Packet
 		case SST_CHANGE_FILE_MODE_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_CHANGE_FILE_MODE_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_CHANGE_FILE_MODE_ACK_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_CHANGE_FILE_MODE_ACK_MODE:
 			{
 				Mode=Value;
-		
 			}
 			break;
 		
@@ -1009,9 +948,9 @@ int CServerManagerAckMsgHandler::HandleMsgChangeFileModeAck(CSmartStruct& Packet
 	}
 		
 
-	return ChangeFileModeAck( Result , ServiceID , FilePath , Mode );
+	return ChangeFileModeAck(Result,ServiceID,FilePath,Mode);
 }
-int CServerManagerAckMsgHandler::HandleMsgAddServiceAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgAddServiceAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	
@@ -1030,7 +969,6 @@ int CServerManagerAckMsgHandler::HandleMsgAddServiceAck(CSmartStruct& Packet)
 		case SST_ADD_SERVICE_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		
@@ -1038,9 +976,9 @@ int CServerManagerAckMsgHandler::HandleMsgAddServiceAck(CSmartStruct& Packet)
 	}
 		
 
-	return AddServiceAck( Result );
+	return AddServiceAck(Result);
 }
-int CServerManagerAckMsgHandler::HandleMsgEditServiceAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgEditServiceAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	
@@ -1059,7 +997,6 @@ int CServerManagerAckMsgHandler::HandleMsgEditServiceAck(CSmartStruct& Packet)
 		case SST_EDIT_SERVICE_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		
@@ -1067,9 +1004,9 @@ int CServerManagerAckMsgHandler::HandleMsgEditServiceAck(CSmartStruct& Packet)
 	}
 		
 
-	return EditServiceAck( Result );
+	return EditServiceAck(Result);
 }
-int CServerManagerAckMsgHandler::HandleMsgDeleteServiceAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgDeleteServiceAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ServiceID;
@@ -1090,13 +1027,11 @@ int CServerManagerAckMsgHandler::HandleMsgDeleteServiceAck(CSmartStruct& Packet)
 		case SST_DELETE_SERVICE_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_DELETE_SERVICE_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -1104,9 +1039,9 @@ int CServerManagerAckMsgHandler::HandleMsgDeleteServiceAck(CSmartStruct& Packet)
 	}
 		
 
-	return DeleteServiceAck( Result , ServiceID );
+	return DeleteServiceAck(Result,ServiceID);
 }
-int CServerManagerAckMsgHandler::HandleMsgSendCommandAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgSendCommandAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ServiceID;
@@ -1127,13 +1062,11 @@ int CServerManagerAckMsgHandler::HandleMsgSendCommandAck(CSmartStruct& Packet)
 		case SST_SEND_COMMAND_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_SEND_COMMAND_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -1141,9 +1074,9 @@ int CServerManagerAckMsgHandler::HandleMsgSendCommandAck(CSmartStruct& Packet)
 	}
 		
 
-	return SendCommandAck( Result , ServiceID );
+	return SendCommandAck(Result,ServiceID);
 }
-int CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck(const CSmartStruct& Packet)
 {
 	short		Result;
 	UINT		ServiceID;
@@ -1166,19 +1099,16 @@ int CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck(CSmartStruct& Packet)
 		case SST_ENABLE_LOG_RECV_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_ENABLE_LOG_RECV_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_ENABLE_LOG_RECV_ACK_ENABLE:
 			{
 				Enable=Value;
-		
 			}
 			break;
 		
@@ -1186,9 +1116,9 @@ int CServerManagerAckMsgHandler::HandleMsgEnableLogRecvAck(CSmartStruct& Packet)
 	}
 		
 
-	return EnableLogRecvAck( Result , ServiceID , Enable );
+	return EnableLogRecvAck(Result,ServiceID,Enable);
 }
-int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		LogMsg;
@@ -1209,13 +1139,11 @@ int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(CSmartStruct& Packet)
 		case SST_CONSOLE_LOG_NOTIFY_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_CONSOLE_LOG_NOTIFY_LOG_MSG:
 			{
-				Value.GetStringRef(LogMsg);
-		
+				Value.GetString(LogMsg);
 			}
 			break;
 		
@@ -1223,9 +1151,9 @@ int CServerManagerAckMsgHandler::HandleMsgConsoleLogNotify(CSmartStruct& Packet)
 	}
 		
 
-	return ConsoleLogNotify( ServiceID , LogMsg );
+	return ConsoleLogNotify(ServiceID,LogMsg);
 }
-int CServerManagerAckMsgHandler::HandleMsgGetServerStatusAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgGetServerStatusAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -1248,19 +1176,16 @@ int CServerManagerAckMsgHandler::HandleMsgGetServerStatusAck(CSmartStruct& Packe
 		case SST_GET_SERVER_STATUS_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_GET_SERVER_STATUS_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_GET_SERVER_STATUS_ACK_STATUS_LIST_PACKET:
 			{
-				StatusListPacket.CloneFrom(Value);
-		
+				StatusListPacket=Value;
 			}
 			break;
 		
@@ -1268,9 +1193,9 @@ int CServerManagerAckMsgHandler::HandleMsgGetServerStatusAck(CSmartStruct& Packe
 	}
 		
 
-	return GetServerStatusAck( Result , ServiceID , StatusListPacket );
+	return GetServerStatusAck(Result,ServiceID,StatusListPacket);
 }
-int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -1293,19 +1218,16 @@ int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(CSmartStruct&
 		case SST_GET_SERVER_STATUS_FORMAT_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_GET_SERVER_STATUS_FORMAT_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_GET_SERVER_STATUS_FORMAT_ACK_STATUS_FORMAT_PACKET:
 			{
-				StatusFormatPacket.CloneFrom(Value);
-		
+				StatusFormatPacket=Value;
 			}
 			break;
 		
@@ -1313,9 +1235,9 @@ int CServerManagerAckMsgHandler::HandleMsgGetServerStatusFormatAck(CSmartStruct&
 	}
 		
 
-	return GetServerStatusFormatAck( Result , ServiceID , StatusFormatPacket );
+	return GetServerStatusFormatAck(Result,ServiceID,StatusFormatPacket);
 }
-int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(CSmartStruct& Packet)
+int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(const CSmartStruct& Packet)
 {
 	short			Result;
 	UINT			ServiceID;
@@ -1338,19 +1260,16 @@ int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(CSmartStruct& Packet)
 		case SST_FILE_COMPARE_ACK_RESULT:
 			{
 				Result=Value;
-		
 			}
 			break;
 		case SST_FILE_COMPARE_ACK_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_FILE_COMPARE_ACK_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		
@@ -1358,5 +1277,5 @@ int CServerManagerAckMsgHandler::HandleMsgFileCompareAck(CSmartStruct& Packet)
 	}
 		
 
-	return FileCompareAck( Result , ServiceID , FilePath );
+	return FileCompareAck(Result,ServiceID,FilePath);
 }

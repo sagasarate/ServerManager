@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="gb2312"?>
 <Setting ServerUpdateListFile="F:\MMOPrj\Dev\Server\MMOServer\Work\UpdateList.csv" SystemServiceName="ServerManager">
 	<ServerList>
-		<Server Name="MMOServer" Group="MMO" Address="192.168.100.2" Port="8300" UserName="test" Password="123"/>
-		<Server Name="MMOServer" Group="MMO" Address="106.53.145.116" Port="8300" UserName="test" Password="123456"/>
+		<Server Name="Test" Group="MMO" Address="127.0.0.1" Port="8300" UserName="test" Password="123"/>
 	</ServerList>
 </Setting>

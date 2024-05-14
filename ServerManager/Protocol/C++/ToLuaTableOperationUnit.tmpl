@@ -1,0 +1,6 @@
+﻿<IfCheckMF>if(Flag&<ModifyFlag>)</IfCheckMF>
+{
+	pLuaThread->PushValue("<VariableName>");
+	<ToLuaOperation>
+	lua_settable(pLuaThread->GetLuaState(), Index);
+}

@@ -31,6 +31,7 @@ BEGIN_MESSAGE_MAP(CDlgServerUpdate, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD_UPDATE_LIST, &CDlgServerUpdate::OnBnClickedButtonLoadUpdateList)
 	ON_BN_CLICKED(IDC_BUTTON_UPDATE_EXEC, &CDlgServerUpdate::OnBnClickedButtonUpdateExec)
 	ON_BN_CLICKED(IDC_BUTTON_UPDATE_CONFIG, &CDlgServerUpdate::OnBnClickedButtonUpdateConfig)
+	ON_BN_CLICKED(IDC_BUTTON_UPDATE_SCRIPT, &CDlgServerUpdate::OnBnClickedButtonUpdateScript)
 END_MESSAGE_MAP()
 
 
@@ -327,6 +328,52 @@ void CDlgServerUpdate::OnBnClickedButtonUpdateConfig()
 							if (ItemInfo.IsSelected)
 								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, ItemInfo.Item, ItemInfo.Param1, false);
 						}
+						TaskQueue.AddReloadConfigDataTask(ServiceInfo.ServiceID);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void CDlgServerUpdate::OnBnClickedButtonUpdateScript()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CDlgListSelector Dlg;
+	CEasyString RecentMatchName;
+	for (int i = 0; i < m_lvList.GetItemCount(); i++)
+	{
+		if (m_lvList.GetCheck(i))
+		{
+			UINT Index = m_lvList.GetItemData(i);
+			if (Index < m_ServiceList.GetCount())
+			{
+				UPDATE_SERVICE_INFO& ServiceInfo = m_ServiceList[Index];
+				CServerConnection* pConnection = CServerManagerClientApp::GetInstance()->GetServerConnection(ServiceInfo.ConnectionID);
+				if (pConnection)
+				{
+					const CServiceInfo* pServiceInfo = pConnection->GetServiceInfo(ServiceInfo.ServiceID);
+					if (pServiceInfo)
+					{
+						CTaskQueue& TaskQueue = pConnection->GetTaskQueue();
+						LPCTSTR MatchName = HaveUpdate(ServiceInfo.ServiceName, UPDTAE_TYPE_SCRIPT);
+						if (MatchName && (RecentMatchName != MatchName))
+						{
+							Dlg.m_ItemList.Clear();
+							GetFiles(m_UpdateFileList, Dlg.m_ItemList, ServiceInfo.ServiceName, UPDTAE_TYPE_SCRIPT);
+							RecentMatchName = MatchName;
+							if (Dlg.DoModal() != IDOK)
+							{
+								break;
+							}
+						}
+						for (SELECT_ITEM_INFO& ItemInfo : Dlg.m_ItemList)
+						{
+							if (ItemInfo.IsSelected)
+								TaskQueue.AddUploadTask(ServiceInfo.ServiceID, ItemInfo.Item, ItemInfo.Param1, false);
+						}
+						TaskQueue.AddReloadConfigDataTask(ServiceInfo.ServiceID);
 					}
 				}
 			}

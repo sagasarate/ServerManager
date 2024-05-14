@@ -13,7 +13,6 @@ CProcessInfoList::~CProcessInfoList()
 void CProcessInfoList::Clear()
 {
 //<GenerateArea1Start>
-
 	m_ModifyFlag=0;
 	   
 	m_List.SetTag(_T("StructData"));
@@ -86,21 +85,20 @@ bool CProcessInfoList::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_
 
 	if(Flag&MF_LIST)
 	{
-		UINT BufferSize;
-		void * pBuffer=Packet.PrepareMember(BufferSize);
+		CSmartStruct& ParentPacket=Packet;
 		{
-			CSmartStruct Packet(pBuffer,BufferSize,true);
+			CSmartArray Packet=ParentPacket.PrepareSubArray();
 			for(size_t i=0;i<m_List.GetCount();i++)
 			{
-				UINT BufferSize;
-				void * pBuffer=Packet.PrepareMember(BufferSize);
-				CSmartStruct SubPacket(pBuffer,BufferSize,true);
-				if(!m_List[i].MakePacket(SubPacket,MemberFlags)) FailCount++;
-				Packet.FinishMember(SST_PROCIL_LIST,SubPacket.GetDataLen());
+				CSmartStruct SubPacket=Packet.PrepareSubStruct();
+				if(!m_List[i].MakePacket(SubPacket,MemberFlags))
+					FailCount++;
+				if(!Packet.FinishMember(SubPacket.GetDataLen()))
+					FailCount++;
 			}
-			BufferSize=Packet.GetDataLen();
+			if(!ParentPacket.FinishMember(SST_PROCIL_LIST,Packet.GetDataLen()))
+				FailCount++;
 		}
-		Packet.FinishMember(SST_PROCIL_LIST,BufferSize);
 	}
 	
 //<GenerateArea6End>
@@ -127,24 +125,13 @@ void CProcessInfoList::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_
 			if(Flag&MF_LIST)
 			{
 				m_List.Clear();
-				CSmartStruct Packet=Value;
-				void * Pos=Packet.GetFirstMemberPosition();
-				while(Pos)
+				CSmartArray Packet=Value;
+				for(CSmartValue Value : Packet)
 				{
-					WORD MemberID;
-					CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
-					switch(MemberID)
-					{
-					case SST_PROCIL_LIST:
-						{	
-							CProcessInfo	ArrayElement;
-							ArrayElement.ParsePacket(Value,MemberFlags);
-							UpdateFlag|=MF_LIST;
-							m_List.Add(ArrayElement);
-						}
-						break;
-					}
+					CProcessInfo& ArrayElement=*m_List.AddEmpty();
+					ArrayElement.ParsePacket(Value,MemberFlags);
 				}
+				UpdateFlag |= MF_LIST;
 			}
 			break;
 		
@@ -186,9 +173,9 @@ UINT CProcessInfoList::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& Member
 	{
 		for(size_t i=0;i<m_List.GetCount();i++)
 		{
-			Size+=CSmartStruct::GetStructMemberSize(m_List[i].GetSmartStructSize(MemberFlags));
+			Size+=CSmartArray::GetStructMemberSize(m_List[i].GetSmartStructSize(MemberFlags));
 		}
-		Size+=CSmartStruct::GetStructMemberSize(0);
+		Size+=CSmartStruct::GetArrayMemberSize(0);
 	}
 	
 		

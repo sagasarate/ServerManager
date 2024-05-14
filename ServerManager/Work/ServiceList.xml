@@ -2,6 +2,8 @@
 <ServiceList>
 	<Service ID="2" Type="2" Name="ServerManager" ImageFilePath="F:\MyPrj\ServerManager\Work\ServerManagerD.exe" 
            WorkDir="F:\MyPrj\ServerManager\Work" StartupParam="" KeepRunning="false" RestartupTime="60" />
-	<Service ID="3" Type="2" Name="Test" ImageFilePath="" 
-           WorkDir="F:\MyPrj\ServerManager\Work\test" StartupParam="-f" KeepRunning="false" RestartupTime="120" ControlPipeName="DOSS" ShutdownCmd="ShutdownCore(0)" CharSet="65001" LogStatusToFile="true"/>
+	<Service ID="3" Type="0" Name="Ngix" ImageFilePath="D:\nginx\nginx.exe" 
+           WorkDir="D:\nginx" StartupParam="" KeepRunning="false" RestartupTime="120" ControlPipeName="DOSS" ShutdownCmd="" CharSet="65001" LogStatusToFile="true"/>
+	<Service ID="4" Type="0" Name="Php" ImageFilePath="D:\nginx\php\php-cgi.exe"
+           WorkDir="D:\nginx\php" StartupParam="-b 127.0.0.1:9000" KeepRunning="false" RestartupTime="120" ControlPipeName="DOSS" ShutdownCmd="" CharSet="65001" LogStatusToFile="true"/>
 </ServiceList>

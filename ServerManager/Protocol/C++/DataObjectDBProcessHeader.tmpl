@@ -1,0 +1,8 @@
+﻿static CEasyString MakeDBCreateFieldStr();
+static CEasyString MakeDBCreateIndexStr();
+static CEasyString MakeDBCreateSQL(LPCTSTR TableName);
+CEasyString MakeDBInsertFieldStr();
+CEasyString MakeDBInsertFormatStr();
+void MakeDBPutParam(CDBParameterSet& ParameterSet, CEasyString::STRING_CODE_PAGE CodePage);
+virtual CEasyString DBPrepareInsert(LPCTSTR TableName, CDBParameterSet& ParameterSet, CEasyString::STRING_CODE_PAGE CodePage);
+virtual void Release();

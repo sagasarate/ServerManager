@@ -13,8 +13,6 @@ CServiceInfo::~CServiceInfo()
 void CServiceInfo::Clear()
 {
 //<GenerateArea1Start>
-	CProcessInfo::Clear();
-
 	m_ModifyFlag=0;
 	   
 	m_ServiceID=0;
@@ -35,6 +33,15 @@ void CServiceInfo::Clear()
 	m_OtherExecFileList.SetTag(_T("StructData"));
 	m_OtherExecFileList.Clear();
 	m_OtherExecFileList.Create(16,8);
+	m_ImageFilePath.Clear();
+	m_ImageFileTime=0;
+	m_CPUUsed=0;
+	m_MemoryUsed=0;
+	m_VirtualMemoryUsed=0;
+	m_DiskFree=0;
+	m_ProcessList.SetTag(_T("StructData"));
+	m_ProcessList.Clear();
+	m_ProcessList.Create(16,8);
 	
 //<GenerateArea1End>
 
@@ -43,7 +50,6 @@ void CServiceInfo::Clear()
 void CServiceInfo::GetModifyFlag(DATA_OBJECT_MODIFY_FLAGS& ModifyFlags,int GetType,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 {
 //<GenerateArea2Start>
-	CProcessInfo::GetModifyFlag(ModifyFlags,GetType,MemberFlags);
 	switch(GetType)
 	{
 	case GMFT_COPY:
@@ -65,7 +71,6 @@ bool CServiceInfo::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 
 	bool IsModified=false;
 //<GenerateArea3Start>	
-	IsModified=IsModified||CProcessInfo::IsModified(MemberFlags);
 	
 	IsModified=IsModified||(m_ModifyFlag&MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO])!=0;
 	
@@ -80,7 +85,6 @@ bool CServiceInfo::IsModified(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const
 void CServiceInfo::ClearModifyFlag(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
 {
 //<GenerateArea4Start>
-	CProcessInfo::ClearModifyFlag(MemberFlags);
 	m_ModifyFlag&=~MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO];
 	
 //<GenerateArea4End>
@@ -100,10 +104,6 @@ bool CServiceInfo::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAG
 {
 //<GenerateArea6Start>
 	UINT FailCount=0;
-	
-	if(!CProcessInfo::MakePacket(Packet,MemberFlags))
-		FailCount++;
-	
 	
 	UINT64 Flag=MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO];
 
@@ -184,17 +184,60 @@ bool CServiceInfo::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAG
 	
 	if(Flag&MF_OTHER_EXEC_FILE_LIST)
 	{
-		UINT BufferSize;
-		void * pBuffer=Packet.PrepareMember(BufferSize);
+		CSmartStruct& ParentPacket=Packet;
 		{
-			CSmartStruct Packet(pBuffer,BufferSize,true);
-			for(size_t i=0;i<m_OtherExecFileList.GetCount();i++)
-			{
-				CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_OTHER_EXEC_FILE_LIST,m_OtherExecFileList[i]),FailCount);
-			}
-			BufferSize=Packet.GetDataLen();
+			CSmartArray Packet=ParentPacket.PrepareSubArray();
+			Packet.AddArray(m_OtherExecFileList);
+			if(!ParentPacket.FinishMember(SST_SRVI_OTHER_EXEC_FILE_LIST,Packet.GetDataLen()))
+				FailCount++;
 		}
-		Packet.FinishMember(SST_SRVI_OTHER_EXEC_FILE_LIST,BufferSize);
+	}
+	if(Flag&MF_IMAGE_FILE_PATH)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_IMAGE_FILE_PATH,m_ImageFilePath),FailCount);
+	}
+	
+	if(Flag&MF_IMAGE_FILE_TIME)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_IMAGE_FILE_TIME,m_ImageFileTime),FailCount);
+	}
+	
+	if(Flag&MF_PUUSED)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_PUUSED,m_CPUUsed),FailCount);
+	}
+	
+	if(Flag&MF_MEMORY_USED)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_MEMORY_USED,m_MemoryUsed),FailCount);
+	}
+	
+	if(Flag&MF_VIRTUAL_MEMORY_USED)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_VIRTUAL_MEMORY_USED,m_VirtualMemoryUsed),FailCount);
+	}
+	
+	if(Flag&MF_DISK_FREE)
+	{
+		CHECK_SMART_STRUCT_ADD(Packet.AddMember(SST_SRVI_DISK_FREE,m_DiskFree),FailCount);
+	}
+	
+	if(Flag&MF_PROCESS_LIST)
+	{
+		CSmartStruct& ParentPacket=Packet;
+		{
+			CSmartArray Packet=ParentPacket.PrepareSubArray();
+			for(size_t i=0;i<m_ProcessList.GetCount();i++)
+			{
+				CSmartStruct SubPacket=Packet.PrepareSubStruct();
+				if(!m_ProcessList[i].MakePacket(SubPacket,MemberFlags))
+					FailCount++;
+				if(!Packet.FinishMember(SubPacket.GetDataLen()))
+					FailCount++;
+			}
+			if(!ParentPacket.FinishMember(SST_SRVI_PROCESS_LIST,Packet.GetDataLen()))
+				FailCount++;
+		}
 	}
 	
 //<GenerateArea6End>
@@ -205,9 +248,6 @@ bool CServiceInfo::MakePacket(CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAG
 void CServiceInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
 {
 //<GenerateArea7Start>
-	
-	CProcessInfo::ParsePacket(Packet,MemberFlags);
-	
 	
 	UINT64 Flag=MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO];
 	UINT64 UpdateFlag=0;
@@ -224,129 +264,170 @@ void CServiceInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODI
 			if(Flag&MF_SERVICE_ID)
 			{
 				m_ServiceID=Value;
-				UpdateFlag|=MF_SERVICE_ID;
+				UpdateFlag |= MF_SERVICE_ID;
 			}
 			break;
 		case SST_SRVI_NAME:
 			if(Flag&MF_NAME)
 			{
 				Value.GetString(m_Name);
-				UpdateFlag|=MF_NAME;
+				UpdateFlag |= MF_NAME;
 			}
 			break;
 		case SST_SRVI_TYPE:
 			if(Flag&MF_TYPE)
 			{
 				m_Type=Value;
-				UpdateFlag|=MF_TYPE;
+				UpdateFlag |= MF_TYPE;
 			}
 			break;
 		case SST_SRVI_WORK_DIR:
 			if(Flag&MF_WORK_DIR)
 			{
 				Value.GetString(m_WorkDir);
-				UpdateFlag|=MF_WORK_DIR;
+				UpdateFlag |= MF_WORK_DIR;
 			}
 			break;
 		case SST_SRVI_STARTUP_PARAM:
 			if(Flag&MF_STARTUP_PARAM)
 			{
 				Value.GetString(m_StartupParam);
-				UpdateFlag|=MF_STARTUP_PARAM;
+				UpdateFlag |= MF_STARTUP_PARAM;
 			}
 			break;
 		case SST_SRVI_STATUS:
 			if(Flag&MF_STATUS)
 			{
 				m_Status=Value;
-				UpdateFlag|=MF_STATUS;
+				UpdateFlag |= MF_STATUS;
 			}
 			break;
 		case SST_SRVI_WORK_STATUS:
 			if(Flag&MF_WORK_STATUS)
 			{
 				m_WorkStatus=Value;
-				UpdateFlag|=MF_WORK_STATUS;
+				UpdateFlag |= MF_WORK_STATUS;
 			}
 			break;
 		case SST_SRVI_LAST_OPERATION:
 			if(Flag&MF_LAST_OPERATION)
 			{
 				m_LastOperation=Value;
-				UpdateFlag|=MF_LAST_OPERATION;
+				UpdateFlag |= MF_LAST_OPERATION;
 			}
 			break;
 		case SST_SRVI_LAST_STATUS_CHANGE_TIME:
 			if(Flag&MF_LAST_STATUS_CHANGE_TIME)
 			{
 				m_LastStatusChangeTime=Value;
-				UpdateFlag|=MF_LAST_STATUS_CHANGE_TIME;
+				UpdateFlag |= MF_LAST_STATUS_CHANGE_TIME;
 			}
 			break;
 		case SST_SRVI_RESTARTUP_TIME:
 			if(Flag&MF_RESTARTUP_TIME)
 			{
 				m_RestartupTime=Value;
-				UpdateFlag|=MF_RESTARTUP_TIME;
+				UpdateFlag |= MF_RESTARTUP_TIME;
 			}
 			break;
 		case SST_SRVI_CONTROL_PIPE_NAME:
 			if(Flag&MF_CONTROL_PIPE_NAME)
 			{
 				Value.GetString(m_ControlPipeName);
-				UpdateFlag|=MF_CONTROL_PIPE_NAME;
+				UpdateFlag |= MF_CONTROL_PIPE_NAME;
 			}
 			break;
 		case SST_SRVI_SHUTDOWN_CMD:
 			if(Flag&MF_SHUTDOWN_CMD)
 			{
 				Value.GetString(m_ShutdownCmd);
-				UpdateFlag|=MF_SHUTDOWN_CMD;
+				UpdateFlag |= MF_SHUTDOWN_CMD;
 			}
 			break;
 		case SST_SRVI_CHAR_SET:
 			if(Flag&MF_CHAR_SET)
 			{
 				m_CharSet=Value;
-				UpdateFlag|=MF_CHAR_SET;
+				UpdateFlag |= MF_CHAR_SET;
 			}
 			break;
 		case SST_SRVI_KEEP_RUNNING:
 			if(Flag&MF_KEEP_RUNNING)
 			{
 				m_KeepRunning=Value;
-				UpdateFlag|=MF_KEEP_RUNNING;
+				UpdateFlag |= MF_KEEP_RUNNING;
 			}
 			break;
 		case SST_SRVI_LOG_STATUS_TO_FILE:
 			if(Flag&MF_LOG_STATUS_TO_FILE)
 			{
 				m_LogStatusToFile=Value;
-				UpdateFlag|=MF_LOG_STATUS_TO_FILE;
+				UpdateFlag |= MF_LOG_STATUS_TO_FILE;
 			}
 			break;
 		case SST_SRVI_OTHER_EXEC_FILE_LIST:
 			if(Flag&MF_OTHER_EXEC_FILE_LIST)
 			{
 				m_OtherExecFileList.Clear();
-				CSmartStruct Packet=Value;
-				void * Pos=Packet.GetFirstMemberPosition();
-				while(Pos)
+				CSmartArray Packet=Value;
+				Packet.GetArray(m_OtherExecFileList);
+				UpdateFlag |= MF_OTHER_EXEC_FILE_LIST;
+			}
+			break;
+		
+		case SST_SRVI_IMAGE_FILE_PATH:
+			if(Flag&MF_IMAGE_FILE_PATH)
+			{
+				Value.GetString(m_ImageFilePath);
+				UpdateFlag |= MF_IMAGE_FILE_PATH;
+			}
+			break;
+		case SST_SRVI_IMAGE_FILE_TIME:
+			if(Flag&MF_IMAGE_FILE_TIME)
+			{
+				m_ImageFileTime=Value;
+				UpdateFlag |= MF_IMAGE_FILE_TIME;
+			}
+			break;
+		case SST_SRVI_PUUSED:
+			if(Flag&MF_PUUSED)
+			{
+				m_CPUUsed=Value;
+				UpdateFlag |= MF_PUUSED;
+			}
+			break;
+		case SST_SRVI_MEMORY_USED:
+			if(Flag&MF_MEMORY_USED)
+			{
+				m_MemoryUsed=Value;
+				UpdateFlag |= MF_MEMORY_USED;
+			}
+			break;
+		case SST_SRVI_VIRTUAL_MEMORY_USED:
+			if(Flag&MF_VIRTUAL_MEMORY_USED)
+			{
+				m_VirtualMemoryUsed=Value;
+				UpdateFlag |= MF_VIRTUAL_MEMORY_USED;
+			}
+			break;
+		case SST_SRVI_DISK_FREE:
+			if(Flag&MF_DISK_FREE)
+			{
+				m_DiskFree=Value;
+				UpdateFlag |= MF_DISK_FREE;
+			}
+			break;
+		case SST_SRVI_PROCESS_LIST:
+			if(Flag&MF_PROCESS_LIST)
+			{
+				m_ProcessList.Clear();
+				CSmartArray Packet=Value;
+				for(CSmartValue Value : Packet)
 				{
-					WORD MemberID;
-					CSmartValue Value=Packet.GetNextMember(Pos,MemberID);
-					switch(MemberID)
-					{
-					case SST_SRVI_OTHER_EXEC_FILE_LIST:
-						{	
-							CEasyString	ArrayElement;
-							Value.GetString(ArrayElement);
-							UpdateFlag|=MF_OTHER_EXEC_FILE_LIST;
-							m_OtherExecFileList.Add(ArrayElement);
-						}
-						break;
-					}
+					CProcessInfo& ArrayElement=*m_ProcessList.AddEmpty();
+					ArrayElement.ParsePacket(Value,MemberFlags);
 				}
+				UpdateFlag |= MF_PROCESS_LIST;
 			}
 			break;
 		
@@ -363,9 +444,6 @@ void CServiceInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODI
 void CServiceInfo::CloneFrom(const CServiceInfo& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags)
 {
 //<GenerateArea8Start>
-	
-	CProcessInfo::CloneFrom(DataObject,MemberFlags);
-	
 	
 	UINT64 Flag=MemberFlags[DATA_OBJECT_FLAG_SERVICE_INFO];
 	UINT64 UpdateFlag=0;
@@ -449,6 +527,41 @@ void CServiceInfo::CloneFrom(const CServiceInfo& DataObject,const DATA_OBJECT_MO
 	{
 		m_OtherExecFileList=DataObject.m_OtherExecFileList;
 		UpdateFlag|=MF_OTHER_EXEC_FILE_LIST;
+	}
+	if(Flag&MF_IMAGE_FILE_PATH)
+	{
+		m_ImageFilePath=DataObject.m_ImageFilePath;
+		UpdateFlag|=MF_IMAGE_FILE_PATH;
+	}
+	if(Flag&MF_IMAGE_FILE_TIME)
+	{
+		m_ImageFileTime=DataObject.m_ImageFileTime;
+		UpdateFlag|=MF_IMAGE_FILE_TIME;
+	}
+	if(Flag&MF_PUUSED)
+	{
+		m_CPUUsed=DataObject.m_CPUUsed;
+		UpdateFlag|=MF_PUUSED;
+	}
+	if(Flag&MF_MEMORY_USED)
+	{
+		m_MemoryUsed=DataObject.m_MemoryUsed;
+		UpdateFlag|=MF_MEMORY_USED;
+	}
+	if(Flag&MF_VIRTUAL_MEMORY_USED)
+	{
+		m_VirtualMemoryUsed=DataObject.m_VirtualMemoryUsed;
+		UpdateFlag|=MF_VIRTUAL_MEMORY_USED;
+	}
+	if(Flag&MF_DISK_FREE)
+	{
+		m_DiskFree=DataObject.m_DiskFree;
+		UpdateFlag|=MF_DISK_FREE;
+	}
+	if(Flag&MF_PROCESS_LIST)
+	{
+		m_ProcessList=DataObject.m_ProcessList;
+		UpdateFlag|=MF_PROCESS_LIST;
 	}
 	
 	
@@ -541,15 +654,50 @@ UINT CServiceInfo::GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlag
 	{
 		for(size_t i=0;i<m_OtherExecFileList.GetCount();i++)
 		{
-			Size+=CSmartStruct::GetStringMemberSize(m_OtherExecFileList[i]);
+			Size+=CSmartArray::GetStringMemberSize(m_OtherExecFileList[i]);
 		}
-		Size+=CSmartStruct::GetStructMemberSize(0);
+		Size+=CSmartStruct::GetArrayMemberSize(0);
+	}
+	if(Flag&MF_IMAGE_FILE_PATH)
+	{
+		Size+=CSmartStruct::GetStringMemberSize(m_ImageFilePath);
+	}
+	
+	if(Flag&MF_IMAGE_FILE_TIME)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_PUUSED)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(float));
+	}
+	
+	if(Flag&MF_MEMORY_USED)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_VIRTUAL_MEMORY_USED)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_DISK_FREE)
+	{
+		Size+=CSmartStruct::GetFixMemberSize(sizeof(UINT64));
+	}
+	
+	if(Flag&MF_PROCESS_LIST)
+	{
+		for(size_t i=0;i<m_ProcessList.GetCount();i++)
+		{
+			Size+=CSmartArray::GetStructMemberSize(m_ProcessList[i].GetSmartStructSize(MemberFlags));
+		}
+		Size+=CSmartStruct::GetArrayMemberSize(0);
 	}
 	
 		
-	
-	Size+=CProcessInfo::GetSmartStructSize(MemberFlags);
-	
 //<GenerateArea9End>	
 	return Size;
 

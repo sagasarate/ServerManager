@@ -1,0 +1,94 @@
+﻿#ifdef ENABLE_DB_AUTOMAKE
+static CEasyString MakeDBCreateFieldStr()
+{
+	CEasyString FieldStr;
+	<IfHaveBaseClass>
+	FieldStr = <BaseClass>::MakeDBCreateFieldStr();
+	</IfHaveBaseClass>
+	<DBFieldDefineOperations>
+	return FieldStr;
+}
+static CEasyString MakeDBCreateIndexStr()
+{
+	CEasyString IndexStr;
+	<IfHaveBaseClass>
+	IndexStr = <BaseClass>::MakeDBCreateIndexStr();
+	</IfHaveBaseClass>
+	<DBIndexDefineOperations>
+	return IndexStr;
+}
+static CEasyString MakeDBCreateSQL(LPCTSTR TableName)
+{
+	CEasyString SQLStr;
+	CEasyString FieldStr = MakeDBCreateFieldStr();
+	CEasyString IndexStr = MakeDBCreateIndexStr();
+	if (IndexStr.IsEmpty())
+	{
+		SQLStr.Format(_T("CREATE TABLE `%s` ( %s ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"),
+			TableName, (LPCTSTR)FieldStr);
+	}
+	else
+	{
+		SQLStr.Format(_T("CREATE TABLE `%s` ( %s,%s ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"),
+			TableName, (LPCTSTR)FieldStr, (LPCTSTR)IndexStr);
+	}
+	return SQLStr;
+}
+CEasyString MakeDBInsertFieldStr()
+{
+	CEasyString FieldStr = _T("<InsertFieldNames>");
+	<IfHaveBaseClass>
+	CEasyString ParentFieldStr = <BaseClass>::MakeDBInsertFieldStr();
+	if(!ParentFieldStr.IsEmpty())
+	{
+		if(FieldStr.IsEmpty())
+			FieldStr = ParentFieldStr;
+		else
+			FieldStr = ParentFieldStr + _T(",") + FieldStr;
+	}
+	</IfHaveBaseClass>	
+	return FieldStr;
+}
+CEasyString MakeDBInsertFormatStr()
+{
+	CEasyString FormatStr = _T("<InsertFieldFormats>");
+	<IfHaveBaseClass>
+	CEasyString ParentFormatStr = <BaseClass>::MakeDBInsertFormatStr();
+	if(!ParentFormatStr.IsEmpty())
+	{
+		if(FormatStr.IsEmpty())
+			FormatStr = ParentFormatStr;
+		else
+			FormatStr = ParentFormatStr + _T(",") + FormatStr;
+	}
+	</IfHaveBaseClass>	
+	return FormatStr;
+}
+void MakeDBPutParam(CDBParameterSet& ParameterSet, CEasyString::STRING_CODE_PAGE CodePage)
+{
+	DB_PARAM_INFO ParamInfo;
+
+	<IfHaveBaseClass>
+	<BaseClass>::MakeDBPutParam(ParameterSet, CodePage);
+	</IfHaveBaseClass>
+
+	UINT StrLen;
+	CEasyBuffer StrBuff(1024);
+
+	<DBPutParamBindOperations>
+}
+virtual CEasyString DBPrepareInsert(LPCTSTR TableName, CDBParameterSet& ParameterSet, CEasyString::STRING_CODE_PAGE CodePage)
+{
+	CEasyString FieldStr = MakeDBInsertFieldStr();
+	CEasyString FormatStr = MakeDBInsertFormatStr();
+	CEasyString Format;
+	Format.Format(_T("INSERT INTO `%s` (%s) VALUES(%s) "),
+		TableName, (LPCTSTR)FieldStr, (LPCTSTR)FormatStr);
+	CEasyString SQLStr;
+	SQLStr.Format((LPCTSTR)Format
+		<DBPutOperations>
+		);
+	MakeDBPutParam(ParameterSet, CodePage);
+	return SQLStr;
+}
+#endif

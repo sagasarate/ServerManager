@@ -1,0 +1,4 @@
+﻿#ifdef ENABLE_LUA_PROCESS
+bool ToLuaTable(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags, CLuaThread* pLuaThread, int Index = -1);
+bool FromLuaTable(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags, CLuaThread* pLuaThread, int Index);
+#endif

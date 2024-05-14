@@ -1,0 +1,11 @@
+﻿<IsFlagEnum>
+if ((Value & <EnumName>::<EnumValue>) != 0)
+{
+	if(!Str.IsEmpty())
+		Str.Append(_T("|"), -1);	
+	Str.Append(<EnumStrValue>, -1);
+}
+<!IsFlagEnum>
+case <EnumName>::<EnumValue>:
+	return <EnumStrValue>;
+</IsFlagEnum>

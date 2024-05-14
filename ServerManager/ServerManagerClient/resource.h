@@ -73,6 +73,7 @@
 #define IDC_BUTTON_UPDATE_CONFIG        1036
 #define IDC_BUTTON_ADD_EXEC_FILE        1036
 #define IDC_BUTTON_DEL_EXEC_FILE        1037
+#define IDC_BUTTON_UPDATE_SCRIPT        1037
 #define IDC_EDIT_ACCOUNT                1038
 #define IDC_LIST                        10211
 #define ID_32771                        32771
@@ -129,7 +130,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
+#define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32820
 #define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101

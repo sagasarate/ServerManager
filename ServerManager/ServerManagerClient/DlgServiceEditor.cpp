@@ -146,9 +146,9 @@ BOOL CDlgServiceEditor::OnInitDialog()
 	m_lvList.InsertColumn(0, _T("文件路径"), LVCFMT_LEFT, 500);
 
 	m_cbServiceType.ResetContent();
-	for (UINT i = 0; i < SERVICE_TYPE_MAX; i++)
+	for (UINT i = 0; i < g_SERVICE_TYPE_COUNT; i++)
 	{
-		m_cbServiceType.AddString(g_szSERVICE_TYPE[i]);
+		m_cbServiceType.AddString(SERVICE_TYPE_To_Str(i));
 	}
 	m_cbServiceType.SetCurSel(0);
 	return TRUE;  // return TRUE unless you set the focus to a control

@@ -1,0 +1,6 @@
+﻿<IfCheckMF>if ((Flag&<ModifyFlag>) != 0)</IfCheckMF>
+{
+	if (!FieldStr.IsEmpty())
+		FieldStr += _T(",\r\n");
+	FieldStr += _T("<DBFieldDefine>");
+}

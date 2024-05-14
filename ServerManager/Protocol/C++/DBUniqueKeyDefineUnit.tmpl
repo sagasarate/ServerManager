@@ -1,0 +1,6 @@
+﻿<IfCheckMF>if ((Flag&<ModifyFlag>) != 0)</IfCheckMF>
+{
+	if (!IndexStr.IsEmpty())
+		IndexStr += _T(",\r\n");
+	IndexStr += _T("UNIQUE KEY `IDX_<!FieldName>` (`<FieldName>`)");
+}

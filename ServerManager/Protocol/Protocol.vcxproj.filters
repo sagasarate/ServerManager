@@ -104,6 +104,9 @@
     <ClCompile Include="ServiceInfoList.cpp">
       <Filter>数据对象</Filter>
     </ClCompile>
+    <ClCompile Include="DataObjectModifyFlags.cpp">
+      <Filter>数据对象</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Protocol.cbp" />

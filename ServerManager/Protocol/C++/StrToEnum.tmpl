@@ -1,0 +1,7 @@
+﻿<IsFlagEnum>
+if (CompareString(Splitter[i], <EnumStrValue>) == 0)
+	Flag |= <EnumName>::<EnumValue>;
+<!IsFlagEnum>
+<IfNotFirst>else </IfNotFirst>if (CompareString(Str, <EnumStrValue>) == 0)
+	return <EnumName>::<EnumValue>;
+</IsFlagEnum>

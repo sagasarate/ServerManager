@@ -1,0 +1,32 @@
+#ifdef ENABLE_LUA_PROCESS
+bool ToLuaTable(CLuaThread* pLuaThread, int Index = -1)
+{
+	if(Index < 0)
+	{
+		lua_newtable(pLuaThread->GetLuaState());
+		Index = lua_gettop(pLuaThread->GetLuaState());
+	}	
+
+	<IfHaveBaseClass>
+	if (!<BaseClass>::ToLuaTable(pLuaThread, Index))
+		return false;
+	</IfHaveBaseClass>
+	<ToLuaTableOperations>
+	return true;
+}
+bool FromLuaTable(CLuaThread* pLuaThread, int Index)
+{
+	if(Index < 0)
+		Index = lua_gettop(pLuaThread->GetLuaState()) + 1 + Index;
+	<IfHaveBaseClass>
+	if (!<BaseClass>::ToLuaTable(pLuaThread, Index))
+		return false;
+	</IfHaveBaseClass>
+	if(lua_istable(pLuaThread->GetLuaState(), Index))
+	{
+		<FromLuaTableOperations>
+		return true;
+	}
+	return false;
+}
+#endif

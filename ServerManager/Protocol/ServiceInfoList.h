@@ -18,16 +18,19 @@ public:
 	
 	enum SERVICE_INFO_LIST_MEMBER_IDS
 	{
-		SST_SRVIL_LIST=401,
-	
+		SST_SRVIL_LIST = 401,
+		
 	};
+	
+	
 	
 	enum SERVICE_INFO_LIST_MODIFY_FLAGS:UINT64
 	{
-		MF_LIST=(((UINT64)1)<<0),
-		MF_ALL=0x1,
-	
+		MF_LIST = (((UINT64)1) << 0),
+		
 	};
+	
+	
 //<GenerateArea3End>
 
 public:
@@ -59,6 +62,8 @@ public:
 	virtual void CloneFrom(const CServiceInfoList& DataObject,const DATA_OBJECT_MODIFY_FLAGS& MemberFlags);
 	virtual UINT GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
 	CServiceInfoList& operator=(const CServiceInfoList& DataObject);
+	
+	
 	
 //<GenerateArea4End>
 

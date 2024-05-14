@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //<GenerateArea1Start>
 <Description>
@@ -46,6 +46,8 @@ public:
 	virtual UINT GetSmartStructSize(const DATA_OBJECT_MODIFY_FLAGS& MemberFlags) const;
 	<ClassName>& operator=(const <ClassName>& DataObject);
 	<JsonProcess>
+	<DBProcess>
+	<LuaProcess>
 //<GenerateArea4End>
 
 };
@@ -64,3 +66,7 @@ inline void <ClassName>::SetModifyFlag(UINT64 RemoveFlags,UINT64 AddFlags)
 <GetMethodsDefine>
 
 //<GenerateArea5End>
+
+//<GenerateArea6Start>
+<LuaProcessSource>
+//<GenerateArea6End>

@@ -1,4 +1,5 @@
-<IfNeedCheckModifyFlag>if((Flag&<ModifyFlag>)!=0)</IfNeedCheckModifyFlag>
+﻿<IfCheckMF>if((Flag&<ModifyFlag>)!=0)</IfCheckMF>
 {
 	<FromJsonOperation>
+	<IfUpdateMF>UpdateFlag |= <ModifyFlag>;</IfUpdateMF>
 }

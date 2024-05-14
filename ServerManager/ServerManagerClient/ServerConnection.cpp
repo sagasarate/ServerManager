@@ -132,7 +132,7 @@ void CServerConnection::OnRecvData(const BYTE * pData, UINT DataSize)
 		CMessage * pMsg = (CMessage *)m_AssembleBuffer.GetBuffer();
 		if (m_AssembleBuffer.GetUsedSize() >= pMsg->GetMsgLength())
 		{
-			if (pMsg->GetMsgFlag()&MESSAGE_FLAG_SYSTEM_MESSAGE)
+			if (pMsg->GetMsgFlag() & DOS_MESSAGE_FLAG_SYSTEM_MESSAGE)
 				OnSystemMsg(pMsg);
 			else
 				OnMsg(pMsg);
@@ -177,7 +177,7 @@ int CServerConnection::Update(int ProcessPacketLimit)
 			CMessage KeepAliveMsg;
 			KeepAliveMsg.Init();
 			KeepAliveMsg.SetMsgID(SM_PROXY_KEEP_ALIVE_PING);
-			KeepAliveMsg.SetMsgFlag(MESSAGE_FLAG_SYSTEM_MESSAGE);
+			KeepAliveMsg.SetMsgFlag(DOS_MESSAGE_FLAG_SYSTEM_MESSAGE);
 			KeepAliveMsg.SetDataLength(0);
 			DoSend(&KeepAliveMsg, KeepAliveMsg.GetMsgLength());
 			

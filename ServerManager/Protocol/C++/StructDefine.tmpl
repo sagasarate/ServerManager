@@ -1,5 +1,5 @@
-<StructDescription>
-struct <StructName><BaseStruct>
+﻿<Description>
+struct <StructName><IfHaveBaseClass>:</IfHaveBaseClass><BaseStruct>
 {
 	<Members>
 	<SSTIDEnumDefine>
@@ -74,6 +74,17 @@ struct <StructName><BaseStruct>
 		return *this;
 	}
 	<XMLProcess>
-	<JsonProcess> 
+	<JsonProcess>
+	<DBProcess>
+	<LogProcess>
+	<EditorProcess>
+	<LuaProcess>
+
+	<NeedVTable>
+	virtual ~<StructName>()
+	{
+	
+	}
+	</NeedVTable>
 };
 

@@ -101,7 +101,7 @@ void CServerManagerMsgHandler::InitMsgMap(CEasyMap<MSG_ID_TYPE,MSG_HANDLE_INFO>&
 	
 }
 
-int CServerManagerMsgHandler::HandleMsgLogin(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgLogin(const CSmartStruct& Packet)
 {
 	CEasyString		UserName;
 	CEasyString		Password;
@@ -121,14 +121,12 @@ int CServerManagerMsgHandler::HandleMsgLogin(CSmartStruct& Packet)
 		{
 		case SST_LOGIN_USER_NAME:
 			{
-				Value.GetStringRef(UserName);
-		
+				Value.GetString(UserName);
 			}
 			break;
 		case SST_LOGIN_PASSWORD:
 			{
-				Value.GetStringRef(Password);
-		
+				Value.GetString(Password);
 			}
 			break;
 		
@@ -136,19 +134,17 @@ int CServerManagerMsgHandler::HandleMsgLogin(CSmartStruct& Packet)
 	}
 		
 
-	return Login( UserName , Password );
+	return Login(UserName,Password);
 }
-int CServerManagerMsgHandler::HandleMsgGetServiceList(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetServiceList(const CSmartStruct& Packet)
 {
 	
 	
 	
 
-	
-
 	return GetServiceList();
 }
-int CServerManagerMsgHandler::HandleMsgGetProcessList(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetProcessList(const CSmartStruct& Packet)
 {
 	short		Page;
 	short		PageLen;
@@ -169,13 +165,11 @@ int CServerManagerMsgHandler::HandleMsgGetProcessList(CSmartStruct& Packet)
 		case SST_GET_PROCESS_LIST_PAGE:
 			{
 				Page=Value;
-		
 			}
 			break;
 		case SST_GET_PROCESS_LIST_PAGE_LEN:
 			{
 				PageLen=Value;
-		
 			}
 			break;
 		
@@ -183,19 +177,17 @@ int CServerManagerMsgHandler::HandleMsgGetProcessList(CSmartStruct& Packet)
 	}
 		
 
-	return GetProcessList( Page , PageLen );
+	return GetProcessList(Page,PageLen);
 }
-int CServerManagerMsgHandler::HandleMsgGetNetAdapterList(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetNetAdapterList(const CSmartStruct& Packet)
 {
 	
 	
 	
 
-	
-
 	return GetNetAdapterList();
 }
-int CServerManagerMsgHandler::HandleMsgGetServiceInfo(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetServiceInfo(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	
@@ -214,7 +206,6 @@ int CServerManagerMsgHandler::HandleMsgGetServiceInfo(CSmartStruct& Packet)
 		case SST_GET_SERVICE_INFO_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -222,9 +213,9 @@ int CServerManagerMsgHandler::HandleMsgGetServiceInfo(CSmartStruct& Packet)
 	}
 		
 
-	return GetServiceInfo( ServiceID );
+	return GetServiceInfo(ServiceID);
 }
-int CServerManagerMsgHandler::HandleMsgServiceStartup(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgServiceStartup(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	
@@ -243,7 +234,6 @@ int CServerManagerMsgHandler::HandleMsgServiceStartup(CSmartStruct& Packet)
 		case SST_SERVICE_STARTUP_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -251,9 +241,9 @@ int CServerManagerMsgHandler::HandleMsgServiceStartup(CSmartStruct& Packet)
 	}
 		
 
-	return ServiceStartup( ServiceID );
+	return ServiceStartup(ServiceID);
 }
-int CServerManagerMsgHandler::HandleMsgServiceShutdown(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgServiceShutdown(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	BYTE	ShutdownType;
@@ -274,13 +264,11 @@ int CServerManagerMsgHandler::HandleMsgServiceShutdown(CSmartStruct& Packet)
 		case SST_SERVICE_SHUTDOWN_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_SERVICE_SHUTDOWN_SHUTDOWN_TYPE:
 			{
 				ShutdownType=Value;
-		
 			}
 			break;
 		
@@ -288,9 +276,9 @@ int CServerManagerMsgHandler::HandleMsgServiceShutdown(CSmartStruct& Packet)
 	}
 		
 
-	return ServiceShutdown( ServiceID , ShutdownType );
+	return ServiceShutdown(ServiceID,ShutdownType);
 }
-int CServerManagerMsgHandler::HandleMsgRunProgram(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgRunProgram(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		FilePath;
@@ -315,25 +303,21 @@ int CServerManagerMsgHandler::HandleMsgRunProgram(CSmartStruct& Packet)
 		case SST_RUN_PROGRAM_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_RUN_PROGRAM_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_RUN_PROGRAM_WORK_DIR:
 			{
-				Value.GetStringRef(WorkDir);
-		
+				Value.GetString(WorkDir);
 			}
 			break;
 		case SST_RUN_PROGRAM_PARAM:
 			{
-				Value.GetStringRef(Param);
-		
+				Value.GetString(Param);
 			}
 			break;
 		
@@ -341,9 +325,9 @@ int CServerManagerMsgHandler::HandleMsgRunProgram(CSmartStruct& Packet)
 	}
 		
 
-	return RunProgram( ServiceID , FilePath , WorkDir , Param );
+	return RunProgram(ServiceID,FilePath,WorkDir,Param);
 }
-int CServerManagerMsgHandler::HandleMsgProcessShutdown(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgProcessShutdown(const CSmartStruct& Packet)
 {
 	UINT	ProcessID;
 	BYTE	ShutdownType;
@@ -364,13 +348,11 @@ int CServerManagerMsgHandler::HandleMsgProcessShutdown(CSmartStruct& Packet)
 		case SST_PROCESS_SHUTDOWN_PROCESS_ID:
 			{
 				ProcessID=Value;
-		
 			}
 			break;
 		case SST_PROCESS_SHUTDOWN_SHUTDOWN_TYPE:
 			{
 				ShutdownType=Value;
-		
 			}
 			break;
 		
@@ -378,9 +360,9 @@ int CServerManagerMsgHandler::HandleMsgProcessShutdown(CSmartStruct& Packet)
 	}
 		
 
-	return ProcessShutdown( ProcessID , ShutdownType );
+	return ProcessShutdown(ProcessID,ShutdownType);
 }
-int CServerManagerMsgHandler::HandleMsgExecuteScript(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgExecuteScript(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		Script;
@@ -403,19 +385,16 @@ int CServerManagerMsgHandler::HandleMsgExecuteScript(CSmartStruct& Packet)
 		case SST_EXECUTE_SCRIPT_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_EXECUTE_SCRIPT_SCRIPT:
 			{
-				Value.GetStringRef(Script);
-		
+				Value.GetString(Script);
 			}
 			break;
 		case SST_EXECUTE_SCRIPT_FROM_FILE:
 			{
 				FromFile=Value;
-		
 			}
 			break;
 		
@@ -423,9 +402,9 @@ int CServerManagerMsgHandler::HandleMsgExecuteScript(CSmartStruct& Packet)
 	}
 		
 
-	return ExecuteScript( ServiceID , Script , FromFile );
+	return ExecuteScript(ServiceID,Script,FromFile);
 }
-int CServerManagerMsgHandler::HandleMsgBrowseServiceDir(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgBrowseServiceDir(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		Dir;
@@ -450,25 +429,21 @@ int CServerManagerMsgHandler::HandleMsgBrowseServiceDir(CSmartStruct& Packet)
 		case SST_BROWSE_SERVICE_DIR_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_DIR:
 			{
-				Value.GetStringRef(Dir);
-		
+				Value.GetString(Dir);
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_PAGE:
 			{
 				Page=Value;
-		
 			}
 			break;
 		case SST_BROWSE_SERVICE_DIR_PAGE_LEN:
 			{
 				PageLen=Value;
-		
 			}
 			break;
 		
@@ -476,9 +451,9 @@ int CServerManagerMsgHandler::HandleMsgBrowseServiceDir(CSmartStruct& Packet)
 	}
 		
 
-	return BrowseServiceDir( ServiceID , Dir , Page , PageLen );
+	return BrowseServiceDir(ServiceID,Dir,Page,PageLen);
 }
-int CServerManagerMsgHandler::HandleMsgFileDownloadStart(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileDownloadStart(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		FilePath;
@@ -501,19 +476,16 @@ int CServerManagerMsgHandler::HandleMsgFileDownloadStart(CSmartStruct& Packet)
 		case SST_FILE_DOWNLOAD_START_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_FILE_DOWNLOAD_START_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_FILE_DOWNLOAD_START_START_OFFSET:
 			{
 				StartOffset=Value;
-		
 			}
 			break;
 		
@@ -521,29 +493,25 @@ int CServerManagerMsgHandler::HandleMsgFileDownloadStart(CSmartStruct& Packet)
 	}
 		
 
-	return FileDownloadStart( ServiceID , FilePath , StartOffset );
+	return FileDownloadStart(ServiceID,FilePath,StartOffset);
 }
-int CServerManagerMsgHandler::HandleMsgFileDownloadData(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileDownloadData(const CSmartStruct& Packet)
 {
 	
 	
-	
-
 	
 
 	return FileDownloadData();
 }
-int CServerManagerMsgHandler::HandleMsgFileDownloadFinish(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileDownloadFinish(const CSmartStruct& Packet)
 {
 	
 	
 	
 
-	
-
 	return FileDownloadFinish();
 }
-int CServerManagerMsgHandler::HandleMsgFileUploadStart(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileUploadStart(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		FilePath;
@@ -566,19 +534,16 @@ int CServerManagerMsgHandler::HandleMsgFileUploadStart(CSmartStruct& Packet)
 		case SST_FILE_UPLOAD_START_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_START_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_FILE_UPLOAD_START_FILE_LAST_WRITE_TIME:
 			{
 				FileLastWriteTime=Value;
-		
 			}
 			break;
 		
@@ -586,9 +551,9 @@ int CServerManagerMsgHandler::HandleMsgFileUploadStart(CSmartStruct& Packet)
 	}
 		
 
-	return FileUploadStart( ServiceID , FilePath , FileLastWriteTime );
+	return FileUploadStart(ServiceID,FilePath,FileLastWriteTime);
 }
-int CServerManagerMsgHandler::HandleMsgFileUploadData(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileUploadData(const CSmartStruct& Packet)
 {
 	UINT			Length;
 	CEasyBuffer		FileData;
@@ -612,20 +577,17 @@ int CServerManagerMsgHandler::HandleMsgFileUploadData(CSmartStruct& Packet)
 		case SST_FILE_UPLOAD_DATA_LENGTH:
 			{
 				Length=Value;
-		
 			}
 			break;
 		case SST_FILE_UPLOAD_DATA_FILE_DATA:
 			{
 				FileData.Create(Value.GetLength());
-		FileData.PushBack((BYTE *)Value.GetValueData(),Value.GetLength());
-		
+		FileData.PushBack(Value.GetValueData(),Value.GetLength());
 			}
 			break;
 		case SST_FILE_UPLOAD_DATA_IS_LAST:
 			{
 				IsLast=Value;
-		
 			}
 			break;
 		
@@ -633,19 +595,17 @@ int CServerManagerMsgHandler::HandleMsgFileUploadData(CSmartStruct& Packet)
 	}
 		
 
-	return FileUploadData( Length , FileData , IsLast );
+	return FileUploadData(Length,FileData,IsLast);
 }
-int CServerManagerMsgHandler::HandleMsgFileUploadFinish(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileUploadFinish(const CSmartStruct& Packet)
 {
 	
 	
 	
 
-	
-
 	return FileUploadFinish();
 }
-int CServerManagerMsgHandler::HandleMsgCreateDir(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgCreateDir(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		Dir;
@@ -666,13 +626,11 @@ int CServerManagerMsgHandler::HandleMsgCreateDir(CSmartStruct& Packet)
 		case SST_CREATE_DIR_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_CREATE_DIR_DIR:
 			{
-				Value.GetStringRef(Dir);
-		
+				Value.GetString(Dir);
 			}
 			break;
 		
@@ -680,9 +638,9 @@ int CServerManagerMsgHandler::HandleMsgCreateDir(CSmartStruct& Packet)
 	}
 		
 
-	return CreateDir( ServiceID , Dir );
+	return CreateDir(ServiceID,Dir);
 }
-int CServerManagerMsgHandler::HandleMsgDeleteFile(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgDeleteFile(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		FilePath;
@@ -705,19 +663,16 @@ int CServerManagerMsgHandler::HandleMsgDeleteFile(CSmartStruct& Packet)
 		case SST_DELETE_FILE_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_DELETE_FILE_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_DELETE_FILE_IS_RECURSIVE:
 			{
 				IsRecursive=Value;
-		
 			}
 			break;
 		
@@ -725,9 +680,9 @@ int CServerManagerMsgHandler::HandleMsgDeleteFile(CSmartStruct& Packet)
 	}
 		
 
-	return DeleteFile( ServiceID , FilePath , IsRecursive );
+	return DeleteFile(ServiceID,FilePath,IsRecursive);
 }
-int CServerManagerMsgHandler::HandleMsgChangeFileMode(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgChangeFileMode(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		FilePath;
@@ -750,19 +705,16 @@ int CServerManagerMsgHandler::HandleMsgChangeFileMode(CSmartStruct& Packet)
 		case SST_CHANGE_FILE_MODE_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_CHANGE_FILE_MODE_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_CHANGE_FILE_MODE_MODE:
 			{
 				Mode=Value;
-		
 			}
 			break;
 		
@@ -770,9 +722,9 @@ int CServerManagerMsgHandler::HandleMsgChangeFileMode(CSmartStruct& Packet)
 	}
 		
 
-	return ChangeFileMode( ServiceID , FilePath , Mode );
+	return ChangeFileMode(ServiceID,FilePath,Mode);
 }
-int CServerManagerMsgHandler::HandleMsgAddService(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgAddService(const CSmartStruct& Packet)
 {
 	CSmartStruct	ServiceInfo;
 	
@@ -790,8 +742,7 @@ int CServerManagerMsgHandler::HandleMsgAddService(CSmartStruct& Packet)
 		{
 		case SST_ADD_SERVICE_SERVICE_INFO:
 			{
-				ServiceInfo.CloneFrom(Value);
-		
+				ServiceInfo=Value;
 			}
 			break;
 		
@@ -799,9 +750,9 @@ int CServerManagerMsgHandler::HandleMsgAddService(CSmartStruct& Packet)
 	}
 		
 
-	return AddService( ServiceInfo );
+	return AddService(ServiceInfo);
 }
-int CServerManagerMsgHandler::HandleMsgEditService(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgEditService(const CSmartStruct& Packet)
 {
 	CSmartStruct	ServiceInfo;
 	
@@ -819,8 +770,7 @@ int CServerManagerMsgHandler::HandleMsgEditService(CSmartStruct& Packet)
 		{
 		case SST_EDIT_SERVICE_SERVICE_INFO:
 			{
-				ServiceInfo.CloneFrom(Value);
-		
+				ServiceInfo=Value;
 			}
 			break;
 		
@@ -828,9 +778,9 @@ int CServerManagerMsgHandler::HandleMsgEditService(CSmartStruct& Packet)
 	}
 		
 
-	return EditService( ServiceInfo );
+	return EditService(ServiceInfo);
 }
-int CServerManagerMsgHandler::HandleMsgDeleteService(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgDeleteService(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	
@@ -849,7 +799,6 @@ int CServerManagerMsgHandler::HandleMsgDeleteService(CSmartStruct& Packet)
 		case SST_DELETE_SERVICE_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -857,9 +806,9 @@ int CServerManagerMsgHandler::HandleMsgDeleteService(CSmartStruct& Packet)
 	}
 		
 
-	return DeleteService( ServiceID );
+	return DeleteService(ServiceID);
 }
-int CServerManagerMsgHandler::HandleMsgSendCommand(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgSendCommand(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		Command;
@@ -880,13 +829,11 @@ int CServerManagerMsgHandler::HandleMsgSendCommand(CSmartStruct& Packet)
 		case SST_SEND_COMMAND_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_SEND_COMMAND_COMMAND:
 			{
-				Value.GetStringRef(Command);
-		
+				Value.GetString(Command);
 			}
 			break;
 		
@@ -894,9 +841,9 @@ int CServerManagerMsgHandler::HandleMsgSendCommand(CSmartStruct& Packet)
 	}
 		
 
-	return SendCommand( ServiceID , Command );
+	return SendCommand(ServiceID,Command);
 }
-int CServerManagerMsgHandler::HandleMsgEnableLogRecv(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgEnableLogRecv(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	bool	Enable;
@@ -917,13 +864,11 @@ int CServerManagerMsgHandler::HandleMsgEnableLogRecv(CSmartStruct& Packet)
 		case SST_ENABLE_LOG_RECV_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_ENABLE_LOG_RECV_ENABLE:
 			{
 				Enable=Value;
-		
 			}
 			break;
 		
@@ -931,9 +876,9 @@ int CServerManagerMsgHandler::HandleMsgEnableLogRecv(CSmartStruct& Packet)
 	}
 		
 
-	return EnableLogRecv( ServiceID , Enable );
+	return EnableLogRecv(ServiceID,Enable);
 }
-int CServerManagerMsgHandler::HandleMsgGetServerStatus(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetServerStatus(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CSmartStruct	StatusListPacket;
@@ -954,13 +899,11 @@ int CServerManagerMsgHandler::HandleMsgGetServerStatus(CSmartStruct& Packet)
 		case SST_GET_SERVER_STATUS_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_GET_SERVER_STATUS_STATUS_LIST_PACKET:
 			{
-				StatusListPacket.CloneFrom(Value);
-		
+				StatusListPacket=Value;
 			}
 			break;
 		
@@ -968,9 +911,9 @@ int CServerManagerMsgHandler::HandleMsgGetServerStatus(CSmartStruct& Packet)
 	}
 		
 
-	return GetServerStatus( ServiceID , StatusListPacket );
+	return GetServerStatus(ServiceID,StatusListPacket);
 }
-int CServerManagerMsgHandler::HandleMsgGetAllServerStatus(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetAllServerStatus(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	
@@ -989,7 +932,6 @@ int CServerManagerMsgHandler::HandleMsgGetAllServerStatus(CSmartStruct& Packet)
 		case SST_GET_ALL_SERVER_STATUS_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -997,9 +939,9 @@ int CServerManagerMsgHandler::HandleMsgGetAllServerStatus(CSmartStruct& Packet)
 	}
 		
 
-	return GetAllServerStatus( ServiceID );
+	return GetAllServerStatus(ServiceID);
 }
-int CServerManagerMsgHandler::HandleMsgGetServerStatusFormat(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgGetServerStatusFormat(const CSmartStruct& Packet)
 {
 	UINT	ServiceID;
 	
@@ -1018,7 +960,6 @@ int CServerManagerMsgHandler::HandleMsgGetServerStatusFormat(CSmartStruct& Packe
 		case SST_GET_SERVER_STATUS_FORMAT_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		
@@ -1026,9 +967,9 @@ int CServerManagerMsgHandler::HandleMsgGetServerStatusFormat(CSmartStruct& Packe
 	}
 		
 
-	return GetServerStatusFormat( ServiceID );
+	return GetServerStatusFormat(ServiceID);
 }
-int CServerManagerMsgHandler::HandleMsgFileCompare(CSmartStruct& Packet)
+int CServerManagerMsgHandler::HandleMsgFileCompare(const CSmartStruct& Packet)
 {
 	UINT			ServiceID;
 	CEasyString		FilePath;
@@ -1053,25 +994,21 @@ int CServerManagerMsgHandler::HandleMsgFileCompare(CSmartStruct& Packet)
 		case SST_FILE_COMPARE_SERVICE_ID:
 			{
 				ServiceID=Value;
-		
 			}
 			break;
 		case SST_FILE_COMPARE_FILE_PATH:
 			{
-				Value.GetStringRef(FilePath);
-		
+				Value.GetString(FilePath);
 			}
 			break;
 		case SST_FILE_COMPARE_FILE_SIZE:
 			{
 				FileSize=Value;
-		
 			}
 			break;
 		case SST_FILE_COMPARE_FILE_MD5:
 			{
-				Value.GetStringRef(FileMD5);
-		
+				Value.GetString(FileMD5);
 			}
 			break;
 		
@@ -1079,5 +1016,5 @@ int CServerManagerMsgHandler::HandleMsgFileCompare(CSmartStruct& Packet)
 	}
 		
 
-	return FileCompare( ServiceID , FilePath , FileSize , FileMD5 );
+	return FileCompare(ServiceID,FilePath,FileSize,FileMD5);
 }

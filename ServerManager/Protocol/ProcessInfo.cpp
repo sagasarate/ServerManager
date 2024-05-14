@@ -13,7 +13,6 @@ CProcessInfo::~CProcessInfo()
 void CProcessInfo::Clear()
 {
 //<GenerateArea1Start>
-
 	m_ModifyFlag=0;
 	   
 	m_ProcessID=0;
@@ -154,56 +153,56 @@ void CProcessInfo::ParsePacket(const CSmartStruct& Packet,const DATA_OBJECT_MODI
 			if(Flag&MF_PROCESS_ID)
 			{
 				m_ProcessID=Value;
-				UpdateFlag|=MF_PROCESS_ID;
+				UpdateFlag |= MF_PROCESS_ID;
 			}
 			break;
 		case SST_PROCI_IMAGE_FILE_PATH:
 			if(Flag&MF_IMAGE_FILE_PATH)
 			{
 				Value.GetString(m_ImageFilePath);
-				UpdateFlag|=MF_IMAGE_FILE_PATH;
+				UpdateFlag |= MF_IMAGE_FILE_PATH;
 			}
 			break;
 		case SST_PROCI_IMAGE_FILE_TIME:
 			if(Flag&MF_IMAGE_FILE_TIME)
 			{
 				m_ImageFileTime=Value;
-				UpdateFlag|=MF_IMAGE_FILE_TIME;
+				UpdateFlag |= MF_IMAGE_FILE_TIME;
 			}
 			break;
 		case SST_PROCI_PUUSED_TIME:
 			if(Flag&MF_PUUSED_TIME)
 			{
 				m_CPUUsedTime=Value;
-				UpdateFlag|=MF_PUUSED_TIME;
+				UpdateFlag |= MF_PUUSED_TIME;
 			}
 			break;
 		case SST_PROCI_PUUSED:
 			if(Flag&MF_PUUSED)
 			{
 				m_CPUUsed=Value;
-				UpdateFlag|=MF_PUUSED;
+				UpdateFlag |= MF_PUUSED;
 			}
 			break;
 		case SST_PROCI_MEMORY_USED:
 			if(Flag&MF_MEMORY_USED)
 			{
 				m_MemoryUsed=Value;
-				UpdateFlag|=MF_MEMORY_USED;
+				UpdateFlag |= MF_MEMORY_USED;
 			}
 			break;
 		case SST_PROCI_VIRTUAL_MEMORY_USED:
 			if(Flag&MF_VIRTUAL_MEMORY_USED)
 			{
 				m_VirtualMemoryUsed=Value;
-				UpdateFlag|=MF_VIRTUAL_MEMORY_USED;
+				UpdateFlag |= MF_VIRTUAL_MEMORY_USED;
 			}
 			break;
 		case SST_PROCI_DISK_FREE:
 			if(Flag&MF_DISK_FREE)
 			{
 				m_DiskFree=Value;
-				UpdateFlag|=MF_DISK_FREE;
+				UpdateFlag |= MF_DISK_FREE;
 			}
 			break;
 		

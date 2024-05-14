@@ -12,6 +12,7 @@ protected:
 	{
 		UPDTAE_TYPE_EXEC = 1,
 		UPDTAE_TYPE_CONFIG = (1 << 1),
+		UPDTAE_TYPE_SCRIPT = (1 << 2),
 		UPDTAE_TYPE_ALL = 0xFFFF,
 	};
 	struct UPDATE_FILE_INFO
@@ -60,4 +61,6 @@ protected:
 	
 	afx_msg void OnBnClickedButtonUpdateExec();
 	afx_msg void OnBnClickedButtonUpdateConfig();
+public:
+	afx_msg void OnBnClickedButtonUpdateScript();
 };

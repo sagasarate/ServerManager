@@ -1,6 +1,7 @@
-case <SST_ID>:
-	<IfNeedCheckModifyFlag>if(Flag&<ModifyFlag>)</IfNeedCheckModifyFlag>
+﻿case <SST_ID>:
+	<IfCheckMF>if(Flag&<ModifyFlag>)</IfCheckMF>
 	{
 		<UnpackOperation>
+		<IfUpdateMF>UpdateFlag |= <ModifyFlag>;</IfUpdateMF>
 	}
 	break;

@@ -1,0 +1,8 @@
+﻿<IfCheckMF>if((Flag&<ModifyFlag>) !=0 )</IfCheckMF>
+{
+	pLuaThread->PushString("<VariableName>");
+	lua_gettable(pLuaThread->GetLuaState(), Index);
+	<FromLuaOperation>
+	pLuaThread->Pop(1);
+	<IfUpdateMF>UpdateFlag |= <ModifyFlag>;</IfUpdateMF>
+}

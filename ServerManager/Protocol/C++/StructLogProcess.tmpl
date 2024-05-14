@@ -1,0 +1,8 @@
+﻿#ifdef ENABLE_LOG_AUTOMAKE
+virtual log_producer_result SendLog(log_producer_client* pLogClient)
+{
+	return log_producer_client_add_log(pLogClient, <LogDataCount> * 2 , 
+		<LogDataList>);
+}
+#endif
+

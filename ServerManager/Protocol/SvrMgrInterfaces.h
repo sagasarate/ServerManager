@@ -1,6 +1,4 @@
-﻿#pragma once
-
-
+﻿
 
 #include "ServerManagerInterface.h"
 #include "ServerManagerMsgCaller.h"
